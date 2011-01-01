@@ -112,6 +112,7 @@ public class Main extends Activity implements LocationListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		setContentView(R.layout.main);
 		TextView tv = (TextView)findViewById(R.id.status);
 		tv.setText("Hello, it worked!");
@@ -294,7 +295,7 @@ public class Main extends Activity implements LocationListener {
 		}
 	}
 
-	SharedPreferences mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+	SharedPreferences mPrefs = null;
 
 	@Override
 	public void onDestroy() {
