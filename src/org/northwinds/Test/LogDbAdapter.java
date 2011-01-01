@@ -52,7 +52,7 @@ public class LogDbAdapter {
 
 	private static final String TAG = "LogDbAdapter";
 
-	private static final String DATABASE_NAME = "locations";
+	private static final String DATABASE_NAME = "data.db";
 	private static final String DATABASE_TABLE = "locations";
 	private static final int DATABASE_VERSION = 1;
 
@@ -123,6 +123,10 @@ public class LogDbAdapter {
 		}, null, null, null, null, null);
 	}
 
+	public Cursor fetchUploadLocations(String[] cols, String condition) {
+		return mDb.query(DATABASE_TABLE, cols, condition, null, null, null, null, "100");
+	}
+
 	public long insertLocation(Location location) {
 		ContentValues values = new ContentValues();
 		values.put(KEY_TIMESTAMP, location.getTime());
@@ -149,6 +153,10 @@ public class LogDbAdapter {
 		args.put(KEY_LATITUDE, location.getLatitude());
 		args.put(KEY_LONGITUDE, location.getLongitude());
 
+		return mDb.update(DATABASE_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
+	}
+
+	public boolean updateLocation(long rowId, ContentValues args) {
 		return mDb.update(DATABASE_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
 	}
 
