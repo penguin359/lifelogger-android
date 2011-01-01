@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_height="wrap_content" android:layout_width="fill_parent">
+<TextView android:id="@+id/timestamp" android:background="#ff0000" android:layout_weight="1" android:text="AAA" android:layout_height="fill_parent" android:layout_width="fill_parent"/>
+<TextView android:id="@+id/latitude" android:text="B" android:layout_weight="1" android:background="#ffff00" android:layout_height="fill_parent" android:layout_width="fill_parent"/>
+<TextView android:id="@+id/longitude" android:text="C" android:background="#0000ff" android:layout_weight="1" android:layout_height="fill_parent" android:layout_width="fill_parent"/>
+</LinearLayout>
