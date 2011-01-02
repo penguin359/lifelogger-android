@@ -30,14 +30,6 @@ package org.northwinds.Test;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Iterator;
-import java.util.Set;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.BasicHttpEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -109,30 +101,19 @@ public class Main extends Activity implements LocationListener {
 		}
 	};
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		setContentView(R.layout.main);
-		TextView tv = (TextView)findViewById(R.id.status);
-		tv.setText("Hello, it worked!");
+	private TextView mTV;
+
+	private void parseIntent(Intent intent) {
 		StringBuilder sb = new StringBuilder();
-		Intent intent = getIntent();
 		sb.append("Hello: ");
 		sb.append(intent.getAction());
 		sb.append(", '");
-		if(intent.getData() != null)
-			sb.append(intent.getData().toString());
-		else
-			sb.append("null");
+		sb.append(intent.getDataString());
 		sb.append("', ");
 		sb.append(intent.getType());
 		sb.append(" - ");
 		if(intent.getCategories() != null) {
-			Set<String> set2 = intent.getCategories();
-			Iterator<String> it2 = set2.iterator();
-			while(it2.hasNext()) {
-				String s = it2.next();
+			for(String s : intent.getCategories()) {
 				sb.append(" '");
 				sb.append(s);
 				sb.append(",");
@@ -142,12 +123,7 @@ public class Main extends Activity implements LocationListener {
 		sb.append(": ");
 		if(intent.getExtras() != null) {
 			sb.append(intent.getExtras().toString());
-			Set<String> set = intent.getExtras().keySet();
-			Iterator<String> it = set.iterator();
-			while(it.hasNext()) {
-			//String str[] = (String[])set.toArray();
-			//for(String s : str) {
-				String s = it.next();
+			for(String s : intent.getExtras().keySet()) {
 				sb.append(" '");
 				sb.append(s);
 				sb.append(",");
@@ -184,24 +160,6 @@ public class Main extends Activity implements LocationListener {
 					sb.append(c);
 					sb.append(" done!");
 					is.close();
-
-					is = cr.openInputStream(uri);
-					BasicHttpEntity entity = new BasicHttpEntity();
-					entity.setContent(is);
-					HttpClient client = new DefaultHttpClient();
-					HttpPost req = new HttpPost(mPrefs.getString("url", "http://www.example.org/photocatalog/") + "cgi/photocatalog.pl");
-					//req.setHeader("Content-Type", "multipart/form-data; boundary="+boundary);
-					req.setHeader("Content-Type", intent.getType());
-					req.setEntity(entity);
-					sb.append("Uploading... ");
-					try {
-						HttpResponse resp = client.execute(req);
-						//sb.append(String.format("%03d %s", resp.getStatusLine().getStatusCode(), resp.getStatusLine().getReasonPhrase()));
-						sb.append(resp.getStatusLine().getReasonPhrase());
-					} catch(Exception e) {
-						sb.append(e);
-					}
-					sb.append(" done!");
 				}
 			} catch(Exception e) {
 				sb.append(e);
@@ -209,35 +167,56 @@ public class Main extends Activity implements LocationListener {
 		} else
 			sb.append("null");
 
-		tv.setText(sb.toString());
+		mTV.setText(sb.toString());
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.main);
+		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+		mTV = (TextView)findViewById(R.id.status);
+		mTV.setText("Hello, it worked!");
+
+		parseIntent(getIntent());
 
 		Button b = (Button)findViewById(R.id.list_but);
 		b.setOnClickListener(new View.OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			startActivity(new Intent(Main.this, GPSList.class));
-		}
-	});
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(Main.this, GPSList.class));
+			}
+		});
+
 		b = (Button)findViewById(R.id.delete_but);
 		b.setOnClickListener(new View.OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			mDbAdapter.deleteAllLocations();
-		}
-	});
+			@Override
+			public void onClick(View v) {
+				mDbAdapter.deleteAllLocations();
+			}
+		});
+
 		b = (Button)findViewById(R.id.start_but);
 		b.setOnClickListener(startGpsOnClick);
 		//b = (Button)findViewById(R.id.stop_but);
 		//b.setOnClickListener(stopGpsOnClick);
+
 		b = (Button)findViewById(R.id.exit_but);
 		b.setOnClickListener(new View.OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			Process.killProcess(Process.myPid());
-		}
-	});
+			@Override
+			public void onClick(View v) {
+				Process.killProcess(Process.myPid());
+			}
+		});
 
-	mDbAdapter.open();
+		mDbAdapter.open();
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		parseIntent(intent);
 	}
 
 	@Override
@@ -252,12 +231,12 @@ public class Main extends Activity implements LocationListener {
 		switch(item.getItemId()) {
 		case R.id.settings:
 			startActivity(new Intent(getBaseContext(), PrefAct.class));
-		return true;
+			return true;
 		case R.id.quit:
-		Process.killProcess(Process.myPid());
-		return true;
+			Process.killProcess(Process.myPid());
+			return true;
 		}
-	return super.onOptionsItemSelected(item);
+		return super.onOptionsItemSelected(item);
 	}
 
 	public void startUpload(View view) {
@@ -267,19 +246,19 @@ public class Main extends Activity implements LocationListener {
 	private boolean mIsBound = false;
 	private boolean mIsListening = false;
 
-//	public void startGPS(View view) {
-//		startService(new Intent(this, Logger.class));
-//		bindService(new Intent(this, Logger.class), mConnection, BIND_AUTO_CREATE);
-//	mIsBound = true;
-//	}
+	//public void startGPS(View view) {
+	//	startService(new Intent(this, Logger.class));
+	//	bindService(new Intent(this, Logger.class), mConnection, BIND_AUTO_CREATE);
+	//	mIsBound = true;
+	//}
 
 	@Override
 	public void onStop() {
 		super.onStop();
 		if(mIsListening) {
 			Toast.makeText(this, "Stop listening to GPS", Toast.LENGTH_SHORT).show();
-		if(mBoundLogger != null)
-			mBoundLogger.setUpdateListener(null);
+			if(mBoundLogger != null)
+				mBoundLogger.setUpdateListener(null);
 			mIsListening = false;
 		}
 	}
@@ -288,10 +267,10 @@ public class Main extends Activity implements LocationListener {
 	public void onStart() {
 		super.onStart();
 		if(mIsBound && !mIsListening) {
-		if(mBoundLogger != null) {
-			mBoundLogger.setUpdateListener(this);
-			mIsListening = true;
-		}
+			if(mBoundLogger != null) {
+				mBoundLogger.setUpdateListener(this);
+				mIsListening = true;
+			}
 		}
 	}
 
@@ -302,24 +281,24 @@ public class Main extends Activity implements LocationListener {
 		super.onDestroy();
 		if(mIsBound) {
 			Toast.makeText(this, "Unbind GPS", Toast.LENGTH_SHORT).show();
-		if(mBoundLogger != null)
-			mBoundLogger.setUpdateListener(null);
+			if(mBoundLogger != null)
+				mBoundLogger.setUpdateListener(null);
 			unbindService(mConnection);
 			mIsBound = false;
-		mIsListening = false;
+			mIsListening = false;
 		}
 	}
 
 	@Override
 	public void onLocationChanged(Location loc) {
-	TextView tv = (TextView)findViewById(R.id.location);
-	StringBuilder sb = new StringBuilder();
-	sb.append("Location: [ ");
-	sb.append(loc.getLatitude());
-	sb.append(", ");
-	sb.append(loc.getLongitude());
-	sb.append(" ]");
-	tv.setText(sb.toString());
+		TextView tv = (TextView)findViewById(R.id.location);
+		StringBuilder sb = new StringBuilder();
+		sb.append("Location: [ ");
+		sb.append(loc.getLatitude());
+		sb.append(", ");
+		sb.append(loc.getLongitude());
+		sb.append(" ]");
+		tv.setText(sb.toString());
 	}
 	public void onProviderDisabled(String provider) {
 	}

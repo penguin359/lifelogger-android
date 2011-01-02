@@ -29,17 +29,34 @@
 package org.northwinds.Test;
 
 import java.io.DataOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.BasicHttpEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -47,39 +64,81 @@ import android.widget.Toast;
  *
  */
 public class Upload extends Activity implements Runnable {
-	Thread thread;
-	Uri uri;
-	String title;
-	String description;
-	Context context2;
+	private static final String TAG = "Upload";
 
-	private class Multipart {
+	Thread mThread;
+	Uri mUri;
+	String mTitle;
+	String mDescription;
+	String mType;
+
+	private static class Multipart {
+		private static final String TAG = "Multipart";
+
 		private static final String boundary = "fjd3Fb5Xr8Hfrb6hnDv3Lg";
 
-		public void send(OutputStream os) {
+		public static void send(OutputStream os, Set<Entry<String,Object>> set) {
 			DataOutputStream dos = new DataOutputStream(os);
 
 			try {
-				dos.writeChars("--" + boundary + "\r\n");
-				dos.writeChars("Content-Disposition: form-data; name=\"name\"\r\n");
-				dos.writeChars("Content-Type: text/plain; name=\"utf-8\"\r\n");
-				dos.writeChars("Content-Transfer-Encoding: 8bit\r\n");
-				dos.writeChars("\r\n");
+				for(Entry<String,Object> entry : set) {
+					String name = entry.getKey();
+					Object obj = entry.getValue();
+					dos.writeChars("--" + boundary + "\r\n");
+					if(obj instanceof Uri) {
+						String value = "a";
+						String filename = "f";
+						dos.writeChars("Content-Disposition: form-data; name=\"" + value + "\"; filename=\"" + filename + "\"\r\n");
+						dos.writeChars("Content-Type: application/octet-stream\r\n");
+						dos.writeChars("Content-Transfer-Encoding: binary\r\n");
+						dos.writeChars("\r\n");
+					} else {
+						String value = obj.toString();
+						dos.writeChars("Content-Disposition: form-data; name=\"" + value + "\"\r\n");
+						dos.writeChars("Content-Type: text/plain; name=\"utf-8\"\r\n");
+						dos.writeChars("Content-Transfer-Encoding: 8bit\r\n");
+						dos.writeChars("\r\n");
+						dos.writeChars("\r\n");
+					}
+				}
+				dos.writeChars("--" + boundary + "--\r\n");
 			} catch(IOException e) {
+				Log.e(TAG, "Failed to upload form", e);
 			}
 		}
 	}
+
+	private static final int MSG_STRING = 0;
+	private TextView mStatus;
+
+	Handler updateUI = new Handler() {
+		@Override
+		public void handleMessage(Message m) {
+			switch(m.what) {
+			case MSG_STRING:
+				mStatus.setText((String)m.obj);
+				break;
+			}
+		}
+	};
+
+	SharedPreferences mPrefs = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.upload);
+
+		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		mStatus = (TextView)findViewById(R.id.status);
+
 		ImageView iv = (ImageView)findViewById(R.id.image);
 		Intent intent = getIntent();
+		mType = intent.getType();
 		try {
 			if(intent.getExtras().get(Intent.EXTRA_STREAM) != null) {
-				uri = (Uri)intent.getExtras().get(Intent.EXTRA_STREAM);
-				iv.setImageURI(uri);
+				mUri = (Uri)intent.getExtras().get(Intent.EXTRA_STREAM);
+				iv.setImageURI(mUri);
 			}
 		} catch(Exception e) {
 		}
@@ -87,32 +146,52 @@ public class Upload extends Activity implements Runnable {
 
 	@Override
 	public void onDestroy() {
-	super.onDestroy();
-	if(thread != null)
-		thread.interrupt();
+		super.onDestroy();
+		if(mThread != null)
+			mThread.interrupt();
 	}
 
 	public void startUpload(View view) {
-		title = ((EditText)findViewById(R.id.title)).getText().toString();
-		description = ((EditText)findViewById(R.id.description)).getText().toString();
+		mTitle = ((EditText)findViewById(R.id.title)).getText().toString();
+		mDescription = ((EditText)findViewById(R.id.description)).getText().toString();
 
-		context2 = getApplicationContext();
-		thread = new Thread(this);
-		thread.start();
+		mThread = new Thread(this);
+		mThread.start();
 
-		//Toast.makeText(this, "Thread started", Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, "Upload started", Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
 	public void run() {
-		//Toast toast = new Toast(this);
-		//toast.setText("hi");
-		//toast.show();
+		StringBuilder sb = new StringBuilder();
 		try {
-			Toast.makeText(context2, "Upload started", Toast.LENGTH_SHORT).show();
+			sb.append("Reading: ");
+			sb.append(mUri.toString());
+			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
+			ContentResolver cr = getContentResolver();
+			InputStream is = cr.openInputStream(mUri);
+			BasicHttpEntity entity = new BasicHttpEntity();
+			entity.setContent(is);
+			HttpClient client = new DefaultHttpClient();
+			HttpPost req = new HttpPost(mPrefs.getString("url", "http://www.example.org/photocatalog/") + "cgi/photocatalog.pl");
+			//req.setHeader("Content-Type", "multipart/form-data; boundary="+boundary);
+			req.setHeader("Content-Type", mType);
+			req.setEntity(entity);
+			sb.append("\nUploading...");
+			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
+			try {
+				HttpResponse resp = client.execute(req);
+				//sb.append(String.format("%03d %s", resp.getStatusLine().getStatusCode(), resp.getStatusLine().getReasonPhrase()));
+				sb.append(resp.getStatusLine().getReasonPhrase());
+			} catch(Exception e) {
+				sb.append(e);
+			}
+			sb.append("\ndone!");
+			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
 		} catch(Exception e) {
-			Toast a = new Toast(this);
-			a.setText("Hi");
+			Log.e(TAG, "Failed to upload file", e);
+			sb.append(e);
 		}
+		updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
 	}
 }
