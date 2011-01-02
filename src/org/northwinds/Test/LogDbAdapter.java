@@ -118,9 +118,10 @@ public class LogDbAdapter {
 	}
 
 	public Cursor fetchAllLocations() {
-		return mDb.query(DATABASE_TABLE, new String[] {
-			KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE
-		}, null, null, null, null, null);
+		//return mDb.query(DATABASE_TABLE, new String[] {
+		//	KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE
+		//}, null, null, null, null, null);
+		return mDb.rawQuery("SELECT _id, datetime(round(timestamp/1000), 'unixepoch') AS timestamp, latitude, longitude FROM locations", null);
 	}
 
 	public Cursor fetchUploadLocations(String[] cols, String condition) {
