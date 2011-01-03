@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	  package="org.northwinds.Test"
+	  package="org.northwinds.photocatalog"
 	  android:versionCode="1"
 	  android:versionName="1.0">
 	<application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="true">
 		<activity android:name=".GPSList"/>
 		<activity android:name=".Main"
-				  android:label="Test Debug" android:launchMode="singleTask">
+				  android:launchMode="singleTask">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"/>
 				<category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
-			<intent-filter>
+			<intent-filter android:label="PhotoCatalog Debug">
 				<action android:name="android.intent.action.SEND"/>
 				<category android:name="android.intent.category.DEFAULT"/>
 				<data android:mimeType="image/*"/>
 			</intent-filter>
 		</activity>
 		<activity android:name=".PrefAct"/>
-		<activity android:name=".Upload" android:label="Test Upload">
+		<activity android:name=".Upload" android:label="PhotoCatalog Upload">
 			<intent-filter>
 				<action android:name="android.intent.action.SEND"/>
 				<category android:name="android.intent.category.DEFAULT"/>

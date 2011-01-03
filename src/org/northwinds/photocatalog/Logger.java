@@ -26,7 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.northwinds.Test;
+package org.northwinds.photocatalog;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
