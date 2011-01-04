@@ -28,23 +28,24 @@
 
 package org.northwinds.photocatalog;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.BasicHttpEntity;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -75,36 +76,61 @@ public class Upload extends Activity implements Runnable {
 	private static class Multipart {
 		private static final String TAG = "Multipart";
 
-		private static final String boundary = "fjd3Fb5Xr8Hfrb6hnDv3Lg";
+		public static final String boundary = "fjd3Fb5Xr8Hfrb6hnDv3Lg";
 
 		public static void send(OutputStream os, Set<Entry<String,Object>> set) {
 			DataOutputStream dos = new DataOutputStream(os);
 
 			try {
+				Log.i(TAG, "Starting the push");
 				for(Entry<String,Object> entry : set) {
 					String name = entry.getKey();
 					Object obj = entry.getValue();
-					dos.writeChars("--" + boundary + "\r\n");
-					if(obj instanceof Uri) {
-						String value = "a";
+					//dos.writeUTF("--" + boundary + "\r\n");
+					dos.write(("--" + boundary + "\r\n").getBytes("UTF-8"));
+					//if(obj instanceof Uri) {
+					if(obj instanceof InputStream) {
+						//ContentResolver cr = getContentResolver();
+						//InputStream is = cr.openInputStream(mUri);
 						String filename = "f";
-						dos.writeChars("Content-Disposition: form-data; name=\"" + value + "\"; filename=\"" + filename + "\"\r\n");
-						dos.writeChars("Content-Type: application/octet-stream\r\n");
-						dos.writeChars("Content-Transfer-Encoding: binary\r\n");
-						dos.writeChars("\r\n");
+						InputStream is = (InputStream)obj;
+						dos.write(("Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + filename + "\"\r\n").getBytes("UTF-8"));
+						dos.write("Content-Type: application/octet-stream\r\n".getBytes("UTF-8"));
+						dos.write("Content-Transfer-Encoding: binary\r\n".getBytes("UTF-8"));
+						dos.write("\r\n".getBytes("UTF-8"));
+
+						Log.i(TAG, "Start file");
+					    byte[] buffer = new byte[1024]; // Adjust if you want
+					    int bytesRead;
+					    while((bytesRead = is.read(buffer)) != -1) {
+					        dos.write(buffer, 0, bytesRead);
+					    }
+						Log.i(TAG, "Finish file");
+
+						dos.write("\r\n".getBytes("UTF-8"));
 					} else {
 						String value = obj.toString();
-						dos.writeChars("Content-Disposition: form-data; name=\"" + value + "\"\r\n");
-						dos.writeChars("Content-Type: text/plain; name=\"utf-8\"\r\n");
-						dos.writeChars("Content-Transfer-Encoding: 8bit\r\n");
-						dos.writeChars("\r\n");
-						dos.writeChars("\r\n");
+						//dos.writeUTF("Content-Disposition: form-data; name=\"" + name + "\"\r\n");
+						//dos.writeUTF("Content-Type: text/plain; name=\"utf-8\"\r\n");
+						//dos.writeUTF("Content-Transfer-Encoding: 8bit\r\n");
+						//dos.writeUTF("\r\n");
+						//dos.writeUTF(value);
+						//dos.writeUTF("\r\n");
+						StringBuilder sb = new StringBuilder();
+						sb.append("Content-Disposition: form-data; name=\"" + name + "\"\r\n");
+						sb.append("Content-Type: text/plain; charset=\"utf-8\"\r\n");
+						sb.append("Content-Transfer-Encoding: 8bit\r\n");
+						sb.append("\r\n");
+						sb.append(value);
+						sb.append("\r\n");
+						dos.write(sb.toString().getBytes("UTF-8"));
 					}
 				}
-				dos.writeChars("--" + boundary + "--\r\n");
+				dos.write(("--" + boundary + "--\r\n").getBytes("UTF-8"));
 			} catch(IOException e) {
 				Log.e(TAG, "Failed to upload form", e);
 			}
+			Log.i(TAG, "done pushing");
 		}
 	}
 
@@ -169,13 +195,30 @@ public class Upload extends Activity implements Runnable {
 			sb.append(mUri.toString());
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
 			ContentResolver cr = getContentResolver();
-			InputStream is = cr.openInputStream(mUri);
-			BasicHttpEntity entity = new BasicHttpEntity();
-			entity.setContent(is);
+			final InputStream is = cr.openInputStream(mUri);
+			//BasicHttpEntity entity = new BasicHttpEntity();
+			//PipedInputStream is2 = new PipedInputStream();
+			//final PipedOutputStream os = new PipedOutputStream(is2);
+			//new Thread() {
+			//	@Override
+			//	public void run() {
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+					Map<String, Object> map = new LinkedHashMap<String, Object>();
+					map.put("title", mTitle);
+					map.put("description", mDescription);
+					//map.put("file", mUri);
+					map.put("file", is);
+					Log.i(TAG, "Start pipe");
+						Multipart.send(os, map.entrySet());
+					//} catch(IOException e) { Log.e(TAG, "Failed send", e); }
+			ByteArrayEntity entity = new ByteArrayEntity(os.toByteArray());
+			//	}
+			//}.start();
+			//entity.setContent(is2);
 			HttpClient client = new DefaultHttpClient();
 			HttpPost req = new HttpPost(mPrefs.getString("url", "http://www.example.org/photocatalog/") + "cgi/photocatalog.pl");
-			//req.setHeader("Content-Type", "multipart/form-data; boundary="+boundary);
-			req.setHeader("Content-Type", mType);
+			req.setHeader("Content-Type", "multipart/form-data; boundary="+Multipart.boundary);
+			//req.setHeader("Content-Type", mType);
 			req.setEntity(entity);
 			sb.append("\nUploading...");
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
@@ -185,6 +228,7 @@ public class Upload extends Activity implements Runnable {
 				sb.append(resp.getStatusLine().getReasonPhrase());
 			} catch(Exception e) {
 				sb.append(e);
+				Log.e(TAG, "Failed client request", e);
 			}
 			sb.append("\ndone!");
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
