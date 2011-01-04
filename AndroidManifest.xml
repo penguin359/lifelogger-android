@@ -26,8 +26,17 @@
 			</intent-filter>
 		</activity>
 		<service android:label="Logging Service" android:name=".Logger"/>
+		<receiver android:name=".Receiver">
+			<intent-filter>
+				<action android:name="android.intent.action.BOOT_COMPLETED"/>
+			</intent-filter>
+			<intent-filter>
+				<action android:name="android.intent.action.BATTERY_LOW"/>
+			</intent-filter>
+		</receiver>
 	</application>
 	<uses-sdk android:targetSdkVersion="7" android:minSdkVersion="7"/>
 	<uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 </manifest>

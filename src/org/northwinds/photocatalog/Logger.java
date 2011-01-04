@@ -100,12 +100,12 @@ public class Logger extends Service implements Runnable {
 		mLM.removeGpsStatusListener(mGpsListener);
 		mDbAdapter.close();
 		mIsListening = false;
-		mNM.cancelAll();
+		mNM.cancel(PHOTOCATALOG_ID);
 		mUpload.interrupt();
-		try {
-			mUpload.join();
-		} catch(InterruptedException e) {
-		}
+		//try {
+		//	mUpload.join();
+		//} catch(InterruptedException e) {
+		//}
 		Toast.makeText(this, "Stop GPS", Toast.LENGTH_SHORT).show();
 	}
 
@@ -256,9 +256,6 @@ public class Logger extends Service implements Runnable {
 
 	@Override
 	public void run() {
-		//SQLiteDatabase db;
-
-		//Toast.makeText(mCtx, "Found: 33", Toast.LENGTH_LONG).show();
 		try {
 			Thread.sleep(2000);
 		} catch(InterruptedException e) {

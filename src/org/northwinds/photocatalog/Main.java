@@ -37,6 +37,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.net.Uri;
@@ -44,6 +45,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore.MediaColumns;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -160,6 +162,16 @@ public class Main extends Activity implements LocationListener {
 					sb.append(c);
 					sb.append(" done!");
 					is.close();
+					Cursor cc = cr.query(uri, new String[] { MediaColumns.DISPLAY_NAME, MediaColumns.TITLE, MediaColumns.MIME_TYPE, MediaColumns.SIZE }, null, null, null);
+					if(cc.moveToFirst()) {
+						sb.append("\n'");
+						for(int i = 0; i < cc.getColumnCount(); i++) {
+							if(i > 0)
+								sb.append("', '");
+							sb.append(cc.getString(i));
+						}
+						sb.append("'");
+					}
 				}
 			} catch(Exception e) {
 				sb.append(e);
