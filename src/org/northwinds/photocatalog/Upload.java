@@ -28,31 +28,35 @@
 
 package org.northwinds.photocatalog;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore.MediaColumns;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -73,12 +77,166 @@ public class Upload extends Activity implements Runnable {
 	String mDescription;
 	String mType;
 
-	private static class Multipart {
+	private class Multipart {
 		private static final String TAG = "Multipart";
 
-		public static final String boundary = "fjd3Fb5Xr8Hfrb6hnDv3Lg";
+		private LinkedHashMap<String, Object> mFields = new LinkedHashMap<String, Object>();
 
-		public static void send(OutputStream os, Set<Entry<String,Object>> set) {
+		private static final String boundary = "fjd3Fb5Xr8Hfrb6hnDv3Lg";
+
+		private class MultipartEntity extends AbstractHttpEntity {
+			private ArrayList<Object> mContent = new ArrayList<Object>();
+			private long mLength = 0;
+
+			MultipartEntity() {
+				StringBuilder sb = new StringBuilder();
+				for(Entry<String, Object> entry: mFields.entrySet()) {
+					String name = entry.getKey();
+					Object obj = entry.getValue();
+					sb.append("--").append(boundary).append("\r\n");
+					if(obj instanceof String) {
+						sb.append("Content-Disposition: form-data; name=\"").append(name).append("\"\r\n");
+						sb.append("Content-Type: text/plain; charset=\"utf-8\"\r\n");
+						sb.append("Content-Transfer-Encoding: 8bit\r\n");
+						sb.append("\r\n");
+						sb.append((String)obj);
+						sb.append("\r\n");
+					} else if(obj instanceof InputStream) {
+						sb.append("Content-Disposition: form-data; name=\"").append(name).append("\"\r\n");
+						sb.append("Content-Type: application/octet-stream\r\n");
+						sb.append("Content-Transfer-Encoding: binary\r\n");
+						sb.append("\r\n");
+
+						try {
+							mContent.add(sb.toString().getBytes("UTF-8"));
+						} catch(UnsupportedEncodingException e) {
+							Log.e(TAG, "Failed to convert string to UTF-8");
+						}
+						sb = new StringBuilder();
+						mContent.add(obj);
+						mLength = -1;
+
+						sb.append("\r\n");
+					} else if(obj instanceof Uri) {
+						String filename = null;
+						String type		= null;
+						String size		= null;
+						Uri uri = (Uri)obj;
+						ContentResolver cr = getContentResolver();
+						Cursor cc = cr.query(uri, new String[] {
+									MediaColumns.DISPLAY_NAME,
+									MediaColumns.MIME_TYPE,
+									MediaColumns.SIZE
+								}, null, null, null);
+						if(cc.moveToFirst()) {
+							filename = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.DISPLAY_NAME));
+							type	 = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.MIME_TYPE));
+							size	 = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.SIZE));
+						}
+						if(type == null)
+							type = "application/octet-stream";
+						if(size == null)
+							mLength = -1;
+						else if(mLength >= 0)
+							mLength += Long.parseLong(size);
+						sb.append("Content-Disposition: form-data; name=\"").append(name);
+						if(filename != null)
+							sb.append("\"; filename=\"").append(filename);
+						sb.append("\"\r\n");
+						sb.append("Content-Type: ");
+						sb.append(type);
+						sb.append("\r\n");
+						sb.append("Content-Transfer-Encoding: binary\r\n");
+						sb.append("\r\n");
+
+						byte[] str;
+						try {
+							str = sb.toString().getBytes("UTF-8");
+							mContent.add(str);
+							if(mLength >= 0)
+								mLength += str.length;
+							sb = new StringBuilder();
+							InputStream is = cr.openInputStream(uri);
+							mContent.add(is);
+							mLength = -1;
+						} catch(UnsupportedEncodingException ex) {
+							Log.e(TAG, "Failed to convert string to UTF-8", ex);
+						} catch(FileNotFoundException ex) {
+							Log.e(TAG, "Failed to open file", ex);
+							mLength = -1;
+						}
+
+						sb.append("\r\n");
+					}
+				}
+				sb.append("--").append(boundary).append("--\r\n");
+
+				try {
+					byte[] str = sb.toString().getBytes("UTF-8");
+					mContent.add(str);
+					if(mLength >= 0)
+						mLength += str.length;
+				} catch(UnsupportedEncodingException e) {
+					Log.e(TAG, "Failed to convert string to UTF-8");
+				}
+			}
+
+			public InputStream getContent() throws IOException {
+				throw new IOException("Entity only supports writing");
+			}
+
+			public Header getContentType() {
+				return new BasicHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
+			}
+
+			public long getContentLength() {
+				return mLength;
+			}
+
+			public boolean isRepeatable() {
+				return true;
+			}
+
+			public boolean isStreaming() {
+				return false;
+			}
+
+			public void writeTo(OutputStream os) throws IOException {
+				Log.i(TAG, "Start file");
+				for(Object obj: mContent) {
+					if(obj instanceof byte[]) {
+						os.write((byte[])obj);
+					} else if(obj instanceof InputStream) {
+						InputStream is = (InputStream)obj;
+						byte[] buffer = new byte[8192]; // Adjust if you want
+						int bytesRead;
+						while((bytesRead = is.read(buffer)) != -1) {
+							os.write(buffer, 0, bytesRead);
+						}
+					}
+				}
+				Log.i(TAG, "Finish file");
+			}
+		}
+
+		public HttpEntity getEntity() {
+			return new MultipartEntity();
+		}
+
+		public void put(String name, String value) {
+			mFields.put(name, value);
+		}
+
+		public void put(String name, InputStream value) {
+			mFields.put(name, value);
+		}
+
+		public void put(String name, Uri value) {
+			mFields.put(name, value);
+		}
+
+		/*
+		public void send(OutputStream os, Set<Entry<String, Object>> set) {
 			DataOutputStream dos = new DataOutputStream(os);
 
 			try {
@@ -132,6 +290,7 @@ public class Upload extends Activity implements Runnable {
 			}
 			Log.i(TAG, "done pushing");
 		}
+		*/
 	}
 
 	private static final int MSG_STRING = 0;
@@ -202,22 +361,28 @@ public class Upload extends Activity implements Runnable {
 			//new Thread() {
 			//	@Override
 			//	public void run() {
-			ByteArrayOutputStream os = new ByteArrayOutputStream();
-					Map<String, Object> map = new LinkedHashMap<String, Object>();
-					map.put("title", mTitle);
-					map.put("description", mDescription);
+			//ByteArrayOutputStream os = new ByteArrayOutputStream();
+					//Map<String, Object> map = new LinkedHashMap<String, Object>();
+					//map.put("title", mTitle);
+					//map.put("description", mDescription);
 					//map.put("file", mUri);
-					map.put("file", is);
-					Log.i(TAG, "Start pipe");
-						Multipart.send(os, map.entrySet());
+					//map.put("file", is);
+					//Log.i(TAG, "Start pipe");
+					//	Multipart.send(os, map.entrySet());
 					//} catch(IOException e) { Log.e(TAG, "Failed send", e); }
-			ByteArrayEntity entity = new ByteArrayEntity(os.toByteArray());
+			Multipart m = new Multipart();
+			m.put("title", mTitle);
+			m.put("description", mDescription);
+			m.put("file", is);
+			m.put("file", mUri);
+			HttpEntity entity = m.getEntity();
+			//ByteArrayEntity entity = new ByteArrayEntity(os.toByteArray());
 			//	}
 			//}.start();
 			//entity.setContent(is2);
 			HttpClient client = new DefaultHttpClient();
 			HttpPost req = new HttpPost(mPrefs.getString("url", "http://www.example.org/photocatalog/") + "cgi/photocatalog.pl");
-			req.setHeader("Content-Type", "multipart/form-data; boundary="+Multipart.boundary);
+			//req.setHeader("Content-Type", "multipart/form-data; boundary="+Multipart.boundary);
 			//req.setHeader("Content-Type", mType);
 			req.setEntity(entity);
 			sb.append("\nUploading...");
