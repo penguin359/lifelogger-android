@@ -46,6 +46,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -76,10 +78,16 @@ public class Upload extends Activity implements Runnable {
 	String mDescription;
 	String mType;
 
+	public static interface ProgressUpdate {
+		void onUpdate(int progress, int max);
+	}
+
 	private class Multipart {
 		private static final String TAG = "Multipart";
 
 		private LinkedHashMap<String, Object> mFields = new LinkedHashMap<String, Object>();
+		
+		private ProgressUpdate mUpdate = null;
 
 		private class MultipartEntity extends AbstractHttpEntity {
 			private static final String boundary = "fjd3Fb5Xr8Hfrb6hnDv3Lg";
@@ -198,9 +206,15 @@ public class Upload extends Activity implements Runnable {
 			}
 
 			public void writeTo(OutputStream os) throws IOException {
+				Long progress = 0L;
+				if(mLength >= 0 && mUpdate != null)
+					mUpdate.onUpdate(0, 100);
 				for(Object obj: mContent) {
 					if(obj instanceof byte[]) {
 						os.write((byte[])obj);
+						progress += ((byte[])obj).length;
+						if(mLength >= 0 && mUpdate != null)
+							mUpdate.onUpdate((int)(progress*100/mLength), 100);
 					} else if(obj instanceof InputStream) {
 						Log.i(TAG, "Start file");
 						InputStream is = (InputStream)obj;
@@ -208,6 +222,9 @@ public class Upload extends Activity implements Runnable {
 						int bytesRead;
 						while((bytesRead = is.read(buffer)) != -1) {
 							os.write(buffer, 0, bytesRead);
+							progress += bytesRead;
+							if(mLength >= 0 && mUpdate != null)
+								mUpdate.onUpdate((int)(progress*100/mLength), 100);
 						}
 						Log.i(TAG, "Finish file");
 					}
@@ -230,10 +247,22 @@ public class Upload extends Activity implements Runnable {
 		public void put(String name, Uri value) {
 			mFields.put(name, value);
 		}
+		
+		public void setProgressUpdate(ProgressUpdate update) {
+			mUpdate = update;
+		}
 	}
 
 	private static final int MSG_STRING = 0;
+	private static final int MSG_PROGRESSWHEEL = 1;
+	private static final int MSG_PROGRESSBAR = 2;
+	private static final int MSG_PROGRESSBAR_UPDATE = 3;
+
+	private static final int DIALOG_PROGRESSWHEEL = 0;
+	private static final int DIALOG_PROGRESSBAR = 1;
+
 	private TextView mStatus;
+	ProgressDialog mProgressbar;
 
 	Handler updateUI = new Handler() {
 		@Override
@@ -242,9 +271,46 @@ public class Upload extends Activity implements Runnable {
 			case MSG_STRING:
 				mStatus.setText((String)m.obj);
 				break;
+			case MSG_PROGRESSWHEEL:
+				if(m.arg1 > 0)
+					showDialog(DIALOG_PROGRESSWHEEL);
+				else
+					dismissDialog(DIALOG_PROGRESSWHEEL);
+				break;
+			case MSG_PROGRESSBAR:
+				if(m.arg1 > 0)
+					showDialog(DIALOG_PROGRESSBAR);
+				else
+					dismissDialog(DIALOG_PROGRESSBAR);
+				break;
+			case MSG_PROGRESSBAR_UPDATE:
+				if(mProgressbar != null) {
+					//if(mProgressbar.isIndeterminate()) {
+					//	mProgressbar.setIndeterminate(false);
+					//	mProgressbar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+					//}
+					mProgressbar.setProgress(m.arg1);
+					mProgressbar.setMax(m.arg2);
+				}
+				break;
 			}
 		}
 	};
+
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		switch(id) {
+		case DIALOG_PROGRESSWHEEL:
+			mProgressbar = new ProgressDialog(this);	
+			mProgressbar.setMessage("Uploading.  Please wait...");
+			mProgressbar.setCancelable(false);
+			//mProgressbar.setIndeterminate(false);
+			mProgressbar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+			return mProgressbar;
+		default:
+			return super.onCreateDialog(id);
+		}
+	}
 
 	SharedPreferences mPrefs = null;
 
@@ -292,13 +358,20 @@ public class Upload extends Activity implements Runnable {
 			sb.append("Reading: ");
 			sb.append(mUri.toString());
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
+			updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSWHEEL, 1, 0));
 			ContentResolver cr = getContentResolver();
 			InputStream is = cr.openInputStream(mUri);
 			Multipart m = new Multipart();
 			m.put("title", mTitle);
 			m.put("description", mDescription);
 			m.put("file", is);
-			//m.put("file", mUri);
+			m.put("file", mUri);
+			m.setProgressUpdate(new ProgressUpdate() {
+				@Override
+				public void onUpdate(int progress, int max) {
+					updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSBAR_UPDATE, progress, max));
+				}
+			});
 			HttpEntity entity = m.getEntity();
 			HttpClient client = new DefaultHttpClient();
 			HttpPost req = new HttpPost(mPrefs.getString("url", "http://www.example.org/photocatalog/") + "cgi/photocatalog.pl");
@@ -315,6 +388,7 @@ public class Upload extends Activity implements Runnable {
 			}
 			sb.append("\ndone!");
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
+			updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSWHEEL, 0, 0));
 		} catch(Exception e) {
 			Log.e(TAG, "Failed to upload file", e);
 			sb.append(e);
