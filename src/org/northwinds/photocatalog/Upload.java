@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -82,13 +81,15 @@ public class Upload extends Activity implements Runnable {
 
 		private LinkedHashMap<String, Object> mFields = new LinkedHashMap<String, Object>();
 
-		private static final String boundary = "fjd3Fb5Xr8Hfrb6hnDv3Lg";
-
 		private class MultipartEntity extends AbstractHttpEntity {
+			private static final String boundary = "fjd3Fb5Xr8Hfrb6hnDv3Lg";
+
 			private ArrayList<Object> mContent = new ArrayList<Object>();
 			private long mLength = 0;
 
 			MultipartEntity() {
+				contentType = new BasicHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
+
 				StringBuilder sb = new StringBuilder();
 				for(Entry<String, Object> entry: mFields.entrySet()) {
 					String name = entry.getKey();
@@ -99,7 +100,7 @@ public class Upload extends Activity implements Runnable {
 						sb.append("Content-Type: text/plain; charset=\"utf-8\"\r\n");
 						sb.append("Content-Transfer-Encoding: 8bit\r\n");
 						sb.append("\r\n");
-						sb.append((String)obj);
+						sb.append(((String)obj).replace("\n", "\r\n"));
 						sb.append("\r\n");
 					} else if(obj instanceof InputStream) {
 						sb.append("Content-Disposition: form-data; name=\"").append(name).append("\"\r\n");
@@ -158,7 +159,6 @@ public class Upload extends Activity implements Runnable {
 							sb = new StringBuilder();
 							InputStream is = cr.openInputStream(uri);
 							mContent.add(is);
-							mLength = -1;
 						} catch(UnsupportedEncodingException ex) {
 							Log.e(TAG, "Failed to convert string to UTF-8", ex);
 						} catch(FileNotFoundException ex) {
@@ -185,10 +185,6 @@ public class Upload extends Activity implements Runnable {
 				throw new IOException("Entity only supports writing");
 			}
 
-			public Header getContentType() {
-				return new BasicHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
-			}
-
 			public long getContentLength() {
 				return mLength;
 			}
@@ -202,20 +198,20 @@ public class Upload extends Activity implements Runnable {
 			}
 
 			public void writeTo(OutputStream os) throws IOException {
-				Log.i(TAG, "Start file");
 				for(Object obj: mContent) {
 					if(obj instanceof byte[]) {
 						os.write((byte[])obj);
 					} else if(obj instanceof InputStream) {
+						Log.i(TAG, "Start file");
 						InputStream is = (InputStream)obj;
 						byte[] buffer = new byte[8192]; // Adjust if you want
 						int bytesRead;
 						while((bytesRead = is.read(buffer)) != -1) {
 							os.write(buffer, 0, bytesRead);
 						}
+						Log.i(TAG, "Finish file");
 					}
 				}
-				Log.i(TAG, "Finish file");
 			}
 		}
 
@@ -234,63 +230,6 @@ public class Upload extends Activity implements Runnable {
 		public void put(String name, Uri value) {
 			mFields.put(name, value);
 		}
-
-		/*
-		public void send(OutputStream os, Set<Entry<String, Object>> set) {
-			DataOutputStream dos = new DataOutputStream(os);
-
-			try {
-				Log.i(TAG, "Starting the push");
-				for(Entry<String,Object> entry : set) {
-					String name = entry.getKey();
-					Object obj = entry.getValue();
-					//dos.writeUTF("--" + boundary + "\r\n");
-					dos.write(("--" + boundary + "\r\n").getBytes("UTF-8"));
-					//if(obj instanceof Uri) {
-					if(obj instanceof InputStream) {
-						//ContentResolver cr = getContentResolver();
-						//InputStream is = cr.openInputStream(mUri);
-						String filename = "f";
-						InputStream is = (InputStream)obj;
-						dos.write(("Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + filename + "\"\r\n").getBytes("UTF-8"));
-						dos.write("Content-Type: application/octet-stream\r\n".getBytes("UTF-8"));
-						dos.write("Content-Transfer-Encoding: binary\r\n".getBytes("UTF-8"));
-						dos.write("\r\n".getBytes("UTF-8"));
-
-						Log.i(TAG, "Start file");
-					    byte[] buffer = new byte[1024]; // Adjust if you want
-					    int bytesRead;
-					    while((bytesRead = is.read(buffer)) != -1) {
-					        dos.write(buffer, 0, bytesRead);
-					    }
-						Log.i(TAG, "Finish file");
-
-						dos.write("\r\n".getBytes("UTF-8"));
-					} else {
-						String value = obj.toString();
-						//dos.writeUTF("Content-Disposition: form-data; name=\"" + name + "\"\r\n");
-						//dos.writeUTF("Content-Type: text/plain; name=\"utf-8\"\r\n");
-						//dos.writeUTF("Content-Transfer-Encoding: 8bit\r\n");
-						//dos.writeUTF("\r\n");
-						//dos.writeUTF(value);
-						//dos.writeUTF("\r\n");
-						StringBuilder sb = new StringBuilder();
-						sb.append("Content-Disposition: form-data; name=\"" + name + "\"\r\n");
-						sb.append("Content-Type: text/plain; charset=\"utf-8\"\r\n");
-						sb.append("Content-Transfer-Encoding: 8bit\r\n");
-						sb.append("\r\n");
-						sb.append(value);
-						sb.append("\r\n");
-						dos.write(sb.toString().getBytes("UTF-8"));
-					}
-				}
-				dos.write(("--" + boundary + "--\r\n").getBytes("UTF-8"));
-			} catch(IOException e) {
-				Log.e(TAG, "Failed to upload form", e);
-			}
-			Log.i(TAG, "done pushing");
-		}
-		*/
 	}
 
 	private static final int MSG_STRING = 0;
@@ -354,36 +293,15 @@ public class Upload extends Activity implements Runnable {
 			sb.append(mUri.toString());
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
 			ContentResolver cr = getContentResolver();
-			final InputStream is = cr.openInputStream(mUri);
-			//BasicHttpEntity entity = new BasicHttpEntity();
-			//PipedInputStream is2 = new PipedInputStream();
-			//final PipedOutputStream os = new PipedOutputStream(is2);
-			//new Thread() {
-			//	@Override
-			//	public void run() {
-			//ByteArrayOutputStream os = new ByteArrayOutputStream();
-					//Map<String, Object> map = new LinkedHashMap<String, Object>();
-					//map.put("title", mTitle);
-					//map.put("description", mDescription);
-					//map.put("file", mUri);
-					//map.put("file", is);
-					//Log.i(TAG, "Start pipe");
-					//	Multipart.send(os, map.entrySet());
-					//} catch(IOException e) { Log.e(TAG, "Failed send", e); }
+			InputStream is = cr.openInputStream(mUri);
 			Multipart m = new Multipart();
 			m.put("title", mTitle);
 			m.put("description", mDescription);
 			m.put("file", is);
-			m.put("file", mUri);
+			//m.put("file", mUri);
 			HttpEntity entity = m.getEntity();
-			//ByteArrayEntity entity = new ByteArrayEntity(os.toByteArray());
-			//	}
-			//}.start();
-			//entity.setContent(is2);
 			HttpClient client = new DefaultHttpClient();
 			HttpPost req = new HttpPost(mPrefs.getString("url", "http://www.example.org/photocatalog/") + "cgi/photocatalog.pl");
-			//req.setHeader("Content-Type", "multipart/form-data; boundary="+Multipart.boundary);
-			//req.setHeader("Content-Type", mType);
 			req.setEntity(entity);
 			sb.append("\nUploading...");
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
