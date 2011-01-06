@@ -29,8 +29,10 @@
 package org.northwinds.photocatalog;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -39,7 +41,7 @@ import java.util.Set;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.ContentProducer;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Notification;
@@ -258,7 +260,7 @@ public class Logger extends Service implements Runnable {
 		} catch(InterruptedException e) {
 			return;
 		}
-		String[] cols = new String[] {
+		final String[] cols = new String[] {
 			"_id",
 			"timestamp",
 			"latitude",
@@ -276,43 +278,50 @@ public class Logger extends Service implements Runnable {
 		//	return;
 		//}
 		//Cursor c = db.query("locations", cols, "uploaded != 1", null, null, null, null, "100");
-		Cursor c = mDbAdapter.fetchUploadLocations(cols, "uploaded != 1");
+		final Cursor c = mDbAdapter.fetchUploadLocations(cols, "uploaded != 1");
 		if(!c.moveToFirst()) {
 			c.close();
 			return;
 		}
 
-		List<Integer> idList = new ArrayList<Integer>();
-		StringBuilder sb = new StringBuilder("PhotoCatalog v1.0\n");
-		for(int i = 0; i < cols.length; i++) {
-			if(i > 0)
-				sb.append(",");
-			if(cols[i].equals("_id"))
-				sb.append("id");
-			else
-				sb.append(cols[i]);
-		}
-		sb.append("\n");
-		do {
-			idList.add(c.getInt(0));
-			for(int i = 0; i < cols.length; i++) {
-				if(i > 0)
-					sb.append(",");
-				if(!c.isNull(i))
-					sb.append(c.getString(i));
-			}
-			sb.append("\n");
-		} while(c.moveToNext());
-		c.close();
-
 		String baseUrl = mPrefs.getString("url", "http://www.example.org/photocatalog/");
+		String source = mPrefs.getString("source", "0");
+		final List<Integer> idList = new ArrayList<Integer>();
+		Multipart m = new Multipart(this);
+		m.put("source", source);
+		m.put("file", new ContentProducer() {
+			public void writeTo(OutputStream os) throws IOException {
+				os.write("PhotoCatalog v1.0\n".getBytes());
+				for(int i = 0; i < cols.length; i++) {
+					if(i > 0)
+						os.write(",".getBytes());
+					if(cols[i].equals("_id"))
+						os.write("id".getBytes());
+					else
+						os.write(cols[i].getBytes());
+				}
+				os.write("\n".getBytes());
+				do {
+					idList.add(c.getInt(0));
+					for(int i = 0; i < cols.length; i++) {
+						if(i > 0)
+							os.write(",".getBytes());
+						if(!c.isNull(i))
+							os.write(c.getString(i).getBytes());
+					}
+					os.write("\n".getBytes());
+				} while(c.moveToNext());
+			}
+		});
+		m.put("finish", "1");
+
 		//StringBuilder sb = new StringBuilder();
 		//sb.append(baseUrl).append("cgi/test-android.pl?loc=").append("123").append(",").append(c.getCount());
-		String uri = baseUrl + "cgi/test-android.pl?source=4";
+		String uri = baseUrl + "cgi/test-android.pl";
 		HttpClient client = new DefaultHttpClient();
 		HttpPost post = new HttpPost(uri);
 		try {
-			post.setEntity(new StringEntity(sb.toString()));
+			post.setEntity(m.getEntity());
 			HttpResponse resp = client.execute(post);
 			InputStream is = resp.getEntity().getContent();
 			BufferedReader r = new BufferedReader(new InputStreamReader(is, "UTF-8"));
@@ -326,9 +335,10 @@ public class Logger extends Service implements Runnable {
 			//sb.append("\nWrite: '").append(r.readLine()).append("'");
 		} catch (Exception ex) {
 			//ex.printStackTrace();
-			sb.append("\nError: '" + ex + "'");
+			//sb.append("\nError: '" + ex + "'");
 		} finally {
 			//get.releaseConnection();
 		}
+		c.close();
 	}
 }
