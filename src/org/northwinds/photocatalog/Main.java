@@ -42,8 +42,12 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.Process;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.MediaColumns;
 import android.view.Menu;
@@ -52,24 +56,24 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class Main extends Activity implements LocationListener {
-	final String boundary = "ak3fGvsHkRacd-Fhkud4";
-
-	private Logger mBoundLogger = null;
+	private Messenger mService = null;
 
 	private ServiceConnection mConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName className, IBinder service) {
-			mBoundLogger = ((Logger.LoggerBinder)service).getService();
-			mBoundLogger.setUpdateListener(Main.this);
-			mIsListening = true;
+			mService = new Messenger(service);
+			try {
+				Message msg = Message.obtain(null, Logger.MSG_REGISTER_CLIENT);
+				msg.replyTo = mMessenger;
+				mService.send(msg);
+			} catch(RemoteException ex) {
+			}
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName className) {
-			mBoundLogger = null;
-			//mIsBound = false;
+			mService = null;
 		}
 	};
 
@@ -78,28 +82,14 @@ public class Main extends Activity implements LocationListener {
 	View.OnClickListener startGpsOnClick = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			startService(new Intent(Main.this, Logger.class));
-			bindService(new Intent(Main.this, Logger.class), mConnection, BIND_AUTO_CREATE);
-			mIsBound = true;
-			Button b = (Button)v;
-			b.setOnClickListener(stopGpsOnClick);
-			b.setText("Stop");
-			b.setTextColor(0xffff0000);
+			startService(new Intent(Logger.ACTION_START_LOG, null, Main.this, Logger.class));
 		}
 	};
 
 	View.OnClickListener stopGpsOnClick = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			stopService(new Intent(Main.this, Logger.class));
-			if(mIsBound) {
-				unbindService(mConnection);
-				mIsBound = false;
-			}
-			Button b = (Button)v;
-			b.setOnClickListener(startGpsOnClick);
-			b.setText("Start");
-			b.setTextColor(0xff00ff00);
+			startService(new Intent(Logger.ACTION_STOP_LOG, null, Main.this, Logger.class));
 		}
 	};
 
@@ -143,8 +133,6 @@ public class Main extends Activity implements LocationListener {
 					ContentResolver cr = getContentResolver();
 					InputStream is = cr.openInputStream(uri);
 					InputStreamReader isr = new InputStreamReader(is);
-					//File f = new File(uri);
-					//InputStream is = new FileInputStream(f);
 					isr.read();
 					isr.read();
 					isr.read();
@@ -209,10 +197,8 @@ public class Main extends Activity implements LocationListener {
 			}
 		});
 
-		b = (Button)findViewById(R.id.start_but);
-		b.setOnClickListener(startGpsOnClick);
-		//b = (Button)findViewById(R.id.stop_but);
-		//b.setOnClickListener(stopGpsOnClick);
+		mStartButton = (Button)findViewById(R.id.start_but);
+		mStartButton.setOnClickListener(startGpsOnClick);
 
 		b = (Button)findViewById(R.id.exit_but);
 		b.setOnClickListener(new View.OnClickListener() {
@@ -221,8 +207,9 @@ public class Main extends Activity implements LocationListener {
 				Process.killProcess(Process.myPid());
 			}
 		});
-
+		
 		mDbAdapter.open();
+		bindService(new Intent(this, Logger.class), mConnection, BIND_AUTO_CREATE);
 	}
 
 	@Override
@@ -255,33 +242,28 @@ public class Main extends Activity implements LocationListener {
 		startActivity(new Intent(this, Upload.class));
 	}
 
-	private boolean mIsBound = false;
-	private boolean mIsListening = false;
-
-	//public void startGPS(View view) {
-	//	startService(new Intent(this, Logger.class));
-	//	bindService(new Intent(this, Logger.class), mConnection, BIND_AUTO_CREATE);
-	//	mIsBound = true;
-	//}
-
 	@Override
-	public void onStop() {
-		super.onStop();
-		if(mIsListening) {
-			Toast.makeText(this, "Stop listening to GPS", Toast.LENGTH_SHORT).show();
-			if(mBoundLogger != null)
-				mBoundLogger.setUpdateListener(null);
-			mIsListening = false;
+	public void onStart() {
+		super.onStart();
+		if(mService != null) {
+			try {
+				Message msg = Message.obtain(null, Logger.MSG_REGISTER_CLIENT);
+				msg.replyTo = mMessenger;
+				mService.send(msg);
+			} catch(RemoteException ex) {
+			}
 		}
 	}
 
 	@Override
-	public void onStart() {
-		super.onStart();
-		if(mIsBound && !mIsListening) {
-			if(mBoundLogger != null) {
-				mBoundLogger.setUpdateListener(this);
-				mIsListening = true;
+	public void onStop() {
+		super.onStop();
+		if(mService != null) {
+			try {
+				Message msg = Message.obtain(null, Logger.MSG_UNREGISTER_CLIENT);
+				msg.replyTo = mMessenger;
+				mService.send(msg);
+			} catch(RemoteException ex) {
 			}
 		}
 	}
@@ -291,15 +273,34 @@ public class Main extends Activity implements LocationListener {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if(mIsBound) {
-			Toast.makeText(this, "Unbind GPS", Toast.LENGTH_SHORT).show();
-			if(mBoundLogger != null)
-				mBoundLogger.setUpdateListener(null);
-			unbindService(mConnection);
-			mIsBound = false;
-			mIsListening = false;
-		}
+		unbindService(mConnection);
 	}
+
+	Button mStartButton;
+	private final Messenger mMessenger = new Messenger(new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			switch(msg.what) {
+			case Logger.MSG_LOCATION:
+				onLocationChanged((Location)msg.obj);
+				break;
+			case Logger.MSG_STATUS:
+				if(msg.arg1 > 0) {
+					mStartButton.setOnClickListener(stopGpsOnClick);
+					mStartButton.setText("Stop");
+					mStartButton.setTextColor(0xffff0000);
+				} else {
+					mStartButton.setOnClickListener(startGpsOnClick);
+					mStartButton.setText("Start");
+					mStartButton.setTextColor(0xff00ff00);
+				}
+				break;
+			default:
+				super.handleMessage(msg);
+				break;
+			}
+		}
+	});
 
 	@Override
 	public void onLocationChanged(Location loc) {

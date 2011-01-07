@@ -64,6 +64,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
@@ -75,21 +77,48 @@ public class Logger extends Service implements Runnable {
 
 	private static final int PHOTOCATALOG_ID = 1;
 
-	private boolean mIsListening = false;
+	private boolean mIsStarted = false;
 
 	private Thread mUpload = null;
-	SharedPreferences mPrefs = null;
+	private SharedPreferences mPrefs = null;
+
+	private ArrayList<Messenger> mClients = new ArrayList<Messenger>();
+
+	static final int MSG_LOCATION = 0;
+	static final int MSG_REGISTER_CLIENT = 1;
+	static final int MSG_UNREGISTER_CLIENT = 2;
+	static final int MSG_STATUS = 3;
+
+	private final Messenger mMessenger = new Messenger(new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			switch(msg.what) {
+			case MSG_REGISTER_CLIENT:
+				mClients.add(msg.replyTo);
+				try {
+					msg.replyTo.send(Message.obtain(null, MSG_STATUS, mIsStarted ? 1 : 0, 0));
+				} catch(RemoteException ex) {
+					mClients.remove(msg.replyTo);
+				}
+				break;
+			case MSG_UNREGISTER_CLIENT:
+				mClients.remove(msg.replyTo);
+				break;
+			default:
+				super.handleMessage(msg);
+				break;
+			}
+		}
+	});
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		mLM = (LocationManager)getSystemService(LOCATION_SERVICE);
 		mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-		mNotification = new Notification(R.drawable.icon, "PhotoCatalog GPS Logging", System.currentTimeMillis());
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Main.class), 0);
-		mNotification.setLatestEventInfo(getApplicationContext(), "PhotoCatalog", "Starting GPS...", contentIntent);
-		mNM.notify(PHOTOCATALOG_ID, mNotification);
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		mDbAdapter = new LogDbAdapter(this);
+		mDbAdapter.open();
 	}
 
 	@Override
@@ -98,7 +127,6 @@ public class Logger extends Service implements Runnable {
 		mLM.removeUpdates(mLocationListener);
 		mLM.removeGpsStatusListener(mGpsListener);
 		mDbAdapter.close();
-		mIsListening = false;
 		mNM.cancel(PHOTOCATALOG_ID);
 		mUpload.interrupt();
 		//try {
@@ -124,6 +152,13 @@ public class Logger extends Service implements Runnable {
 			mDbAdapter.insertLocation(loc);
 			if(context.mListener != null)
 				context.mListener.onLocationChanged(loc);
+			for(int i = mClients.size()-1; i >= 0; i--) {
+				try {
+					mClients.get(i).send(Message.obtain(null, MSG_LOCATION, loc));
+				} catch(RemoteException ex) {
+					mClients.remove(i);
+				}
+			}
 			if(mUpload == null || mUpload.getState() == Thread.State.TERMINATED) {
 				if(mPrefs.getBoolean("autoUpload", true)) {
 					mUpload = new Thread(Logger.this);
@@ -221,15 +256,49 @@ public class Logger extends Service implements Runnable {
 		}
 	};
 
+	public static final String ACTION_START_LOG = "org.northwinds.android.intent.START_LOG";
+	public static final String ACTION_STOP_LOG = "org.northwinds.android.intent.STOP_LOG";
+
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if(!mIsListening) {
-			Toast.makeText(this, "Start GPS", Toast.LENGTH_SHORT).show();
-			mLM.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.parseLong(mPrefs.getString("time", "5"))*1000, Float.parseFloat(mPrefs.getString("distance", "5")), mLocationListener);
-			mLM.addGpsStatusListener(mGpsListener);
-			mDbAdapter = new LogDbAdapter(this);
-			mDbAdapter.open();
-			mIsListening = true;
+		String action = intent.getAction();
+		if(action == null) {
+		} else if(action.equals(ACTION_START_LOG)) {
+			if(!mIsStarted) {
+				Toast.makeText(this, "Start GPS", Toast.LENGTH_SHORT).show();
+				mLM.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.parseLong(mPrefs.getString("time", "5"))*1000, Float.parseFloat(mPrefs.getString("distance", "5")), mLocationListener);
+				mLM.addGpsStatusListener(mGpsListener);
+				//mDbAdapter.open();
+				mNotification = new Notification(R.drawable.icon, "PhotoCatalog GPS Logging", System.currentTimeMillis());
+				PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Main.class), 0);
+				mNotification.setLatestEventInfo(getApplicationContext(), "PhotoCatalog", "Starting GPS...", contentIntent);
+				mNM.notify(PHOTOCATALOG_ID, mNotification);
+				mIsStarted = true;
+				for(int i = mClients.size()-1; i >= 0; i--) {
+					try {
+						mClients.get(i).send(Message.obtain(null, MSG_STATUS, 1, 0));
+					} catch(RemoteException ex) {
+						mClients.remove(i);
+					}
+				}
+			}
+		} else if(action.equals(ACTION_STOP_LOG)) {
+			if(mIsStarted) {
+				Toast.makeText(this, "Stop GPS", Toast.LENGTH_SHORT).show();
+				mLM.removeUpdates(mLocationListener);
+				mLM.removeGpsStatusListener(mGpsListener);
+				//mDbAdapter.close();
+				mIsStarted = false;
+				mNM.cancel(PHOTOCATALOG_ID);
+				for(int i = mClients.size()-1; i >= 0; i--) {
+					try {
+						mClients.get(i).send(Message.obtain(null, MSG_STATUS, 0, 0));
+					} catch(RemoteException ex) {
+						mClients.remove(i);
+					}
+				}
+				stopSelfResult(startId);
+			}
 		}
 
 		return START_STICKY;
@@ -237,7 +306,8 @@ public class Logger extends Service implements Runnable {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		return mBinder;
+		return mMessenger.getBinder();
+		//return mBinder;
 	}
 
 	@Override
