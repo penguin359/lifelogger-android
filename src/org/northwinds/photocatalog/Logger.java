@@ -141,12 +141,12 @@ public class Logger extends Service implements Runnable {
 		mLM.removeGpsStatusListener(mGpsListener);
 		mDbAdapter.close();
 		mNM.cancel(PHOTOCATALOG_ID);
-		mUpload.interrupt();
+		if(mUpload != null && mUpload.getState() != Thread.State.TERMINATED)
+			mUpload.interrupt();
 		//try {
 		//	mUpload.join();
 		//} catch(InterruptedException e) {
 		//}
-		Toast.makeText(this, "Stop GPS", Toast.LENGTH_SHORT).show();
 	}
 
 	public Handler h = new Handler() {

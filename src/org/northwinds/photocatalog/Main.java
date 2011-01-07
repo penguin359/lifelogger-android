@@ -150,7 +150,7 @@ public class Main extends Activity {
 					sb.append(" done!");
 					is.close();
 					Cursor cc = cr.query(uri, new String[] { MediaColumns.DISPLAY_NAME, MediaColumns.TITLE, MediaColumns.MIME_TYPE, MediaColumns.SIZE }, null, null, null);
-					if(cc.moveToFirst()) {
+					if(cc != null && cc.moveToFirst()) {
 						sb.append("\n'");
 						for(int i = 0; i < cc.getColumnCount(); i++) {
 							if(i > 0)

@@ -76,17 +76,21 @@ public class Multipart {
 					String filename = null;
 					String type		= null;
 					String size		= null;
-					Uri uri = (Uri)obj;
 					ContentResolver cr = mContext.getContentResolver();
-					Cursor cc = cr.query(uri, new String[] {
+					Uri uri = (Uri)obj;
+					if(uri.getScheme().equals("content")) {
+						Cursor cc = cr.query(uri, new String[] {
 								MediaColumns.DISPLAY_NAME,
 								MediaColumns.MIME_TYPE,
 								MediaColumns.SIZE
 							}, null, null, null);
-					if(cc.moveToFirst()) {
-						filename = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.DISPLAY_NAME));
-						type	 = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.MIME_TYPE));
-						size	 = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.SIZE));
+						if(cc.moveToFirst()) {
+							filename = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.DISPLAY_NAME));
+							type	 = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.MIME_TYPE));
+							size	 = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.SIZE));
+						}
+					} else {
+						filename = uri.getLastPathSegment();
 					}
 					if(type == null)
 						type = "application/octet-stream";

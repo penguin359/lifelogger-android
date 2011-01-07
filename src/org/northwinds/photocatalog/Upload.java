@@ -184,11 +184,15 @@ public class Upload extends Activity implements Runnable {
 					mUri = extras.getParcelable(Intent.EXTRA_STREAM);
 					if(mUri != null) {
 						iv.setImageURI(mUri);
-						Cursor cc = cr.query(mUri, new String[] {
+						if(mUri.getScheme().equals("content")) {
+							Cursor cc = cr.query(mUri, new String[] {
 									MediaColumns.TITLE
 								}, null, null, null);
-						if(cc.moveToFirst())
-							mTitle = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.TITLE));
+							if(cc.moveToFirst())
+								mTitle = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.TITLE));
+						} else {
+							mTitle = mUri.getLastPathSegment();
+						}
 					}
 				} catch(Exception ex) {
 				}
