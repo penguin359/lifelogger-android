@@ -39,7 +39,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.location.Location;
-import android.location.LocationListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -57,7 +56,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class Main extends Activity implements LocationListener {
+public class Main extends Activity {
 	private Messenger mService = null;
 
 	private ServiceConnection mConnection = new ServiceConnection() {
@@ -161,14 +160,17 @@ public class Main extends Activity implements LocationListener {
 						sb.append("'");
 					}
 				}
-			} catch(Exception e) {
-				sb.append(e);
+			} catch(Exception ex) {
+				sb.append(ex);
 			}
 		} else
 			sb.append("null");
 
 		mTV.setText(sb.toString());
 	}
+
+	private TextView mGpsStatus;
+	private TextView mUploadStatus;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -207,7 +209,9 @@ public class Main extends Activity implements LocationListener {
 				Process.killProcess(Process.myPid());
 			}
 		});
-		
+		mGpsStatus = (TextView)findViewById(R.id.location);
+		mUploadStatus = (TextView)findViewById(R.id.upload);
+
 		mDbAdapter.open();
 		bindService(new Intent(this, Logger.class), mConnection, BIND_AUTO_CREATE);
 	}
@@ -282,7 +286,15 @@ public class Main extends Activity implements LocationListener {
 		public void handleMessage(Message msg) {
 			switch(msg.what) {
 			case Logger.MSG_LOCATION:
-				onLocationChanged((Location)msg.obj);
+				Location loc = (Location)msg.obj;
+				//StringBuilder sb = new StringBuilder();
+				//sb.append("Location: [ ");
+				//sb.append(loc.getLatitude());
+				//sb.append(", ");
+				//sb.append(loc.getLongitude());
+				//sb.append(" ]");
+				//mGpsStatus.setText(sb.toString());
+				mGpsStatus.setText(String.format("Location: [ %.6f, %.6f ]", loc.getLatitude(), loc.getLongitude()));
 				break;
 			case Logger.MSG_STATUS:
 				if(msg.arg1 > 0) {
@@ -295,28 +307,13 @@ public class Main extends Activity implements LocationListener {
 					mStartButton.setTextColor(0xff00ff00);
 				}
 				break;
+			case Logger.MSG_UPLOAD:
+				mUploadStatus.setText((String)msg.obj);
+				break;
 			default:
 				super.handleMessage(msg);
 				break;
 			}
 		}
 	});
-
-	@Override
-	public void onLocationChanged(Location loc) {
-		TextView tv = (TextView)findViewById(R.id.location);
-		StringBuilder sb = new StringBuilder();
-		sb.append("Location: [ ");
-		sb.append(loc.getLatitude());
-		sb.append(", ");
-		sb.append(loc.getLongitude());
-		sb.append(" ]");
-		tv.setText(sb.toString());
-	}
-	public void onProviderDisabled(String provider) {
-	}
-	public void onProviderEnabled(String provider) {
-	}
-	public void onStatusChanged(String provider, int status, Bundle extras) {
-	}
 }

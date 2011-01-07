@@ -148,7 +148,7 @@ public class Upload extends Activity implements Runnable {
 				mUri = (Uri)intent.getExtras().get(Intent.EXTRA_STREAM);
 				iv.setImageURI(mUri);
 			}
-		} catch(Exception e) {
+		} catch(Exception ex) {
 		}
 	}
 
@@ -200,16 +200,16 @@ public class Upload extends Activity implements Runnable {
 				HttpResponse resp = client.execute(req);
 				//sb.append(String.format("%03d %s", resp.getStatusLine().getStatusCode(), resp.getStatusLine().getReasonPhrase()));
 				sb.append(resp.getStatusLine().getReasonPhrase());
-			} catch(Exception e) {
-				sb.append(e);
-				Log.e(TAG, "Failed client request", e);
+			} catch(Exception ex) {
+				sb.append(ex);
+				Log.e(TAG, "Failed client request", ex);
 			}
 			sb.append("\ndone!");
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSWHEEL, 0, 0));
-		} catch(Exception e) {
-			Log.e(TAG, "Failed to upload file", e);
-			sb.append(e);
+		} catch(Exception ex) {
+			Log.e(TAG, "Failed to upload file", ex);
+			sb.append(ex);
 		}
 		updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
 	}

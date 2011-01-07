@@ -30,18 +30,20 @@ package org.northwinds.photocatalog;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentProducer;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Notification;
@@ -88,6 +90,7 @@ public class Logger extends Service implements Runnable {
 	static final int MSG_REGISTER_CLIENT = 1;
 	static final int MSG_UNREGISTER_CLIENT = 2;
 	static final int MSG_STATUS = 3;
+	static final int MSG_UPLOAD = 4;
 
 	private final Messenger mMessenger = new Messenger(new Handler() {
 		@Override
@@ -110,6 +113,16 @@ public class Logger extends Service implements Runnable {
 			}
 		}
 	});
+	
+	private void sendUploadStatus(String status) {
+		for(int i = mClients.size()-1; i >= 0; i--) {
+			try {
+				mClients.get(i).send(Message.obtain(null, MSG_UPLOAD, status));
+			} catch(RemoteException ex) {
+				mClients.remove(i);
+			}
+		}
+	}
 
 	@Override
 	public void onCreate() {
@@ -325,11 +338,13 @@ public class Logger extends Service implements Runnable {
 
 	@Override
 	public void run() {
+		sendUploadStatus("Sleeping...");
 		try {
 			Thread.sleep(2000);
 		} catch(InterruptedException e) {
 			return;
 		}
+		sendUploadStatus("Sending...");
 		final String[] cols = new String[] {
 			"_id",
 			"timestamp",
@@ -393,22 +408,31 @@ public class Logger extends Service implements Runnable {
 		try {
 			post.setEntity(m.getEntity());
 			HttpResponse resp = client.execute(post);
-			InputStream is = resp.getEntity().getContent();
-			BufferedReader r = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-			if(r.readLine().equals("OK")) {
+			if(resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+				//throw 
+			}
+			//InputStream is = resp.getEntity().getContent();
+			//BufferedReader r = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+			String respString = new BasicResponseHandler().handleResponse(resp);
+			BufferedReader r = new BufferedReader(new StringReader(respString));
+			String line = r.readLine();
+			if(line != null && line.equals("OK")) {
 				ContentValues values = new ContentValues();
 				values.put("uploaded", 1);
 				Integer ids[] = idList.toArray(new Integer[1]);
 				for(int i = 0; i < ids.length; i++)
 					mDbAdapter.updateLocation(ids[i], values);
+				sendUploadStatus("Sent!");
+			} else {
+				sendUploadStatus("Invalid response: " + (line == null ? "(null)" : line));
 			}
-			//sb.append("\nWrite: '").append(r.readLine()).append("'");
-		} catch (Exception ex) {
-			//ex.printStackTrace();
-			//sb.append("\nError: '" + ex + "'");
+		} catch(HttpResponseException ex) {
+			sendUploadStatus("HTTP Error: " + ex);
+		} catch (IOException ex) {
+			sendUploadStatus("IO Error: " + ex);
 		} finally {
 			//get.releaseConnection();
+			c.close();
 		}
-		c.close();
 	}
 }
