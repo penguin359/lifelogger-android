@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_height="wrap_content" android:layout_width="fill_parent"
+  android:orientation="vertical">
+<LinearLayout
   android:layout_height="wrap_content" android:layout_width="fill_parent">
+<TextView android:layout_weight="2" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="Time" android:background="#008000"/>
+<TextView android:layout_weight="3" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="Latitude" android:background="#008000"/>
+<TextView android:layout_weight="3" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="Longitude" android:background="#008000"/>
+</LinearLayout>
 <ListView android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/android:list"/>
 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/android:empty" android:text="@string/no_gps"/>
 </LinearLayout>
