@@ -165,6 +165,10 @@ public class LogDbAdapter {
 		return mDb.delete(DATABASE_TABLE, KEY_ROWID + "=" + rowId, null) > 0;
 	}
 
+	public boolean deleteUploadedLocations() {
+		return mDb.delete(DATABASE_TABLE, "uploaded = 1", null) > 0;
+	}
+
 	public boolean deleteAllLocations() {
 		return mDb.delete(DATABASE_TABLE, null, null) > 0;
 	}

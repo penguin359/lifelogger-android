@@ -194,7 +194,6 @@ public class Logger extends Service implements Runnable {
 		}
 
 		public void onLocationChanged(Location location) {
-			//Toast.makeText(mContext, "Location Update", Toast.LENGTH_SHORT).show();
 			Bundle data = new Bundle();
 			data.putParcelable("loc", location);
 			Message m = Message.obtain();

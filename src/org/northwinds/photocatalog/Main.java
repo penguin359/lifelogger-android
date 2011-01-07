@@ -179,7 +179,7 @@ public class Main extends Activity {
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
 		mTV = (TextView)findViewById(R.id.status);
-		mTV.setText("Hello, it worked!");
+		mTV.setText("Hello, PhotoCataloger!");
 
 		parseIntent(getIntent());
 
@@ -188,6 +188,14 @@ public class Main extends Activity {
 			@Override
 			public void onClick(View v) {
 				startActivity(new Intent(Main.this, GPSList.class));
+			}
+		});
+
+		b = (Button)findViewById(R.id.delete_uploaded_but);
+		b.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mDbAdapter.deleteUploadedLocations();
 			}
 		});
 

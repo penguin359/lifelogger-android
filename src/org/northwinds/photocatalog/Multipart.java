@@ -13,7 +13,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.ContentProducer;
 import org.apache.http.message.BasicHeader;
-import org.northwinds.photocatalog.Upload.ProgressUpdate;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -28,6 +27,10 @@ public class Multipart {
 	private final Context mContext;
 
 	private LinkedHashMap<String, Object> mFields = new LinkedHashMap<String, Object>();
+
+	public static interface ProgressUpdate {
+		void onUpdate(int progress, int max);
+	}
 
 	private ProgressUpdate mUpdate = null;
 

@@ -28,7 +28,11 @@
 
 package org.northwinds.photocatalog;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -42,11 +46,13 @@ import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore.MediaColumns;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -61,15 +67,11 @@ import android.widget.Toast;
 public class Upload extends Activity implements Runnable {
 	private static final String TAG = "Upload";
 
-	Thread mThread;
-	Uri mUri;
-	String mTitle;
-	String mDescription;
-	String mType;
-
-	public static interface ProgressUpdate {
-		void onUpdate(int progress, int max);
-	}
+	private Thread mThread;
+	private Uri mUri = null;
+	private String mTitle = null;
+	private String mDescription = null;
+	private String mType = null;
 
 	private static final int MSG_STRING = 0;
 	private static final int MSG_PROGRESSWHEEL = 1;
@@ -79,15 +81,17 @@ public class Upload extends Activity implements Runnable {
 	private static final int DIALOG_PROGRESSWHEEL = 0;
 	private static final int DIALOG_PROGRESSBAR = 1;
 
-	private TextView mStatus;
-	ProgressDialog mProgressbar;
+	private EditText mTitleView;
+	private EditText mDescriptionView;
+	private TextView mStatusView;
+	private ProgressDialog mProgressbar;
 
 	Handler updateUI = new Handler() {
 		@Override
 		public void handleMessage(Message m) {
 			switch(m.what) {
 			case MSG_STRING:
-				mStatus.setText((String)m.obj);
+				mStatusView.setText((String)m.obj);
 				break;
 			case MSG_PROGRESSWHEEL:
 				if(m.arg1 > 0)
@@ -135,20 +139,67 @@ public class Upload extends Activity implements Runnable {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.upload);
+
+		Intent intent = getIntent();
+		Bundle extras = intent.getExtras();
+		mType = intent.getType();
+		if(mType != null && mType.toLowerCase().startsWith("image/"))
+			setContentView(R.layout.upload_image);
+		else
+			setContentView(R.layout.upload);
 
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		mStatus = (TextView)findViewById(R.id.status);
+		mStatusView = (TextView)findViewById(R.id.status);
+		mTitleView = (EditText)findViewById(R.id.title);
+		mDescriptionView = (EditText)findViewById(R.id.description);
 
-		ImageView iv = (ImageView)findViewById(R.id.image);
-		Intent intent = getIntent();
-		mType = intent.getType();
-		try {
-			if(intent.getExtras().get(Intent.EXTRA_STREAM) != null) {
-				mUri = (Uri)intent.getExtras().get(Intent.EXTRA_STREAM);
-				iv.setImageURI(mUri);
+		ContentResolver cr = getContentResolver();
+
+		if(mType != null && extras != null) {
+			if(mType.toLowerCase().startsWith("text/")) {
+				CharSequence text = extras.getCharSequence(Intent.EXTRA_TEXT);
+				if(text == null) {
+					try {
+						Uri uri = extras.getParcelable(Intent.EXTRA_STREAM);
+						InputStream is = cr.openInputStream(uri);
+						BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+						StringBuilder sb = new StringBuilder();
+						/* If file is larger than 1024 characters
+						 * then it probably wasn't intended for this
+						 */
+						char buf[] = new char[1024];
+						if(reader.read(buf) > 0) {
+							sb.append(buf);
+							text = sb.toString();
+						}
+					} catch(FileNotFoundException ex) {
+					} catch(IOException ex) {
+					}
+				}
+				if(text != null)
+					mDescriptionView.setText(text);
+			} else if(mType.toLowerCase().startsWith("image/")) {
+				ImageView iv = (ImageView)findViewById(R.id.image);
+				try {
+					mUri = extras.getParcelable(Intent.EXTRA_STREAM);
+					if(mUri != null) {
+						iv.setImageURI(mUri);
+						Cursor cc = cr.query(mUri, new String[] {
+									MediaColumns.TITLE
+								}, null, null, null);
+						if(cc.moveToFirst())
+							mTitle = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.TITLE));
+					}
+				} catch(Exception ex) {
+				}
 			}
-		} catch(Exception ex) {
+		}
+
+		if(mTitle == null && extras != null)
+			mTitle = extras.getString(Intent.EXTRA_SUBJECT);
+		if(mTitle != null) {
+			mTitleView.setText(mTitle);
+			mTitleView.selectAll();
 		}
 	}
 
@@ -160,8 +211,8 @@ public class Upload extends Activity implements Runnable {
 	}
 
 	public void startUpload(View view) {
-		mTitle = ((EditText)findViewById(R.id.title)).getText().toString();
-		mDescription = ((EditText)findViewById(R.id.description)).getText().toString();
+		mTitle = mTitleView.getText().toString();
+		mDescription = mDescriptionView.getText().toString();
 
 		mThread = new Thread(this);
 		mThread.start();
@@ -177,14 +228,15 @@ public class Upload extends Activity implements Runnable {
 			sb.append(mUri.toString());
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSWHEEL, 1, 0));
-			ContentResolver cr = getContentResolver();
-			InputStream is = cr.openInputStream(mUri);
+			//ContentResolver cr = getContentResolver();
+			//InputStream is = cr.openInputStream(mUri);
 			Multipart m = new Multipart(this);
 			m.put("title", mTitle);
 			m.put("description", mDescription);
-			m.put("file", is);
-			m.put("file", mUri);
-			m.setProgressUpdate(new ProgressUpdate() {
+			//m.put("file", is);
+			if(mUri != null)
+				m.put("file", mUri);
+			m.setProgressUpdate(new Multipart.ProgressUpdate() {
 				@Override
 				public void onUpdate(int progress, int max) {
 					updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSBAR_UPDATE, progress, max));
