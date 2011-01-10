@@ -144,21 +144,22 @@ public class Main extends Activity {
 					//sb.append(is.read());
 					//for(int i = 0; i < 12; i++)
 					//	sb.append(String.format("0x%02x ", is.read()));
-					char c[] = new char[4];
-					isr.read(c, 0, 4);
-					sb.append(c);
+					char buf[] = new char[4];
+					isr.read(buf, 0, 4);
+					sb.append(buf);
 					sb.append(" done!");
 					is.close();
-					Cursor cc = cr.query(uri, new String[] { MediaColumns.DISPLAY_NAME, MediaColumns.TITLE, MediaColumns.MIME_TYPE, MediaColumns.SIZE }, null, null, null);
-					if(cc != null && cc.moveToFirst()) {
+					Cursor c = cr.query(uri, new String[] { MediaColumns.DISPLAY_NAME, MediaColumns.TITLE, MediaColumns.MIME_TYPE, MediaColumns.SIZE }, null, null, null);
+					if(c != null && c.moveToFirst()) {
 						sb.append("\n'");
-						for(int i = 0; i < cc.getColumnCount(); i++) {
+						for(int i = 0; i < c.getColumnCount(); i++) {
 							if(i > 0)
 								sb.append("', '");
-							sb.append(cc.getString(i));
+							sb.append(c.getString(i));
 						}
 						sb.append("'");
 					}
+					c.close();
 				}
 			} catch(Exception ex) {
 				sb.append(ex);

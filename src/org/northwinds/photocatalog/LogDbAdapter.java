@@ -128,6 +128,15 @@ public class LogDbAdapter {
 		return mDb.query(DATABASE_TABLE, cols, condition, null, null, null, null, "100");
 	}
 
+	public int countUploadLocations() {
+		Cursor c = mDb.rawQuery("SELECT count(*) FROM locations WHERE uploaded != 1", null);
+		int count = 0;
+		if(c.moveToFirst())
+			count = c.getInt(0);
+		c.close();
+		return count;
+	}
+
 	public long insertLocation(Location location) {
 		ContentValues values = new ContentValues();
 		values.put(KEY_TIMESTAMP, location.getTime());

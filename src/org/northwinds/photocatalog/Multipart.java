@@ -89,6 +89,7 @@ public class Multipart {
 							type	 = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.MIME_TYPE));
 							size	 = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.SIZE));
 						}
+						cc.close();
 					} else {
 						filename = uri.getLastPathSegment();
 					}

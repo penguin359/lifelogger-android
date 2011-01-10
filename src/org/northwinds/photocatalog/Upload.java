@@ -33,11 +33,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
@@ -58,7 +61,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
  * @author Loren M. Lang
@@ -126,6 +128,11 @@ public class Upload extends Activity implements Runnable {
 			mProgressbar = new ProgressDialog(this);	
 			mProgressbar.setMessage("Uploading.  Please wait...");
 			mProgressbar.setCancelable(false);
+			return mProgressbar;
+		case DIALOG_PROGRESSBAR:
+			mProgressbar = new ProgressDialog(this);	
+			mProgressbar.setMessage("Uploading.  Please wait...");
+			mProgressbar.setCancelable(false);
 			//mProgressbar.setIndeterminate(false);
 			mProgressbar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			return mProgressbar;
@@ -185,11 +192,12 @@ public class Upload extends Activity implements Runnable {
 					if(mUri != null) {
 						iv.setImageURI(mUri);
 						if(mUri.getScheme().equals("content")) {
-							Cursor cc = cr.query(mUri, new String[] {
+							Cursor c = cr.query(mUri, new String[] {
 									MediaColumns.TITLE
 								}, null, null, null);
-							if(cc.moveToFirst())
-								mTitle = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.TITLE));
+							if(c.moveToFirst())
+								mTitle = c.getString(c.getColumnIndexOrThrow(MediaColumns.TITLE));
+							c.close();
 						} else {
 							mTitle = mUri.getLastPathSegment();
 						}
@@ -215,31 +223,39 @@ public class Upload extends Activity implements Runnable {
 	}
 
 	public void startUpload(View view) {
+		if(mThread != null && mThread.getState() != Thread.State.TERMINATED)
+			return;
+
 		mTitle = mTitleView.getText().toString();
 		mDescription = mDescriptionView.getText().toString();
 
 		mThread = new Thread(this);
 		mThread.start();
 
-		Toast.makeText(this, "Upload started", Toast.LENGTH_SHORT).show();
+		//Toast.makeText(this, "Upload started", Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
 	public void run() {
 		StringBuilder sb = new StringBuilder();
-		try {
+		//try {
 			sb.append("Reading: ");
 			sb.append(mUri.toString());
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
-			updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSWHEEL, 1, 0));
 			//ContentResolver cr = getContentResolver();
-			//InputStream is = cr.openInputStream(mUri);
+			//InputStream is;
+			//try {
+			//	is = cr.openInputStream(mUri);
+			//} catch(FileNotFoundException ex) {
+			//	is = null;
+			//}
 			Multipart m = new Multipart(this);
 			m.put("title", mTitle);
 			m.put("description", mDescription);
-			//m.put("file", is);
 			if(mUri != null)
 				m.put("file", mUri);
+			//if(is != null)
+			//	m.put("file", is);
 			m.setProgressUpdate(new Multipart.ProgressUpdate() {
 				@Override
 				public void onUpdate(int progress, int max) {
@@ -247,6 +263,10 @@ public class Upload extends Activity implements Runnable {
 				}
 			});
 			HttpEntity entity = m.getEntity();
+			if(entity.getContentLength() >= 0)
+				updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSBAR, 1, 0));
+			else
+				updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSWHEEL, 1, 0));
 			HttpClient client = new DefaultHttpClient();
 			HttpPost req = new HttpPost(mPrefs.getString("url", "http://www.example.org/photocatalog/") + "cgi/photocatalog.pl");
 			req.setEntity(entity);
@@ -256,17 +276,26 @@ public class Upload extends Activity implements Runnable {
 				HttpResponse resp = client.execute(req);
 				//sb.append(String.format("%03d %s", resp.getStatusLine().getStatusCode(), resp.getStatusLine().getReasonPhrase()));
 				sb.append(resp.getStatusLine().getReasonPhrase());
-			} catch(Exception ex) {
-				sb.append(ex);
+				String respString = new BasicResponseHandler().handleResponse(resp);
+				BufferedReader r = new BufferedReader(new StringReader(respString));
+				String line = r.readLine();
+				if(line != null && line.equals("OK"))
+					finish();
+			} catch(HttpResponseException ex) {
 				Log.e(TAG, "Failed client request", ex);
+				sb.append(ex);
+			} catch(IOException ex) {
+				Log.e(TAG, "Failed to upload file", ex);
+				sb.append(ex);
 			}
 			sb.append("\ndone!");
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
-			updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSWHEEL, 0, 0));
-		} catch(Exception ex) {
-			Log.e(TAG, "Failed to upload file", ex);
-			sb.append(ex);
-		}
+			if(entity.getContentLength() >= 0)
+				updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSBAR, 0, 0));
+			else
+				updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSWHEEL, 0, 0));
+		//} catch(ClientProtocolException ex) {
+		//}
 		updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
 	}
 }

@@ -69,10 +69,12 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.Toast;
 
 public class Logger extends Service implements Runnable {
-	//private static final String TAG = "PhotoCatalog";
+	private static final String TAG = "PhotoCatalog";
+
 	private LocationManager mLM;
 	private NotificationManager mNM;
 	private Notification mNotification;
@@ -82,6 +84,11 @@ public class Logger extends Service implements Runnable {
 	private boolean mIsStarted = false;
 
 	private Thread mUpload = null;
+	private volatile boolean mUploadRun = false;
+	private volatile boolean mUploadRunOnce = false;
+	private volatile int mUploadCount = 0;
+	private Object mUploadLock = new Object();
+
 	private SharedPreferences mPrefs = null;
 
 	private ArrayList<Messenger> mClients = new ArrayList<Messenger>();
@@ -132,6 +139,39 @@ public class Logger extends Service implements Runnable {
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		mDbAdapter = new LogDbAdapter(this);
 		mDbAdapter.open();
+		
+		/* upload thread hasn't been started yet */
+		mUploadCount = mDbAdapter.countUploadLocations();
+		/* preferences can only be updated on the main thread so this
+		 * should be safe without synchronization
+		 */
+		if(mPrefs.getBoolean("autoUpload", true)) {
+			mUploadRun = true;
+			mUploadRunOnce = false;
+			mUpload = new Thread(Logger.this);
+			mUpload.start();
+		}
+		mPrefs.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+			@Override
+			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+					String key) {
+				boolean autoUpload = key.equals("autoUpload");
+				if(autoUpload != mUploadRun) {
+					if(mPrefs.getBoolean("autoUpload", true)) {
+						mUploadRun = true;
+						mUploadRunOnce = false;
+						if(mUpload == null || mUpload.getState() == Thread.State.TERMINATED) {
+							mUpload = new Thread(Logger.this);
+							mUpload.start();
+						}
+					} else {
+						mUploadRun = false;
+						if(mUpload != null && mUpload.getState() != Thread.State.TERMINATED)
+							mUpload.interrupt();
+					}
+				}
+			}
+		});
 	}
 
 	@Override
@@ -172,8 +212,12 @@ public class Logger extends Service implements Runnable {
 					mClients.remove(i);
 				}
 			}
+			synchronized(mUploadLock) {
+				mUploadCount++;
+				mUploadLock.notify();
+			}
 			if(mUpload == null || mUpload.getState() == Thread.State.TERMINATED) {
-				if(mPrefs.getBoolean("autoUpload", true)) {
+				if(mUploadRun) {
 					mUpload = new Thread(Logger.this);
 					mUpload.start();
 				}
@@ -337,101 +381,152 @@ public class Logger extends Service implements Runnable {
 
 	@Override
 	public void run() {
-		sendUploadStatus("Sleeping...");
 		try {
 			Thread.sleep(2000);
 		} catch(InterruptedException e) {
-			return;
+			if(!mUploadRun)
+				return;
 		}
-		sendUploadStatus("Sending...");
-		final String[] cols = new String[] {
-			"_id",
-			"timestamp",
-			"latitude",
-			"longitude",
-			"altitude",
-			"accuracy",
-			"bearing",
-			"speed",
-			"satellites"
-		};
-		//try {
-		//	db = SQLiteDatabase.openDatabase("databases/data.db", null, SQLiteDatabase.OPEN_READWRITE);
-		//} catch(SQLiteException e) {
-		//	Log.e(TAG, "Failed to open SQLite Database", e);
-		//	return;
-		//}
-		//Cursor c = db.query("locations", cols, "uploaded != 1", null, null, null, null, "100");
-		final Cursor c = mDbAdapter.fetchUploadLocations(cols, "uploaded != 1");
-		if(!c.moveToFirst()) {
-			c.close();
-			return;
-		}
-
-		String baseUrl = mPrefs.getString("url", "http://www.example.org/photocatalog/");
-		String source = mPrefs.getString("source", "0");
-		final List<Integer> idList = new ArrayList<Integer>();
-		Multipart m = new Multipart(this);
-		m.put("source", source);
-		m.put("file", new ContentProducer() {
-			public void writeTo(OutputStream os) throws IOException {
-				os.write("PhotoCatalog v1.0\n".getBytes());
-				for(int i = 0; i < cols.length; i++) {
-					if(i > 0)
-						os.write(",".getBytes());
-					if(cols[i].equals("_id"))
-						os.write("id".getBytes());
-					else
-						os.write(cols[i].getBytes());
+		while(mUploadRun) {
+			if(mUploadRunOnce) {
+				mUploadRun = false;
+				mUploadRunOnce = false;
+			}
+			if(mUploadCount <= 0) {
+				if(!mUploadRun)
+					break;
+				sendUploadStatus("Sleeping...");
+				synchronized(mUploadLock) {
+					try {
+						while(mUploadCount <= 0)
+							mUploadLock.wait();
+					} catch(InterruptedException ex) {
+						if(!mUploadRun)
+							break;
+					}
 				}
-				os.write("\n".getBytes());
-				do {
-					idList.add(c.getInt(0));
+			}
+			sendUploadStatus("Sending...");
+			final String[] cols = new String[] {
+				"_id",
+				"timestamp",
+				"latitude",
+				"longitude",
+				"altitude",
+				"accuracy",
+				"bearing",
+				"speed",
+				"satellites"
+			};
+			//try {
+			//	db = SQLiteDatabase.openDatabase("databases/data.db", null, SQLiteDatabase.OPEN_READWRITE);
+			//} catch(SQLiteException e) {
+			//	Log.e(TAG, "Failed to open SQLite Database", e);
+			//	return;
+			//}
+			//Cursor c = db.query("locations", cols, "uploaded != 1", null, null, null, null, "100");
+			Cursor c = mDbAdapter.fetchUploadLocations(cols, "uploaded != 1");
+			if(!c.moveToFirst()) {
+				c.close();
+				mUploadCount = 0;
+				Log.w(TAG, "No data to upload but count > 0");
+				sendUploadStatus("Internal Error: count > 0");
+				try {
+					Thread.sleep(5000);
+				} catch(InterruptedException ex) {
+					if(!mUploadRun)
+						return;
+				}
+				continue;
+			}
+
+			String baseUrl = mPrefs.getString("url", "http://www.example.org/photocatalog/");
+			String source = mPrefs.getString("source", "0");
+			List<Integer> idList = new ArrayList<Integer>();
+			Multipart m = new Multipart(this);
+			m.put("source", source);
+			class MyProducer implements ContentProducer {
+				Cursor mC;
+				List<Integer> mIdList;
+				MyProducer(Cursor c, List<Integer> idList) { mC = c; mIdList = idList; }
+				public void writeTo(OutputStream os) throws IOException {
+					os.write("PhotoCatalog v1.0\n".getBytes());
 					for(int i = 0; i < cols.length; i++) {
 						if(i > 0)
 							os.write(",".getBytes());
-						if(!c.isNull(i))
-							os.write(c.getString(i).getBytes());
+						if(cols[i].equals("_id"))
+							os.write("id".getBytes());
+						else
+							os.write(cols[i].getBytes());
 					}
 					os.write("\n".getBytes());
-				} while(c.moveToNext());
+					do {
+						mIdList.add(mC.getInt(0));
+						for(int i = 0; i < cols.length; i++) {
+							if(i > 0)
+								os.write(",".getBytes());
+							if(!mC.isNull(i))
+								os.write(mC.getString(i).getBytes());
+						}
+						os.write("\n".getBytes());
+					} while(mC.moveToNext());
+				}
 			}
-		});
-		m.put("finish", "1");
+			m.put("file", new MyProducer(c, idList));
+			m.put("finish", "1");
 
-		//StringBuilder sb = new StringBuilder();
-		//sb.append(baseUrl).append("cgi/test-android.pl?loc=").append("123").append(",").append(c.getCount());
-		String uri = baseUrl + "cgi/test-android.pl";
-		HttpClient client = new DefaultHttpClient();
-		HttpPost post = new HttpPost(uri);
-		try {
-			post.setEntity(m.getEntity());
-			HttpResponse resp = client.execute(post);
-			if(resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-				//throw 
+			//StringBuilder sb = new StringBuilder();
+			//sb.append(baseUrl).append("cgi/test-android.pl?loc=").append("123").append(",").append(c.getCount());
+			String uri = baseUrl + "cgi/test-android.pl";
+			HttpClient client = new DefaultHttpClient();
+			HttpPost post = new HttpPost(uri);
+			boolean ok = false;
+			try {
+				post.setEntity(m.getEntity());
+				HttpResponse resp = client.execute(post);
+				if(resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+					//throw 
+				}
+				//InputStream is = resp.getEntity().getContent();
+				//BufferedReader r = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+				String respString = new BasicResponseHandler().handleResponse(resp);
+				BufferedReader r = new BufferedReader(new StringReader(respString));
+				String line = r.readLine();
+				if(line != null && line.equals("OK")) {
+					ContentValues values = new ContentValues();
+					values.put("uploaded", 1);
+					Integer ids[] = idList.toArray(new Integer[1]);
+					for(int i = 0; i < ids.length; i++)
+						mDbAdapter.updateLocation(ids[i], values);
+					sendUploadStatus("Sent!");
+					ok = true;
+					synchronized(mUploadLock) {
+						int uploadedCount = ids.length;
+						if(uploadedCount > mUploadCount)
+							uploadedCount = mUploadCount;
+						mUploadCount -= uploadedCount;
+					}
+				} else {
+					sendUploadStatus("Invalid response: " + (line == null ? "(null)" : line));
+				}
+			} catch(HttpResponseException ex) {
+				sendUploadStatus("HTTP Error: " + ex);
+			} catch (IOException ex) {
+				sendUploadStatus("IO Error: " + ex);
+			} finally {
+				//get.releaseConnection();
+				c.close();
 			}
-			//InputStream is = resp.getEntity().getContent();
-			//BufferedReader r = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-			String respString = new BasicResponseHandler().handleResponse(resp);
-			BufferedReader r = new BufferedReader(new StringReader(respString));
-			String line = r.readLine();
-			if(line != null && line.equals("OK")) {
-				ContentValues values = new ContentValues();
-				values.put("uploaded", 1);
-				Integer ids[] = idList.toArray(new Integer[1]);
-				for(int i = 0; i < ids.length; i++)
-					mDbAdapter.updateLocation(ids[i], values);
-				sendUploadStatus("Sent!");
-			} else {
-				sendUploadStatus("Invalid response: " + (line == null ? "(null)" : line));
+			try {
+				if(ok)
+					Thread.sleep(5000);
+				else
+					Thread.sleep(60000);
+			} catch(InterruptedException ex) {
+				if(!mUploadRun)
+					break;
 			}
-		} catch(HttpResponseException ex) {
-			sendUploadStatus("HTTP Error: " + ex);
-		} catch (IOException ex) {
-			sendUploadStatus("IO Error: " + ex);
-		} finally {
-			//get.releaseConnection();
-			c.close();
 		}
+		sendUploadStatus("Stopped.");
 	}
 }
