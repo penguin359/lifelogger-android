@@ -108,20 +108,20 @@ public class LogDbAdapter {
 	}
 
 	public Cursor fetchLocation(long rowId) throws SQLException {
-		Cursor mCursor = mDb.query(true, DATABASE_TABLE, new String[] {
+		Cursor c = mDb.query(true, DATABASE_TABLE, new String[] {
 			KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE
 		}, KEY_ROWID + "=" + rowId, null, null, null, null, null);
-		if (mCursor != null) {
-			mCursor.moveToFirst();
+		if (c != null) {
+			c.moveToFirst();
 		}
-		return mCursor;
+		return c;
 	}
 
 	public Cursor fetchAllLocations() {
 		//return mDb.query(DATABASE_TABLE, new String[] {
 		//	KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE
 		//}, null, null, null, null, null);
-		return mDb.rawQuery("SELECT _id, datetime(round(timestamp/1000), 'unixepoch') AS timestamp, latitude, longitude FROM locations", null);
+		return mDb.rawQuery("SELECT _id, datetime(round(timestamp/1000), 'unixepoch') AS timestamp, latitude, longitude, uploaded FROM locations", null);
 	}
 
 	public Cursor fetchUploadLocations(String[] cols, String condition) {

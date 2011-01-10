@@ -222,7 +222,7 @@ public class Main extends Activity {
 		mUploadStatus = (TextView)findViewById(R.id.upload);
 
 		mDbAdapter.open();
-		bindService(new Intent(this, Logger.class), mConnection, BIND_AUTO_CREATE);
+		bindService(new Intent(this, Logger.class), mConnection, 0);
 	}
 
 	@Override

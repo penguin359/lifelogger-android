@@ -31,6 +31,7 @@ package org.northwinds.photocatalog;
 import android.app.ListActivity;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.SimpleCursorAdapter;
 
 public class GPSList extends ListActivity {
@@ -49,16 +50,29 @@ public class GPSList extends ListActivity {
 		String[] from = new String[] {
 			LogDbAdapter.KEY_TIMESTAMP,
 			LogDbAdapter.KEY_LATITUDE,
-			LogDbAdapter.KEY_LONGITUDE
+			LogDbAdapter.KEY_LONGITUDE,
+			LogDbAdapter.KEY_UPLOADED
 		};
 		int[] to = new int[] {
 			R.id.timestamp,
 			R.id.latitude,
-			R.id.longitude
+			R.id.longitude,
+			R.id.row
 		};
 
 		SimpleCursorAdapter entries =
 			new SimpleCursorAdapter(this, R.layout.gps_row, c, from, to);
+		entries.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+			@Override
+			public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+				if(cursor.getColumnName(columnIndex).equals(LogDbAdapter.KEY_UPLOADED)) {
+					if(cursor.getInt(columnIndex) != 0)
+						view.setBackgroundColor(0xff008000);
+					return true;
+				}
+				return false;
+			}
+		});
 		setListAdapter(entries);
 	}
 }

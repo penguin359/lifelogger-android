@@ -218,8 +218,13 @@ public class Upload extends Activity implements Runnable {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if(mThread != null)
+		if(mThread != null && mThread.getState() != Thread.State.TERMINATED) {
 			mThread.interrupt();
+			try {
+				mThread.join();
+			} catch(InterruptedException ex) {
+			}
+		}
 	}
 
 	public void startUpload(View view) {

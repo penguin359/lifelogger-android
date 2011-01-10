@@ -86,6 +86,7 @@ public class Logger extends Service implements Runnable {
 	private Thread mUpload = null;
 	private volatile boolean mUploadRun = false;
 	private volatile boolean mUploadRunOnce = false;
+	private volatile int mUploadRunOnceStartId = 0;
 	private volatile int mUploadCount = 0;
 	private Object mUploadLock = new Object();
 
@@ -139,7 +140,7 @@ public class Logger extends Service implements Runnable {
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		mDbAdapter = new LogDbAdapter(this);
 		mDbAdapter.open();
-		
+
 		/* upload thread hasn't been started yet */
 		mUploadCount = mDbAdapter.countUploadLocations();
 		/* preferences can only be updated on the main thread so this
@@ -148,7 +149,7 @@ public class Logger extends Service implements Runnable {
 		if(mPrefs.getBoolean("autoUpload", true)) {
 			mUploadRun = true;
 			mUploadRunOnce = false;
-			mUpload = new Thread(Logger.this);
+			mUpload = new Thread(this);
 			mUpload.start();
 		}
 		mPrefs.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
@@ -181,15 +182,17 @@ public class Logger extends Service implements Runnable {
 		mLM.removeGpsStatusListener(mGpsListener);
 		mDbAdapter.close();
 		mNM.cancel(PHOTOCATALOG_ID);
-		if(mUpload != null && mUpload.getState() != Thread.State.TERMINATED)
+		mUploadRun = false;
+		if(mUpload != null && mUpload.getState() != Thread.State.TERMINATED) {
 			mUpload.interrupt();
-		//try {
-		//	mUpload.join();
-		//} catch(InterruptedException e) {
-		//}
+			try {
+				mUpload.join();
+			} catch(InterruptedException e) {
+			}
+		}
 	}
 
-	public Handler h = new Handler() {
+	private Handler h = new Handler() {
 		Logger context = Logger.this;
 
 		public void handleMessage(Message m) {
@@ -203,8 +206,8 @@ public class Logger extends Service implements Runnable {
 			sb.append(" ]");
 			//Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show();
 			mDbAdapter.insertLocation(loc);
-			if(context.mListener != null)
-				context.mListener.onLocationChanged(loc);
+			//if(context.mListener != null)
+			//	context.mListener.onLocationChanged(loc);
 			for(int i = mClients.size()-1; i >= 0; i--) {
 				try {
 					mClients.get(i).send(Message.obtain(null, MSG_LOCATION, loc));
@@ -225,10 +228,10 @@ public class Logger extends Service implements Runnable {
 		}
 	};
 
-	public LocationListener mListener = null;
-	LogDbAdapter mDbAdapter;
+	//public LocationListener mListener = null;
+	private LogDbAdapter mDbAdapter;
 
-	class MyLocListener implements LocationListener {
+	private class MyLocListener implements LocationListener {
 		Context mContext;
 		Handler mH;
 
@@ -314,6 +317,7 @@ public class Logger extends Service implements Runnable {
 
 	public static final String ACTION_START_LOG = "org.northwinds.android.intent.START_LOG";
 	public static final String ACTION_STOP_LOG = "org.northwinds.android.intent.STOP_LOG";
+	public static final String ACTION_UPLOAD_ONCE = "org.northwinds.android.intent.UPLOAD_ONCE";
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -355,6 +359,16 @@ public class Logger extends Service implements Runnable {
 				}
 				stopSelfResult(startId);
 			}
+		} else if(action.equals(ACTION_UPLOAD_ONCE)) {
+			if(!mUploadRun) {
+				mUploadRun = true;
+				mUploadRunOnce = true;
+				mUploadRunOnceStartId = startId;
+			}
+			if(mUpload == null || mUpload.getState() == Thread.State.TERMINATED) {
+				mUpload = new Thread(Logger.this);
+				mUpload.start();
+			}
 		}
 
 		return START_STICKY;
@@ -368,16 +382,16 @@ public class Logger extends Service implements Runnable {
 
 	@Override
 	public boolean onUnbind(Intent intent) {
-		mListener = null;
+		//mListener = null;
 		//return super.onUnbind(intent);
 		return false;
 	}
 
 	public final IBinder mBinder = new LoggerBinder();
 
-	public void setUpdateListener(LocationListener listener) {
-		mListener = listener;
-	}
+	//public void setUpdateListener(LocationListener listener) {
+	//	mListener = listener;
+	//}
 
 	@Override
 	public void run() {
@@ -388,10 +402,8 @@ public class Logger extends Service implements Runnable {
 				return;
 		}
 		while(mUploadRun) {
-			if(mUploadRunOnce) {
+			if(mUploadRunOnce)
 				mUploadRun = false;
-				mUploadRunOnce = false;
-			}
 			if(mUploadCount <= 0) {
 				if(!mUploadRun)
 					break;
@@ -528,5 +540,7 @@ public class Logger extends Service implements Runnable {
 			}
 		}
 		sendUploadStatus("Stopped.");
+		if(!mIsStarted && mUploadRunOnce)
+			stopSelfResult(mUploadRunOnceStartId);
 	}
 }

@@ -79,17 +79,17 @@ public class Multipart {
 					ContentResolver cr = mContext.getContentResolver();
 					Uri uri = (Uri)obj;
 					if(uri.getScheme().equals("content")) {
-						Cursor cc = cr.query(uri, new String[] {
+						Cursor c = cr.query(uri, new String[] {
 								MediaColumns.DISPLAY_NAME,
 								MediaColumns.MIME_TYPE,
 								MediaColumns.SIZE
 							}, null, null, null);
-						if(cc.moveToFirst()) {
-							filename = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.DISPLAY_NAME));
-							type	 = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.MIME_TYPE));
-							size	 = cc.getString(cc.getColumnIndexOrThrow(MediaColumns.SIZE));
+						if(c.moveToFirst()) {
+							filename = c.getString(c.getColumnIndexOrThrow(MediaColumns.DISPLAY_NAME));
+							type	 = c.getString(c.getColumnIndexOrThrow(MediaColumns.MIME_TYPE));
+							size	 = c.getString(c.getColumnIndexOrThrow(MediaColumns.SIZE));
 						}
-						cc.close();
+						c.close();
 					} else {
 						filename = uri.getLastPathSegment();
 					}
