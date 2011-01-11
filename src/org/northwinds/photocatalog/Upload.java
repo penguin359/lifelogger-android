@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.util.ArrayList;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -71,6 +72,7 @@ public class Upload extends Activity implements Runnable {
 
 	private Thread mThread;
 	private Uri mUri = null;
+	private ArrayList<Uri> mUris = null;
 	private String mTitle = null;
 	private String mDescription = null;
 	private String mType = null;
@@ -147,13 +149,19 @@ public class Upload extends Activity implements Runnable {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		boolean multifile = false;
 		Intent intent = getIntent();
-		Bundle extras = intent.getExtras();
+		String action = intent.getAction();
+		if(action != null && action.equals(Intent.ACTION_SEND_MULTIPLE))
+			multifile = true;
 		mType = intent.getType();
-		if(mType != null && mType.toLowerCase().startsWith("image/"))
+		if(multifile)
+			setContentView(R.layout.upload_multifile);
+		else if(mType != null && mType.toLowerCase().startsWith("image/"))
 			setContentView(R.layout.upload_image);
 		else
 			setContentView(R.layout.upload);
+		Bundle extras = intent.getExtras();
 
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		mStatusView = (TextView)findViewById(R.id.status);
@@ -185,7 +193,8 @@ public class Upload extends Activity implements Runnable {
 				}
 				if(text != null)
 					mDescriptionView.setText(text);
-			} else if(mType.toLowerCase().startsWith("image/")) {
+			} else if(mType.toLowerCase().startsWith("image/") &&
+				  !multifile) {
 				ImageView iv = (ImageView)findViewById(R.id.image);
 				try {
 					mUri = extras.getParcelable(Intent.EXTRA_STREAM);
@@ -204,6 +213,9 @@ public class Upload extends Activity implements Runnable {
 					}
 				} catch(Exception ex) {
 				}
+			}
+			if(multifile) {
+				mUris = extras.getParcelableArrayList(Intent.EXTRA_STREAM);
 			}
 		}
 
@@ -261,6 +273,8 @@ public class Upload extends Activity implements Runnable {
 			m.put("description", mDescription);
 			if(mUri != null)
 				m.put("file", mUri);
+			if(mUris != null)
+				m.put("files", mUris);
 			m.put("finish", "1");
 			//if(is != null)
 			//	m.put("file", is);
