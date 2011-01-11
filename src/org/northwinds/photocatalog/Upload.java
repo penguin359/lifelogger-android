@@ -244,8 +244,10 @@ public class Upload extends Activity implements Runnable {
 	public void run() {
 		StringBuilder sb = new StringBuilder();
 		//try {
-			sb.append("Reading: ");
-			sb.append(mUri.toString());
+			if(mUri != null) {
+				sb.append("Reading: ");
+				sb.append(mUri.toString());
+			}
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
 			//ContentResolver cr = getContentResolver();
 			//InputStream is;
@@ -259,6 +261,7 @@ public class Upload extends Activity implements Runnable {
 			m.put("description", mDescription);
 			if(mUri != null)
 				m.put("file", mUri);
+			m.put("finish", "1");
 			//if(is != null)
 			//	m.put("file", is);
 			m.setProgressUpdate(new Multipart.ProgressUpdate() {
@@ -275,7 +278,9 @@ public class Upload extends Activity implements Runnable {
 			HttpClient client = new DefaultHttpClient();
 			HttpPost req = new HttpPost(mPrefs.getString("url", "http://www.example.org/photocatalog/") + "cgi/photocatalog.pl");
 			req.setEntity(entity);
-			sb.append("\nUploading...");
+			if(mUri != null)
+				sb.append("\n");
+			sb.append("Uploading...");
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
 			try {
 				HttpResponse resp = client.execute(req);

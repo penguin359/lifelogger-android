@@ -208,6 +208,14 @@ public class Main extends Activity {
 			}
 		});
 
+		b = (Button)findViewById(R.id.upload_once_but);
+		b.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startService(new Intent(Logger.ACTION_UPLOAD_ONCE, null, Main.this, Logger.class));
+			}
+		});
+
 		mStartButton = (Button)findViewById(R.id.start_but);
 		mStartButton.setOnClickListener(startGpsOnClick);
 
@@ -287,6 +295,7 @@ public class Main extends Activity {
 	public void onDestroy() {
 		super.onDestroy();
 		unbindService(mConnection);
+		mDbAdapter.close();
 	}
 
 	Button mStartButton;

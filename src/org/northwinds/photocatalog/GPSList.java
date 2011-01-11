@@ -75,4 +75,10 @@ public class GPSList extends ListActivity {
 		});
 		setListAdapter(entries);
 	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		mDbAdapter.close();
+	}
 }
