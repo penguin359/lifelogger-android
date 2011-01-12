@@ -11,7 +11,7 @@
 				<action android:name="android.intent.action.MAIN"/>
 				<category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
-			<intent-filter android:label="PhotoCatalog Debug">
+			<intent-filter android:label="Debug">
 				<action android:name="android.intent.action.SEND"/>
 				<category android:name="android.intent.category.DEFAULT"/>
 				<data android:mimeType="image/*"/>
@@ -19,7 +19,7 @@
 			</intent-filter>
 		</activity>
 		<activity android:name=".PrefAct"/>
-		<activity android:name=".Upload" android:label="PhotoCatalog Upload">
+		<activity android:name=".Upload" android:label="PhotoCatalog">
 			<intent-filter>
 				<action android:name="android.intent.action.SEND"/>
 				<category android:name="android.intent.category.DEFAULT"/>

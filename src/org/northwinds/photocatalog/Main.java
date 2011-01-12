@@ -28,18 +28,18 @@
 
 package org.northwinds.photocatalog;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
+//import java.io.InputStream;
+//import java.io.InputStreamReader;
 
 import android.app.Activity;
 import android.content.ComponentName;
-import android.content.ContentResolver;
+//import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.database.Cursor;
+//import android.database.Cursor;
 import android.location.Location;
-import android.net.Uri;
+//import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -48,7 +48,7 @@ import android.os.Messenger;
 import android.os.Process;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore.MediaColumns;
+//import android.provider.MediaStore.MediaColumns;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -94,6 +94,7 @@ public class Main extends Activity {
 
 	private TextView mTV;
 
+	/*
 	private void parseIntent(Intent intent) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Hello: ");
@@ -169,6 +170,7 @@ public class Main extends Activity {
 
 		mTV.setText(sb.toString());
 	}
+	*/
 
 	private TextView mGpsStatus;
 	private TextView mUploadStatus;
@@ -182,7 +184,7 @@ public class Main extends Activity {
 		mTV = (TextView)findViewById(R.id.status);
 		mTV.setText("Hello, PhotoCataloger!");
 
-		parseIntent(getIntent());
+		//parseIntent(getIntent());
 
 		Button b = (Button)findViewById(R.id.list_but);
 		b.setOnClickListener(new View.OnClickListener() {
@@ -230,13 +232,13 @@ public class Main extends Activity {
 		mUploadStatus = (TextView)findViewById(R.id.upload);
 
 		mDbAdapter.open();
-		bindService(new Intent(this, Logger.class), mConnection, 0);
+		bindService(new Intent(this, Logger.class), mConnection, BIND_AUTO_CREATE);
 	}
 
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		parseIntent(intent);
+		//parseIntent(intent);
 	}
 
 	@Override

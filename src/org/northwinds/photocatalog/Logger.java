@@ -35,7 +35,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+//import java.util.Set;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -51,7 +51,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -60,7 +59,7 @@ import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
+//import android.location.LocationProvider;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -192,22 +191,18 @@ public class Logger extends Service implements Runnable {
 		}
 	}
 
-	private Handler h = new Handler() {
-		Logger context = Logger.this;
+	//public LocationListener mListener = null;
+	private LogDbAdapter mDbAdapter;
 
-		public void handleMessage(Message m) {
-			Bundle data = m.getData();
-			Location loc = data.getParcelable("loc");
-			StringBuilder sb = new StringBuilder();
-			sb.append("Location: [ ");
-			sb.append(loc.getLatitude());
-			sb.append(", ");
-			sb.append(loc.getLongitude());
-			sb.append(" ]");
-			//Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show();
+	public class LoggerBinder extends Binder {
+		Logger getService() {
+			return Logger.this;
+		}
+	}
+
+	private LocationListener mLocationListener = new LocationListener() {
+		public void onLocationChanged(Location loc) {
 			mDbAdapter.insertLocation(loc);
-			//if(context.mListener != null)
-			//	context.mListener.onLocationChanged(loc);
 			for(int i = mClients.size()-1; i >= 0; i--) {
 				try {
 					mClients.get(i).send(Message.obtain(null, MSG_LOCATION, loc));
@@ -226,74 +221,48 @@ public class Logger extends Service implements Runnable {
 				}
 			}
 		}
+
+		public void onProviderDisabled(String provider) {
+			//Toast.makeText(Logger.this, provider + " provider disabled", Toast.LENGTH_SHORT).show();
+		}
+
+		public void onProviderEnabled(String provider) {
+			//Toast.makeText(Logger.this, provider + " provider enabled", Toast.LENGTH_SHORT).show();
+		}
+
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+			//StringBuilder sb = new StringBuilder();
+			//sb.append(provider);
+			//sb.append(" status changed: ");
+			//switch(status) {
+			//case LocationProvider.OUT_OF_SERVICE:
+			//	sb.append("Out of Service.");
+			//	break;
+			//case LocationProvider.TEMPORARILY_UNAVAILABLE:
+			//	sb.append("Temporarily Unavailable.");
+			//	break;
+			//case LocationProvider.AVAILABLE:
+			//	sb.append("Available.");
+			//	break;
+			//default:
+			//	sb.append("Unknown.");
+			//	break;
+			//}
+			//if(extras != null && extras.size() > 0) {
+			//	Set<String> set = extras.keySet();
+			//	Iterator<String> i = set.iterator();
+			//	while(i.hasNext()) {
+			//		String name = i.next();
+			//		sb.append(", ");
+			//		sb.append(name);
+			//	}
+			//}
+			//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
+		}
 	};
 
-	//public LocationListener mListener = null;
-	private LogDbAdapter mDbAdapter;
-
-	private class MyLocListener implements LocationListener {
-		Context mContext;
-		Handler mH;
-
-		public MyLocListener(Context context, Handler h) {
-			mContext = context;
-			mH = h;
-		}
-
-		public void onLocationChanged(Location location) {
-			Bundle data = new Bundle();
-			data.putParcelable("loc", location);
-			Message m = Message.obtain();
-			m.setData(data);
-			mH.dispatchMessage(m);
-		}
-		public void onProviderDisabled(String provider) {
-			Toast.makeText(mContext, provider + " provider disabled", Toast.LENGTH_SHORT).show();
-		}
-		public void onProviderEnabled(String provider) {
-			Toast.makeText(mContext, provider + " provider enabled", Toast.LENGTH_SHORT).show();
-		}
-		public void onStatusChanged(String provider, int status, Bundle extras) {
-			StringBuilder sb = new StringBuilder();
-			sb.append(provider);
-			sb.append(" status changed: ");
-			switch(status) {
-			case LocationProvider.OUT_OF_SERVICE:
-				sb.append("Out of Service.");
-				break;
-			case LocationProvider.TEMPORARILY_UNAVAILABLE:
-				sb.append("Temporarily Unavailable.");
-				break;
-			case LocationProvider.AVAILABLE:
-				sb.append("Available.");
-				break;
-			default:
-				sb.append("Unknown.");
-				break;
-			}
-			if(extras != null && extras.size() > 0) {
-				Set<String> set = extras.keySet();
-				Iterator<String> i = set.iterator();
-				while(i.hasNext()) {
-					String name = i.next();
-					sb.append(", ");
-					sb.append(name);
-				}
-			}
-			Toast.makeText(mContext, sb.toString(), Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	public class LoggerBinder extends Binder {
-		Logger getService() {
-			return Logger.this;
-		}
-	}
-
-	private LocationListener mLocationListener = new MyLocListener(this, h);
 	private GpsStatus.Listener mGpsListener = new GpsStatus.Listener() {
 		GpsStatus status = null;
-		//LocationManager mLM = lm;
 
 		@Override
 		public void onGpsStatusChanged(int event) {
@@ -311,7 +280,6 @@ public class Logger extends Service implements Runnable {
 			PendingIntent contentIntent = PendingIntent.getActivity(Logger.this, 0, new Intent(Logger.this, Main.class), 0);
 			mNotification.setLatestEventInfo(getApplicationContext(), "PhotoCatalog", "GPS: " + nUsed + " / " + nSat, contentIntent);
 			mNM.notify(PHOTOCATALOG_ID, mNotification);
-			//Toast.makeText(Logger.this, "GPS: " + nUsed + " / " + nSat, Toast.LENGTH_SHORT).show();
 		}
 	};
 
@@ -388,10 +356,6 @@ public class Logger extends Service implements Runnable {
 	}
 
 	public final IBinder mBinder = new LoggerBinder();
-
-	//public void setUpdateListener(LocationListener listener) {
-	//	mListener = listener;
-	//}
 
 	@Override
 	public void run() {
