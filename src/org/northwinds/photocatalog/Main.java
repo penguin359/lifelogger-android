@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2010, Loren M. Lang
  * All rights reserved.
  *
@@ -58,6 +58,26 @@ import android.widget.TextView;
 //import android.widget.Toast;
 
 public class Main extends Activity {
+	private TextView mLatitude;
+	private TextView mLongitude;
+	private TextView mAltitude;
+	private TextView mAccuracy;
+	private TextView mBearing;
+	private TextView mSpeed;
+
+	private static String formatCoordinate(double coordinate) {
+		int degrees = (int)coordinate;
+		coordinate -= degrees;
+		coordinate *= 60.;
+		if(coordinate < 0)
+			coordinate *= -1;
+		int minutes = (int)coordinate;
+		coordinate -= minutes;
+		coordinate *= 60.;
+		double seconds = coordinate;
+		return String.format("%d°  %d′  %.3f″", degrees, minutes, seconds);
+	}
+
 	private final Messenger mMessenger = new Messenger(new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -71,8 +91,15 @@ public class Main extends Activity {
 				//sb.append(loc.getLongitude());
 				//sb.append(" ]");
 				//mGpsStatus.setText(sb.toString());
-				if(loc != null)
+				if(loc != null) {
 					mGpsStatus.setText(String.format("Location: [ %.6f, %.6f ]", loc.getLatitude(), loc.getLongitude()));
+					mLatitude.setText(formatCoordinate(loc.getLatitude()));
+					mLongitude.setText(formatCoordinate(loc.getLongitude()));
+					mAltitude.setText(String.format("%.3f m", loc.getAltitude()));
+					mAccuracy.setText(String.format("%.3f m", loc.getAccuracy()));
+					mBearing.setText(String.format("%3.1f°", loc.getBearing()));
+					mSpeed.setText(String.format("%3.1f m/s", loc.getSpeed()));
+				}
 				break;
 			case Logger.MSG_STATUS:
 				if(msg.arg1 > 0) {
@@ -234,6 +261,13 @@ public class Main extends Activity {
 		mTV.setText("Hello, PhotoCataloger!");
 		mGpsStatus = (TextView)findViewById(R.id.location);
 		mUploadStatus = (TextView)findViewById(R.id.upload);
+
+		mLatitude = (TextView)findViewById(R.id.latitude);
+		mLongitude = (TextView)findViewById(R.id.longitude);
+		mAltitude = (TextView)findViewById(R.id.altitude);
+		mAccuracy = (TextView)findViewById(R.id.accuracy);
+		mBearing = (TextView)findViewById(R.id.bearing);
+		mSpeed = (TextView)findViewById(R.id.speed);
 
 		Button b = (Button)findViewById(R.id.status_but);
 		b.setOnClickListener(new View.OnClickListener() {
