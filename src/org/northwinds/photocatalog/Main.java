@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (c) 2010, Loren M. Lang
+ * Copyright (c) 2011, Loren M. Lang
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,9 @@ package org.northwinds.photocatalog;
 
 //import java.io.InputStream;
 //import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -39,6 +42,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 //import android.database.Cursor;
 import android.location.Location;
+import android.location.LocationProvider;
 //import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -58,12 +62,16 @@ import android.widget.TextView;
 //import android.widget.Toast;
 
 public class Main extends Activity {
+	private TextView mTimestamp;
 	private TextView mLatitude;
 	private TextView mLongitude;
 	private TextView mAltitude;
 	private TextView mAccuracy;
 	private TextView mBearing;
 	private TextView mSpeed;
+	private TextView mSatellites;
+
+	private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd  HH:mm:ss");
 
 	private static String formatCoordinate(double coordinate) {
 		int degrees = (int)coordinate;
@@ -84,21 +92,34 @@ public class Main extends Activity {
 			switch(msg.what) {
 			case Logger.MSG_LOCATION:
 				Location loc = (Location)msg.obj;
-				//StringBuilder sb = new StringBuilder();
-				//sb.append("Location: [ ");
-				//sb.append(loc.getLatitude());
-				//sb.append(", ");
-				//sb.append(loc.getLongitude());
-				//sb.append(" ]");
-				//mGpsStatus.setText(sb.toString());
 				if(loc != null) {
-					mGpsStatus.setText(String.format("Location: [ %.6f, %.6f ]", loc.getLatitude(), loc.getLongitude()));
+					//mGpsStatus.setText(String.format("Location: [ %.6f, %.6f ]", loc.getLatitude(), loc.getLongitude()));
+					Bundle extras = loc.getExtras();
+					String satellites = "";
+					if(extras != null && extras.containsKey("satellites"))
+						satellites = String.format("%d", extras.getInt("satellites"));
+					//mGpsStatus.setText("Tracking...");
+					mTimestamp.setText(dateFormat.format(new Date()));
 					mLatitude.setText(formatCoordinate(loc.getLatitude()));
 					mLongitude.setText(formatCoordinate(loc.getLongitude()));
 					mAltitude.setText(String.format("%.3f m", loc.getAltitude()));
 					mAccuracy.setText(String.format("%.3f m", loc.getAccuracy()));
 					mBearing.setText(String.format("%3.1f°", loc.getBearing()));
 					mSpeed.setText(String.format("%3.1f m/s", loc.getSpeed()));
+					mSatellites.setText(satellites);
+				}
+				break;
+			case Logger.MSG_GPS:
+				switch(msg.arg1) {
+				case LocationProvider.AVAILABLE:
+					mGpsStatus.setText("Tracking...");
+					break;
+				case LocationProvider.OUT_OF_SERVICE:
+					mGpsStatus.setText("GPS Out of Service");
+					break;
+				case LocationProvider.TEMPORARILY_UNAVAILABLE:
+					mGpsStatus.setText("GPS Unavailable");
+					break;
 				}
 				break;
 			case Logger.MSG_STATUS:
@@ -262,12 +283,14 @@ public class Main extends Activity {
 		mGpsStatus = (TextView)findViewById(R.id.location);
 		mUploadStatus = (TextView)findViewById(R.id.upload);
 
+		mTimestamp = (TextView)findViewById(R.id.timestamp);
 		mLatitude = (TextView)findViewById(R.id.latitude);
 		mLongitude = (TextView)findViewById(R.id.longitude);
 		mAltitude = (TextView)findViewById(R.id.altitude);
 		mAccuracy = (TextView)findViewById(R.id.accuracy);
 		mBearing = (TextView)findViewById(R.id.bearing);
 		mSpeed = (TextView)findViewById(R.id.speed);
+		mSatellites = (TextView)findViewById(R.id.satellites);
 
 		Button b = (Button)findViewById(R.id.status_but);
 		b.setOnClickListener(new View.OnClickListener() {

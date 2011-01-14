@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Loren M. Lang
+ * Copyright (c) 2011, Loren M. Lang
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,6 +100,7 @@ public class Logger extends Service implements Runnable {
 	static final int MSG_LOCATION = 2;
 	static final int MSG_STATUS = 3;
 	static final int MSG_UPLOAD = 4;
+	static final int MSG_GPS = 5;
 
 	private SharedPreferences mPrefs = null;
 
@@ -237,7 +238,7 @@ public class Logger extends Service implements Runnable {
 				sb.append("Time to first GPS fix: ");
 				sb.append(timeDiff/1000);
 				sb.append(" seconds");
-				Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_LONG);
+				Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_LONG).show();
 				mStartTime = 0L;
 			}
 		}
@@ -296,6 +297,13 @@ public class Logger extends Service implements Runnable {
 			Log.v(TAG, sb.toString());
 			*/
 			//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
+			for(int i = mClients.size()-1; i >= 0; i--) {
+				try {
+					mClients.get(i).send(Message.obtain(null, MSG_GPS, status, 0));
+				} catch(RemoteException ex) {
+					mClients.remove(i);
+				}
+			}
 		}
 	};
 
@@ -550,7 +558,7 @@ public class Logger extends Service implements Runnable {
 					break;
 			}
 		}
-		sendUploadStatus("Stopped.");
+		sendUploadStatus("Upload stopped.");
 		if(!mIsStarted && mUploadRunOnce)
 			stopSelfResult(mUploadRunOnceStartId);
 	}
