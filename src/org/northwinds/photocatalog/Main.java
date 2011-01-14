@@ -55,8 +55,48 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+//import android.widget.Toast;
 
 public class Main extends Activity {
+	private final Messenger mMessenger = new Messenger(new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			switch(msg.what) {
+			case Logger.MSG_LOCATION:
+				Location loc = (Location)msg.obj;
+				//StringBuilder sb = new StringBuilder();
+				//sb.append("Location: [ ");
+				//sb.append(loc.getLatitude());
+				//sb.append(", ");
+				//sb.append(loc.getLongitude());
+				//sb.append(" ]");
+				//mGpsStatus.setText(sb.toString());
+				if(loc != null)
+					mGpsStatus.setText(String.format("Location: [ %.6f, %.6f ]", loc.getLatitude(), loc.getLongitude()));
+				break;
+			case Logger.MSG_STATUS:
+				if(msg.arg1 > 0) {
+					mStartButton.setOnClickListener(mStopGpsOnClick);
+					mStartButton.setText("Stop");
+					mStartButton.setTextColor(0xffff0000);
+					mGpsStatus.setText("GPS waiting for fix");
+				} else {
+					mStartButton.setOnClickListener(mStartGpsOnClick);
+					mStartButton.setText("Start");
+					mStartButton.setTextColor(0xff00ff00);
+					mGpsStatus.setText("GPS Idle");
+				}
+				break;
+			case Logger.MSG_UPLOAD:
+				mUploadStatus.setText((String)msg.obj);
+				break;
+			default:
+				super.handleMessage(msg);
+				break;
+			}
+		}
+	});
+
 	private Messenger mService = null;
 
 	private ServiceConnection mConnection = new ServiceConnection() {
@@ -68,6 +108,7 @@ public class Main extends Activity {
 				msg.replyTo = mMessenger;
 				mService.send(msg);
 			} catch(RemoteException ex) {
+				mService = null;
 			}
 		}
 		@Override
@@ -76,16 +117,18 @@ public class Main extends Activity {
 		}
 	};
 
-	LogDbAdapter mDbAdapter = new LogDbAdapter(this);
+	private LogDbAdapter mDbAdapter = new LogDbAdapter(this);
 
-	View.OnClickListener startGpsOnClick = new View.OnClickListener() {
+	private SharedPreferences mPrefs = null;
+
+	private View.OnClickListener mStartGpsOnClick = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			startService(new Intent(Logger.ACTION_START_LOG, null, Main.this, Logger.class));
 		}
 	};
 
-	View.OnClickListener stopGpsOnClick = new View.OnClickListener() {
+	private View.OnClickListener mStopGpsOnClick = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			startService(new Intent(Logger.ACTION_STOP_LOG, null, Main.this, Logger.class));
@@ -93,9 +136,18 @@ public class Main extends Activity {
 	};
 
 	private TextView mTV;
+	private TextView mGpsStatus;
+	private TextView mUploadStatus;
 
-	/*
+	private Button mStartButton;
+
 	private void parseIntent(Intent intent) {
+		String action = intent.getAction();
+		if(action != null && action.equals(Intent.ACTION_MAIN) &&
+		   intent.hasCategory(Intent.CATEGORY_LAUNCHER) &&
+		   mPrefs.getBoolean("autoStart", false))
+			startService(new Intent(Logger.ACTION_START_LOG, null, Main.this, Logger.class));
+		/*
 		StringBuilder sb = new StringBuilder();
 		sb.append("Hello: ");
 		sb.append(intent.getAction());
@@ -169,24 +221,29 @@ public class Main extends Activity {
 			sb.append("null");
 
 		mTV.setText(sb.toString());
+		*/
 	}
-	*/
-
-	private TextView mGpsStatus;
-	private TextView mUploadStatus;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
 		mTV = (TextView)findViewById(R.id.status);
 		mTV.setText("Hello, PhotoCataloger!");
+		mGpsStatus = (TextView)findViewById(R.id.location);
+		mUploadStatus = (TextView)findViewById(R.id.upload);
 
-		//parseIntent(getIntent());
+		Button b = (Button)findViewById(R.id.status_but);
+		b.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(Main.this, Upload.class));
+			}
+		});
 
-		Button b = (Button)findViewById(R.id.list_but);
+		b = (Button)findViewById(R.id.list_but);
 		b.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -218,21 +275,21 @@ public class Main extends Activity {
 			}
 		});
 
-		mStartButton = (Button)findViewById(R.id.start_but);
-		mStartButton.setOnClickListener(startGpsOnClick);
+		//b = (Button)findViewById(R.id.exit_but);
+		//b.setOnClickListener(new View.OnClickListener() {
+		//	@Override
+		//	public void onClick(View v) {
+		//		Process.killProcess(Process.myPid());
+		//	}
+		//});
 
-		b = (Button)findViewById(R.id.exit_but);
-		b.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Process.killProcess(Process.myPid());
-			}
-		});
-		mGpsStatus = (TextView)findViewById(R.id.location);
-		mUploadStatus = (TextView)findViewById(R.id.upload);
+		mStartButton = (Button)findViewById(R.id.start_but);
+		mStartButton.setOnClickListener(mStartGpsOnClick);
 
 		mDbAdapter.open();
 		bindService(new Intent(this, Logger.class), mConnection, BIND_AUTO_CREATE);
+
+		parseIntent(getIntent());
 	}
 
 	@Override
@@ -252,21 +309,21 @@ public class Main extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
 		case R.id.settings:
-			startActivity(new Intent(getBaseContext(), PrefAct.class));
+			startActivity(new Intent(this, PrefAct.class));
 			return true;
 		case R.id.quit:
+			startService(new Intent(Logger.ACTION_STOP_LOG, null, Main.this, Logger.class));
+			finish();
+			return true;
+		case R.id.kill:
 			Process.killProcess(Process.myPid());
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
 
-	public void startUpload(View view) {
-		startActivity(new Intent(this, Upload.class));
-	}
-
 	@Override
-	public void onStart() {
+	protected void onStart() {
 		super.onStart();
 		if(mService != null) {
 			try {
@@ -274,12 +331,13 @@ public class Main extends Activity {
 				msg.replyTo = mMessenger;
 				mService.send(msg);
 			} catch(RemoteException ex) {
+				mService = null;
 			}
 		}
 	}
 
 	@Override
-	public void onStop() {
+	protected void onStop() {
 		super.onStop();
 		if(mService != null) {
 			try {
@@ -287,56 +345,15 @@ public class Main extends Activity {
 				msg.replyTo = mMessenger;
 				mService.send(msg);
 			} catch(RemoteException ex) {
+				mService = null;
 			}
 		}
 	}
 
-	SharedPreferences mPrefs = null;
-
 	@Override
-	public void onDestroy() {
+	protected void onDestroy() {
 		super.onDestroy();
 		unbindService(mConnection);
 		mDbAdapter.close();
 	}
-
-	Button mStartButton;
-	private final Messenger mMessenger = new Messenger(new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			switch(msg.what) {
-			case Logger.MSG_LOCATION:
-				Location loc = (Location)msg.obj;
-				//StringBuilder sb = new StringBuilder();
-				//sb.append("Location: [ ");
-				//sb.append(loc.getLatitude());
-				//sb.append(", ");
-				//sb.append(loc.getLongitude());
-				//sb.append(" ]");
-				//mGpsStatus.setText(sb.toString());
-				if(loc != null)
-					mGpsStatus.setText(String.format("Location: [ %.6f, %.6f ]", loc.getLatitude(), loc.getLongitude()));
-				break;
-			case Logger.MSG_STATUS:
-				if(msg.arg1 > 0) {
-					mStartButton.setOnClickListener(stopGpsOnClick);
-					mStartButton.setText("Stop");
-					mStartButton.setTextColor(0xffff0000);
-					mGpsStatus.setText("GPS waiting for fix");
-				} else {
-					mStartButton.setOnClickListener(startGpsOnClick);
-					mStartButton.setText("Start");
-					mStartButton.setTextColor(0xff00ff00);
-					mGpsStatus.setText("GPS Idle");
-				}
-				break;
-			case Logger.MSG_UPLOAD:
-				mUploadStatus.setText((String)msg.obj);
-				break;
-			default:
-				super.handleMessage(msg);
-				break;
-			}
-		}
-	});
 }

@@ -35,7 +35,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 //import java.util.Set;
 
 import org.apache.http.HttpResponse;
@@ -61,13 +60,14 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 //import android.location.LocationProvider;
-import android.os.Binder;
+//import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -90,8 +90,6 @@ public class Logger extends Service implements Runnable {
 	private volatile int mUploadCount = 0;
 	private Object mUploadLock = new Object();
 
-	private SharedPreferences mPrefs = null;
-
 	private ArrayList<Messenger> mClients = new ArrayList<Messenger>();
 
 	private String mLastUploadStatus = "Stopped.";
@@ -102,6 +100,32 @@ public class Logger extends Service implements Runnable {
 	static final int MSG_LOCATION = 2;
 	static final int MSG_STATUS = 3;
 	static final int MSG_UPLOAD = 4;
+
+	private SharedPreferences mPrefs = null;
+
+	private final SharedPreferences.OnSharedPreferenceChangeListener mPrefsChange = new SharedPreferences.OnSharedPreferenceChangeListener() {
+		@Override
+		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+				String key) {
+			if(!key.equals("autoUpload"))
+				return;
+			boolean autoUpload = mPrefs.getBoolean("autoUpload", true);
+			if(autoUpload != mUploadRun) {
+				if(autoUpload) {
+					mUploadRun = true;
+					mUploadRunOnce = false;
+					if(mUpload == null || mUpload.getState() == Thread.State.TERMINATED) {
+						mUpload = new Thread(Logger.this);
+						mUpload.start();
+					}
+				} else {
+					mUploadRun = false;
+					if(mUpload != null && mUpload.getState() != Thread.State.TERMINATED)
+						mUpload.interrupt();
+				}
+			}
+		}
+	};
 
 	private final Messenger mMessenger = new Messenger(new Handler() {
 		@Override
@@ -158,27 +182,7 @@ public class Logger extends Service implements Runnable {
 			mUpload = new Thread(this);
 			mUpload.start();
 		}
-		mPrefs.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
-			@Override
-			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-					String key) {
-				boolean autoUpload = key.equals("autoUpload");
-				if(autoUpload != mUploadRun) {
-					if(mPrefs.getBoolean("autoUpload", true)) {
-						mUploadRun = true;
-						mUploadRunOnce = false;
-						if(mUpload == null || mUpload.getState() == Thread.State.TERMINATED) {
-							mUpload = new Thread(Logger.this);
-							mUpload.start();
-						}
-					} else {
-						mUploadRun = false;
-						if(mUpload != null && mUpload.getState() != Thread.State.TERMINATED)
-							mUpload.interrupt();
-					}
-				}
-			}
-		});
+		mPrefs.registerOnSharedPreferenceChangeListener(mPrefsChange);
 	}
 
 	@Override
@@ -196,16 +200,10 @@ public class Logger extends Service implements Runnable {
 			} catch(InterruptedException e) {
 			}
 		}
+		mPrefs.unregisterOnSharedPreferenceChangeListener(mPrefsChange);
 	}
 
-	//public LocationListener mListener = null;
 	private LogDbAdapter mDbAdapter;
-
-	public class LoggerBinder extends Binder {
-		Logger getService() {
-			return Logger.this;
-		}
-	}
 
 	private LocationListener mLocationListener = new LocationListener() {
 		public void onLocationChanged(Location loc) {
@@ -234,7 +232,7 @@ public class Logger extends Service implements Runnable {
 				}
 			}
 			if(mStartTime != 0) {
-				Long timeDiff = System.currentTimeMillis() - mStartTime;
+				Long timeDiff = SystemClock.uptimeMillis() - mStartTime;
 				StringBuilder sb = new StringBuilder();
 				sb.append("Time to first GPS fix: ");
 				sb.append(timeDiff/1000);
@@ -280,6 +278,7 @@ public class Logger extends Service implements Runnable {
 			//	}
 			//}
 			//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
+			/*
 			StringBuilder sb = new StringBuilder();
 			if(extras != null)
 				sb.append("Status changed extras(").append(extras.size()).append("): ");
@@ -295,6 +294,7 @@ public class Logger extends Service implements Runnable {
 					sb.append(extras.getInt("satellites")).append(" satellites used");
 			}
 			Log.v(TAG, sb.toString());
+			*/
 			//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
 		}
 	};
@@ -333,7 +333,7 @@ public class Logger extends Service implements Runnable {
 		if(action == null) {
 		} else if(action.equals(ACTION_START_LOG)) {
 			if(!mIsStarted) {
-				Toast.makeText(this, "Start GPS", Toast.LENGTH_SHORT).show();
+				//Toast.makeText(this, "Start GPS", Toast.LENGTH_SHORT).show();
 				mLM.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.parseLong(mPrefs.getString("time", "5"))*1000, Float.parseFloat(mPrefs.getString("distance", "5")), mLocationListener);
 				mLM.addGpsStatusListener(mGpsListener);
 				//mDbAdapter.open();
@@ -349,11 +349,11 @@ public class Logger extends Service implements Runnable {
 						mClients.remove(i);
 					}
 				}
-				mStartTime = System.currentTimeMillis();
+				mStartTime = SystemClock.uptimeMillis();
 			}
 		} else if(action.equals(ACTION_STOP_LOG)) {
 			if(mIsStarted) {
-				Toast.makeText(this, "Stop GPS", Toast.LENGTH_SHORT).show();
+				//Toast.makeText(this, "Stop GPS", Toast.LENGTH_SHORT).show();
 				mLM.removeUpdates(mLocationListener);
 				mLM.removeGpsStatusListener(mGpsListener);
 				//mDbAdapter.close();
@@ -372,6 +372,10 @@ public class Logger extends Service implements Runnable {
 			}
 		} else if(action.equals(ACTION_UPLOAD_ONCE)) {
 			if(!mUploadRun) {
+				if(mUploadCount <= 0) {
+					stopSelfResult(startId);
+					return START_STICKY;
+				}
 				mUploadRun = true;
 				mUploadRunOnce = true;
 				mUploadRunOnceStartId = startId;
@@ -398,7 +402,7 @@ public class Logger extends Service implements Runnable {
 		return false;
 	}
 
-	public final IBinder mBinder = new LoggerBinder();
+	//public final IBinder mBinder = new LoggerBinder();
 
 	@Override
 	public void run() {

@@ -68,6 +68,8 @@ public class GPSList extends ListActivity {
 				if(cursor.getColumnName(columnIndex).equals(LogDbAdapter.KEY_UPLOADED)) {
 					if(cursor.getInt(columnIndex) != 0)
 						view.setBackgroundColor(0xff008000);
+					else
+						view.setBackgroundColor(0xff800000);
 					return true;
 				}
 				return false;
