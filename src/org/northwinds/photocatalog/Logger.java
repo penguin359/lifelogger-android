@@ -35,6 +35,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 //import java.util.Set;
 
 import org.apache.http.HttpResponse;
@@ -72,7 +73,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class Logger extends Service implements Runnable {
-	private static final String TAG = "PhotoCatalog";
+	private static final String TAG = "PhotoCatalog-Logger";
 
 	private LocationManager mLM;
 	private NotificationManager mNM;
@@ -93,9 +94,12 @@ public class Logger extends Service implements Runnable {
 
 	private ArrayList<Messenger> mClients = new ArrayList<Messenger>();
 
-	static final int MSG_LOCATION = 0;
-	static final int MSG_REGISTER_CLIENT = 1;
-	static final int MSG_UNREGISTER_CLIENT = 2;
+	private String mLastUploadStatus = "Stopped.";
+	private Location mLastLocation = null;
+
+	static final int MSG_REGISTER_CLIENT = 0;
+	static final int MSG_UNREGISTER_CLIENT = 1;
+	static final int MSG_LOCATION = 2;
 	static final int MSG_STATUS = 3;
 	static final int MSG_UPLOAD = 4;
 
@@ -107,6 +111,8 @@ public class Logger extends Service implements Runnable {
 				mClients.add(msg.replyTo);
 				try {
 					msg.replyTo.send(Message.obtain(null, MSG_STATUS, mIsStarted ? 1 : 0, 0));
+					msg.replyTo.send(Message.obtain(null, MSG_LOCATION, mLastLocation));
+					msg.replyTo.send(Message.obtain(null, MSG_UPLOAD, mLastUploadStatus));
 				} catch(RemoteException ex) {
 					mClients.remove(msg.replyTo);
 				}
@@ -120,8 +126,9 @@ public class Logger extends Service implements Runnable {
 			}
 		}
 	});
-	
+
 	private void sendUploadStatus(String status) {
+		mLastUploadStatus = status;
 		for(int i = mClients.size()-1; i >= 0; i--) {
 			try {
 				mClients.get(i).send(Message.obtain(null, MSG_UPLOAD, status));
@@ -202,7 +209,13 @@ public class Logger extends Service implements Runnable {
 
 	private LocationListener mLocationListener = new LocationListener() {
 		public void onLocationChanged(Location loc) {
+			if(loc.hasAccuracy() &&
+			   loc.getAccuracy() > Float.parseFloat(mPrefs.getString("accuracy", "200"))) {
+				Log.v(TAG, "Accuracy too low: " + loc.getAccuracy());
+				return;
+			}
 			mDbAdapter.insertLocation(loc);
+			mLastLocation = loc;
 			for(int i = mClients.size()-1; i >= 0; i--) {
 				try {
 					mClients.get(i).send(Message.obtain(null, MSG_LOCATION, loc));
@@ -219,6 +232,15 @@ public class Logger extends Service implements Runnable {
 					mUpload = new Thread(Logger.this);
 					mUpload.start();
 				}
+			}
+			if(mStartTime != 0) {
+				Long timeDiff = System.currentTimeMillis() - mStartTime;
+				StringBuilder sb = new StringBuilder();
+				sb.append("Time to first GPS fix: ");
+				sb.append(timeDiff/1000);
+				sb.append(" seconds");
+				Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_LONG);
+				mStartTime = 0L;
 			}
 		}
 
@@ -258,6 +280,22 @@ public class Logger extends Service implements Runnable {
 			//	}
 			//}
 			//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
+			StringBuilder sb = new StringBuilder();
+			if(extras != null)
+				sb.append("Status changed extras(").append(extras.size()).append("): ");
+			if(extras != null && extras.size() > 0) {
+				Set<String> set = extras.keySet();
+				for(String name: set) {
+					sb.append(name);
+					sb.append(" ISA ");
+					sb.append(extras.get(name).getClass().getName());
+					sb.append(", ");
+				}
+				if(extras.containsKey("satellites"))
+					sb.append(extras.getInt("satellites")).append(" satellites used");
+			}
+			Log.v(TAG, sb.toString());
+			//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
 		}
 	};
 
@@ -287,6 +325,8 @@ public class Logger extends Service implements Runnable {
 	public static final String ACTION_STOP_LOG = "org.northwinds.android.intent.STOP_LOG";
 	public static final String ACTION_UPLOAD_ONCE = "org.northwinds.android.intent.UPLOAD_ONCE";
 
+	private Long mStartTime = 0L;
+
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		String action = intent.getAction();
@@ -309,6 +349,7 @@ public class Logger extends Service implements Runnable {
 						mClients.remove(i);
 					}
 				}
+				mStartTime = System.currentTimeMillis();
 			}
 		} else if(action.equals(ACTION_STOP_LOG)) {
 			if(mIsStarted) {
@@ -318,9 +359,11 @@ public class Logger extends Service implements Runnable {
 				//mDbAdapter.close();
 				mIsStarted = false;
 				mNM.cancel(PHOTOCATALOG_ID);
+				mLastLocation = null;
 				for(int i = mClients.size()-1; i >= 0; i--) {
 					try {
 						mClients.get(i).send(Message.obtain(null, MSG_STATUS, 0, 0));
+						mClients.get(i).send(Message.obtain(null, MSG_LOCATION, mLastLocation));
 					} catch(RemoteException ex) {
 						mClients.remove(i);
 					}

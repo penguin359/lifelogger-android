@@ -314,17 +314,20 @@ public class Main extends Activity {
 				//sb.append(loc.getLongitude());
 				//sb.append(" ]");
 				//mGpsStatus.setText(sb.toString());
-				mGpsStatus.setText(String.format("Location: [ %.6f, %.6f ]", loc.getLatitude(), loc.getLongitude()));
+				if(loc != null)
+					mGpsStatus.setText(String.format("Location: [ %.6f, %.6f ]", loc.getLatitude(), loc.getLongitude()));
 				break;
 			case Logger.MSG_STATUS:
 				if(msg.arg1 > 0) {
 					mStartButton.setOnClickListener(stopGpsOnClick);
 					mStartButton.setText("Stop");
 					mStartButton.setTextColor(0xffff0000);
+					mGpsStatus.setText("GPS waiting for fix");
 				} else {
 					mStartButton.setOnClickListener(startGpsOnClick);
 					mStartButton.setText("Start");
 					mStartButton.setTextColor(0xff00ff00);
+					mGpsStatus.setText("GPS Idle");
 				}
 				break;
 			case Logger.MSG_UPLOAD:

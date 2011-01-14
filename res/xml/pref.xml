@@ -7,4 +7,5 @@
 <EditTextPreference android:summary="ID of GPS Source to report" android:title="GPS Source" android:key="source" android:defaultValue="0"/>
 <EditTextPreference android:summary="in Meters" android:defaultValue="5" android:key="distance" android:title="Minimum Distance"/>
 <EditTextPreference android:summary="in Seconds" android:defaultValue="5" android:key="time" android:title="Minimum Time"/>
+<EditTextPreference android:summary="Minimum accuracy (maximum distance in meters) for a GPS fix to be recorded." android:title="Minimum Accuracy" android:defaultValue="200" android:key="accuracy"></EditTextPreference>
 </PreferenceScreen>

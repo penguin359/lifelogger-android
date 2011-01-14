@@ -28,6 +28,8 @@
 
 package org.northwinds.photocatalog;
 
+import java.util.Set;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -39,6 +41,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 public class LogDbAdapter {
+	private static final String TAG = "PhotoCatalog-LogDbAdapter";
+
 	public static final String KEY_ROWID     = "_id";
 	public static final String KEY_TIMESTAMP = "timestamp";
 	public static final String KEY_LATITUDE  = "latitude";
@@ -49,8 +53,6 @@ public class LogDbAdapter {
 	public static final String KEY_SPEED     = "speed";
 	public static final String KEY_SATELLITES= "satellites";
 	public static final String KEY_UPLOADED  = "uploaded";
-
-	private static final String TAG = "LogDbAdapter";
 
 	private static final String DATABASE_NAME = "data.db";
 	private static final String DATABASE_TABLE = "locations";
@@ -153,6 +155,20 @@ public class LogDbAdapter {
 		Bundle extras = location.getExtras();
 		if(extras != null && extras.containsKey("satellites"))
 			values.put(KEY_SATELLITES, extras.getInt("satellites"));
+		StringBuilder sb = new StringBuilder();
+		if(extras != null)
+			sb.append("Location extras(").append(extras.size()).append("): ");
+		if(extras != null && extras.size() > 0) {
+			Set<String> set = extras.keySet();
+			for(String name: set) {
+				sb.append(name);
+				sb.append(" ISA ");
+				sb.append(extras.get(name).getClass().getName());
+				sb.append(", ");
+			}
+		}
+		Log.v(TAG, sb.toString());
+		//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
 
 		return mDb.insert(DATABASE_TABLE, null, values);
 	}
