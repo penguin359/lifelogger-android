@@ -28,7 +28,7 @@
 
 package org.northwinds.photocatalog;
 
-import java.util.Set;
+//import java.util.Set;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -155,19 +155,19 @@ public class LogDbAdapter {
 		Bundle extras = location.getExtras();
 		if(extras != null && extras.containsKey("satellites"))
 			values.put(KEY_SATELLITES, extras.getInt("satellites"));
-		StringBuilder sb = new StringBuilder();
-		if(extras != null)
-			sb.append("Location extras(").append(extras.size()).append("): ");
-		if(extras != null && extras.size() > 0) {
-			Set<String> set = extras.keySet();
-			for(String name: set) {
-				sb.append(name);
-				sb.append(" ISA ");
-				sb.append(extras.get(name).getClass().getName());
-				sb.append(", ");
-			}
-		}
-		Log.v(TAG, sb.toString());
+		//StringBuilder sb = new StringBuilder();
+		//if(extras != null)
+		//	sb.append("Location extras(").append(extras.size()).append("): ");
+		//if(extras != null && extras.size() > 0) {
+		//	Set<String> set = extras.keySet();
+		//	for(String name: set) {
+		//		sb.append(name);
+		//		sb.append(" ISA ");
+		//		sb.append(extras.get(name).getClass().getName());
+		//		sb.append(", ");
+		//	}
+		//}
+		//Log.v(TAG, sb.toString());
 		//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
 
 		return mDb.insert(DATABASE_TABLE, null, values);

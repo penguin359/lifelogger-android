@@ -68,7 +68,7 @@ import android.widget.TextView;
  *
  */
 public class Upload extends Activity implements Runnable {
-	private static final String TAG = "Upload";
+	private static final String TAG = "PhotoCatalog-Upload";
 
 	private Thread mThread;
 	private Uri mUri = null;

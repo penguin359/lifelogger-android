@@ -22,7 +22,7 @@ import android.provider.MediaStore.MediaColumns;
 import android.util.Log;
 
 public class Multipart {
-	private static final String TAG = "Multipart";
+	private static final String TAG = "PhotoCatalog-Multipart";
 
 	private final Context mContext;
 
@@ -193,7 +193,7 @@ public class Multipart {
 					if(mLength >= 0 && mUpdate != null)
 						mUpdate.onUpdate((int)(progress*100/mLength), 100);
 				} else if(obj instanceof InputStream) {
-					Log.i(TAG, "Start file");
+					//Log.i(TAG, "Start file");
 					InputStream is = (InputStream)obj;
 					byte[] buffer = new byte[8192];
 					int bytesRead;
@@ -203,12 +203,12 @@ public class Multipart {
 						if(mLength >= 0 && mUpdate != null)
 							mUpdate.onUpdate((int)(progress*100/mLength), 100);
 					}
-					Log.i(TAG, "Finish file");
+					//Log.i(TAG, "Finish file");
 				} else if(obj instanceof ContentProducer) {
-					Log.i(TAG, "Start content");
+					//Log.i(TAG, "Start content");
 					ContentProducer cp = (ContentProducer)obj;
 					cp.writeTo(os);
-					Log.i(TAG, "Finish content");
+					//Log.i(TAG, "Finish content");
 				}
 			}
 		}

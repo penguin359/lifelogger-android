@@ -344,15 +344,13 @@ public class Logger extends Service implements Runnable {
 	private Long mStartTime = 0L;
 
 	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
+	public void onStart(Intent intent, int startId) {
 		String action = intent.getAction();
 		if(action == null) {
 		} else if(action.equals(ACTION_START_LOG)) {
 			if(!mIsStarted) {
-				//Toast.makeText(this, "Start GPS", Toast.LENGTH_SHORT).show();
 				mLM.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.parseLong(mPrefs.getString("time", "5"))*1000, Float.parseFloat(mPrefs.getString("distance", "5")), mLocationListener);
 				mLM.addGpsStatusListener(mGpsListener);
-				//mDbAdapter.open();
 				mNotification = new Notification(R.drawable.icon, "PhotoCatalog GPS Logging", System.currentTimeMillis());
 				PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Main.class), 0);
 				mNotification.setLatestEventInfo(getApplicationContext(), "PhotoCatalog", "Starting GPS...", contentIntent);
@@ -379,10 +377,8 @@ public class Logger extends Service implements Runnable {
 			}
 		} else if(action.equals(ACTION_STOP_LOG)) {
 			if(mIsStarted) {
-				//Toast.makeText(this, "Stop GPS", Toast.LENGTH_SHORT).show();
 				mLM.removeUpdates(mLocationListener);
 				mLM.removeGpsStatusListener(mGpsListener);
-				//mDbAdapter.close();
 				mIsStarted = false;
 				mNM.cancel(PHOTOCATALOG_ID);
 				mLastLocation = null;
@@ -406,7 +402,7 @@ public class Logger extends Service implements Runnable {
 		} else if(action.equals(ACTION_UPLOAD_ONCE)) {
 			if(mUploadCount <= 0) {
 				stopSelfResult(startId);
-				return START_STICKY;
+				return;
 			}
 			if(!mUploadRun) {
 				mUploadRun = true;
@@ -421,7 +417,7 @@ public class Logger extends Service implements Runnable {
 			}
 		}
 
-		return START_STICKY;
+		return;
 	}
 
 	@Override
@@ -527,8 +523,20 @@ public class Logger extends Service implements Runnable {
 						for(int i = 0; i < cols.length; i++) {
 							if(i > 0)
 								os.write(",".getBytes());
-							if(!mC.isNull(i))
-								os.write(mC.getString(i).getBytes());
+							if(!mC.isNull(i)) {
+								String name = mC.getColumnName(i);
+								if(name.equals("latitude") ||
+								   name.equals("longitude") ||
+								   name.equals("altitude")) {
+									os.write(String.format("%.10f", mC.getDouble(i)).getBytes());
+								} else if(name.equals("accuracy") ||
+								          name.equals("bearing") ||
+								          name.equals("speed")) {
+									os.write(String.format("%.10f", mC.getFloat(i)).getBytes());
+								} else {
+									os.write(mC.getString(i).getBytes());
+								}
+							}
 						}
 						os.write("\n".getBytes());
 					} while(mC.moveToNext());
