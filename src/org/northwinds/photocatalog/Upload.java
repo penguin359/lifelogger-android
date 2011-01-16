@@ -269,6 +269,7 @@ public class Upload extends Activity implements Runnable {
 			//	is = null;
 			//}
 			Multipart m = new Multipart(this);
+			m.put("response", "text");
 			m.put("title", mTitle);
 			m.put("description", mDescription);
 			if(mUri != null)
@@ -290,7 +291,7 @@ public class Upload extends Activity implements Runnable {
 			else
 				updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSWHEEL, 1, 0));
 			HttpClient client = new DefaultHttpClient();
-			HttpPost req = new HttpPost(mPrefs.getString("url", "http://www.example.org/photocatalog/") + "cgi/photocatalog.pl");
+			HttpPost req = new HttpPost(mPrefs.getString("url", "http://www.example.org/photocatalog/") + "upload.pl");
 			req.setEntity(entity);
 			if(mUri != null)
 				sb.append("\n");
@@ -299,12 +300,17 @@ public class Upload extends Activity implements Runnable {
 			try {
 				HttpResponse resp = client.execute(req);
 				//sb.append(String.format("%03d %s", resp.getStatusLine().getStatusCode(), resp.getStatusLine().getReasonPhrase()));
-				sb.append(resp.getStatusLine().getReasonPhrase());
+				//sb.append(resp.getStatusLine().getReasonPhrase());
 				String respString = new BasicResponseHandler().handleResponse(resp);
 				BufferedReader r = new BufferedReader(new StringReader(respString));
 				String line = r.readLine();
-				if(line != null && line.equals("OK"))
+				if(line != null && line.equals("OK")) {
+					sb.append("\ndone!");
 					finish();
+				} else {
+					sb.append("Error: ");
+					sb.append(r.readLine());
+				}
 			} catch(HttpResponseException ex) {
 				Log.e(TAG, "Failed client request", ex);
 				sb.append(ex);
@@ -312,7 +318,7 @@ public class Upload extends Activity implements Runnable {
 				Log.e(TAG, "Failed to upload file", ex);
 				sb.append(ex);
 			}
-			sb.append("\ndone!");
+			//sb.append("\ndone!");
 			updateUI.sendMessage(Message.obtain(updateUI, MSG_STRING, sb.toString()));
 			if(entity.getContentLength() >= 0)
 				updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSBAR, 0, 0));

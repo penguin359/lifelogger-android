@@ -83,6 +83,7 @@ public class Logger extends Service implements Runnable {
 
 	private boolean mIsStarted = false;
 
+	private boolean mAutoUpload = false;
 	private Thread mUpload = null;
 	private volatile boolean mUploadRun = false;
 	private volatile boolean mUploadRunOnce = false;
@@ -110,14 +111,18 @@ public class Logger extends Service implements Runnable {
 				String key) {
 			if(!key.equals("autoUpload"))
 				return;
-			boolean autoUpload = mPrefs.getBoolean("autoUpload", true);
-			if(autoUpload != mUploadRun) {
-				if(autoUpload) {
+			mAutoUpload = mPrefs.getBoolean("autoUpload", true);
+			if(mAutoUpload != mUploadRun) {
+				if(mAutoUpload) {
 					mUploadRun = true;
 					mUploadRunOnce = false;
 					if(mUpload == null || mUpload.getState() == Thread.State.TERMINATED) {
-						mUpload = new Thread(Logger.this);
-						mUpload.start();
+						synchronized(mUploadLock) {
+							if(mUploadCount > 0) {
+								mUpload = new Thread(Logger.this);
+								mUpload.start();
+							}
+						}
 					}
 				} else {
 					mUploadRun = false;
@@ -177,12 +182,13 @@ public class Logger extends Service implements Runnable {
 		/* preferences can only be updated on the main thread so this
 		 * should be safe without synchronization
 		 */
-		if(mPrefs.getBoolean("autoUpload", true)) {
-			mUploadRun = true;
-			mUploadRunOnce = false;
-			mUpload = new Thread(this);
-			mUpload.start();
-		}
+		mAutoUpload = mPrefs.getBoolean("autoUpload", true);
+		//if(mAutoUpload) {
+		//	mUploadRun = true;
+		//	mUploadRunOnce = false;
+		//	//mUpload = new Thread(this);
+		//	//mUpload.start();
+		//}
 		mPrefs.registerOnSharedPreferenceChangeListener(mPrefsChange);
 	}
 
@@ -227,7 +233,9 @@ public class Logger extends Service implements Runnable {
 				mUploadLock.notify();
 			}
 			if(mUpload == null || mUpload.getState() == Thread.State.TERMINATED) {
-				if(mUploadRun) {
+				if(mAutoUpload) {
+					mUploadRun = true;
+					mUploadRunOnce = false;
 					mUpload = new Thread(Logger.this);
 					mUpload.start();
 				}
@@ -358,6 +366,16 @@ public class Logger extends Service implements Runnable {
 					}
 				}
 				mStartTime = SystemClock.uptimeMillis();
+				if(mUpload == null || mUpload.getState() == Thread.State.TERMINATED) {
+					synchronized(mUploadLock) {
+						if(mAutoUpload && mUploadCount > 0) {
+							mUploadRun = true;
+							mUploadRunOnce = false;
+							mUpload = new Thread(this);
+							mUpload.start();
+						}
+					}
+				}
 			}
 		} else if(action.equals(ACTION_STOP_LOG)) {
 			if(mIsStarted) {
@@ -376,14 +394,21 @@ public class Logger extends Service implements Runnable {
 						mClients.remove(i);
 					}
 				}
-				stopSelfResult(startId);
+				if(mUploadRun) {
+					mUploadRunOnce = true;
+					mUploadRunOnceStartId = startId;
+					if(mUpload != null && mUpload.getState() != Thread.State.TERMINATED)
+						mUpload.interrupt();
+				} else {
+					stopSelfResult(startId);
+				}
 			}
 		} else if(action.equals(ACTION_UPLOAD_ONCE)) {
+			if(mUploadCount <= 0) {
+				stopSelfResult(startId);
+				return START_STICKY;
+			}
 			if(!mUploadRun) {
-				if(mUploadCount <= 0) {
-					stopSelfResult(startId);
-					return START_STICKY;
-				}
 				mUploadRun = true;
 				mUploadRunOnce = true;
 				mUploadRunOnceStartId = startId;
@@ -391,6 +416,8 @@ public class Logger extends Service implements Runnable {
 			if(mUpload == null || mUpload.getState() == Thread.State.TERMINATED) {
 				mUpload = new Thread(Logger.this);
 				mUpload.start();
+			} else {
+				mUpload.interrupt();
 			}
 		}
 
@@ -432,8 +459,7 @@ public class Logger extends Service implements Runnable {
 						while(mUploadCount <= 0)
 							mUploadLock.wait();
 					} catch(InterruptedException ex) {
-						if(!mUploadRun)
-							break;
+						continue;
 					}
 				}
 			}
@@ -472,16 +498,19 @@ public class Logger extends Service implements Runnable {
 			}
 
 			String baseUrl = mPrefs.getString("url", "http://www.example.org/photocatalog/");
-			String source = mPrefs.getString("source", "0");
+			final String source = mPrefs.getString("source", "0");
 			List<Integer> idList = new ArrayList<Integer>();
 			Multipart m = new Multipart(this);
+			m.put("response", "text");
 			m.put("source", source);
+			m.put("type", "gps");
 			class MyProducer implements ContentProducer {
 				Cursor mC;
 				List<Integer> mIdList;
 				MyProducer(Cursor c, List<Integer> idList) { mC = c; mIdList = idList; }
 				public void writeTo(OutputStream os) throws IOException {
 					os.write("PhotoCatalog v1.0\n".getBytes());
+					os.write("source,".getBytes());
 					for(int i = 0; i < cols.length; i++) {
 						if(i > 0)
 							os.write(",".getBytes());
@@ -493,6 +522,8 @@ public class Logger extends Service implements Runnable {
 					os.write("\n".getBytes());
 					do {
 						mIdList.add(mC.getInt(0));
+						os.write(source.getBytes());
+						os.write(",".getBytes());
 						for(int i = 0; i < cols.length; i++) {
 							if(i > 0)
 								os.write(",".getBytes());
@@ -508,7 +539,7 @@ public class Logger extends Service implements Runnable {
 
 			//StringBuilder sb = new StringBuilder();
 			//sb.append(baseUrl).append("cgi/test-android.pl?loc=").append("123").append(",").append(c.getCount());
-			String uri = baseUrl + "cgi/test-android.pl";
+			String uri = baseUrl + "upload.pl";
 			HttpClient client = new DefaultHttpClient();
 			HttpPost post = new HttpPost(uri);
 			boolean ok = false;
@@ -538,7 +569,7 @@ public class Logger extends Service implements Runnable {
 						mUploadCount -= uploadedCount;
 					}
 				} else {
-					sendUploadStatus("Invalid response: " + (line == null ? "(null)" : line));
+					sendUploadStatus("Invalid response: " + r.readLine());
 				}
 			} catch(HttpResponseException ex) {
 				sendUploadStatus("HTTP Error: " + ex);
@@ -561,5 +592,6 @@ public class Logger extends Service implements Runnable {
 		sendUploadStatus("Upload stopped.");
 		if(!mIsStarted && mUploadRunOnce)
 			stopSelfResult(mUploadRunOnceStartId);
+		mUploadRunOnce = false;
 	}
 }
