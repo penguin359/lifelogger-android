@@ -92,7 +92,7 @@ public class Logger extends Service implements Runnable {
 
 	private ArrayList<Messenger> mClients = new ArrayList<Messenger>();
 
-	private String mLastUploadStatus = "Stopped.";
+	private String mLastUploadStatus = "Upload stopped.";
 	private Location mLastLocation = null;
 
 	static final int MSG_REGISTER_CLIENT = 0;

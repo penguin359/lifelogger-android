@@ -32,6 +32,7 @@ import android.app.ListActivity;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.SimpleCursorAdapter;
 
 public class GPSList extends ListActivity {
@@ -76,6 +77,22 @@ public class GPSList extends ListActivity {
 			}
 		});
 		setListAdapter(entries);
+
+		Button b = (Button)findViewById(R.id.delete_uploaded_but);
+		b.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mDbAdapter.deleteUploadedLocations();
+			}
+		});
+
+		b = (Button)findViewById(R.id.delete_but);
+		b.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mDbAdapter.deleteAllLocations();
+			}
+		});
 	}
 
 	@Override

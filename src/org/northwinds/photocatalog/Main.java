@@ -279,7 +279,7 @@ public class Main extends Activity {
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
 		mTV = (TextView)findViewById(R.id.status);
-		mTV.setText("Hello, PhotoCataloger!");
+		mTV.setText("Hello, PhotoCatalogger!");
 		mGpsStatus = (TextView)findViewById(R.id.location);
 		mUploadStatus = (TextView)findViewById(R.id.upload);
 

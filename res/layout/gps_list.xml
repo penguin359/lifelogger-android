@@ -11,4 +11,10 @@
 </LinearLayout>
 <ListView android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/android:list"/>
 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/android:empty" android:text="@string/no_gps"/>
+<LinearLayout
+  android:layout_height="wrap_content" android:layout_width="fill_parent"
+  android:orientation="horizontal">
+  <Button android:id="@+id/delete_but" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1" android:text="Delete All"/>
+  <Button android:id="@+id/delete_uploaded_but" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1" android:text="Delete Uploaded"/>
+</LinearLayout>
 </LinearLayout>
