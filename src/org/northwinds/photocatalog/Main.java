@@ -165,18 +165,18 @@ public class Main extends Activity {
 		}
 	};
 
-	private LogDbAdapter mDbAdapter = new LogDbAdapter(this);
-
 	private SharedPreferences mPrefs = null;
 
-	private View.OnClickListener mStartGpsOnClick = new View.OnClickListener() {
+	private final LogDbAdapter mDbAdapter = new LogDbAdapter(this);
+
+	private final View.OnClickListener mStartGpsOnClick = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			startService(new Intent(Logger.ACTION_START_LOG, null, Main.this, Logger.class));
 		}
 	};
 
-	private View.OnClickListener mStopGpsOnClick = new View.OnClickListener() {
+	private final View.OnClickListener mStopGpsOnClick = new View.OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			startService(new Intent(Logger.ACTION_STOP_LOG, null, Main.this, Logger.class));
@@ -194,7 +194,7 @@ public class Main extends Activity {
 		if(action != null && action.equals(Intent.ACTION_MAIN) &&
 		   intent.hasCategory(Intent.CATEGORY_LAUNCHER) &&
 		   mPrefs.getBoolean("autoStart", false))
-			startService(new Intent(Logger.ACTION_START_LOG, null, Main.this, Logger.class));
+			startService(new Intent(Logger.ACTION_START_LOG, null, this, Logger.class));
 		/*
 		StringBuilder sb = new StringBuilder();
 		sb.append("Hello: ");
@@ -332,14 +332,6 @@ public class Main extends Activity {
 			}
 		});
 
-		//b = (Button)findViewById(R.id.exit_but);
-		//b.setOnClickListener(new View.OnClickListener() {
-		//	@Override
-		//	public void onClick(View v) {
-		//		Process.killProcess(Process.myPid());
-		//	}
-		//});
-
 		mStartButton = (Button)findViewById(R.id.start_but);
 		mStartButton.setOnClickListener(mStartGpsOnClick);
 
@@ -369,7 +361,7 @@ public class Main extends Activity {
 			startActivity(new Intent(this, PrefAct.class));
 			return true;
 		case R.id.quit:
-			startService(new Intent(Logger.ACTION_STOP_LOG, null, Main.this, Logger.class));
+			startService(new Intent(Logger.ACTION_STOP_LOG, null, this, Logger.class));
 			finish();
 			return true;
 		case R.id.kill:

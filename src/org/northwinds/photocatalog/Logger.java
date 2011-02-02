@@ -95,6 +95,7 @@ public class Logger extends Service implements Runnable {
 
 	private String mLastUploadStatus = "Upload stopped.";
 	private Location mLastLocation = null;
+	private int mGpsStatus = -1;
 
 	static final int MSG_REGISTER_CLIENT = 0;
 	static final int MSG_UNREGISTER_CLIENT = 1;
@@ -141,6 +142,8 @@ public class Logger extends Service implements Runnable {
 				mClients.add(msg.replyTo);
 				try {
 					msg.replyTo.send(Message.obtain(null, MSG_STATUS, mIsStarted ? 1 : 0, 0));
+					if(mGpsStatus >= 0)
+						msg.replyTo.send(Message.obtain(null, MSG_GPS, mGpsStatus, 0));
 					msg.replyTo.send(Message.obtain(null, MSG_LOCATION, mLastLocation));
 					msg.replyTo.send(Message.obtain(null, MSG_UPLOAD, mLastUploadStatus));
 				} catch(RemoteException ex) {
@@ -260,6 +263,7 @@ public class Logger extends Service implements Runnable {
 		}
 
 		public void onStatusChanged(String provider, int status, Bundle extras) {
+			mGpsStatus = status;
 			//StringBuilder sb = new StringBuilder();
 			//sb.append(provider);
 			//sb.append(" status changed: ");
@@ -307,7 +311,7 @@ public class Logger extends Service implements Runnable {
 			//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
 			for(int i = mClients.size()-1; i >= 0; i--) {
 				try {
-					mClients.get(i).send(Message.obtain(null, MSG_GPS, status, 0));
+					mClients.get(i).send(Message.obtain(null, MSG_GPS, mGpsStatus, 0));
 				} catch(RemoteException ex) {
 					mClients.remove(i);
 				}
@@ -345,6 +349,9 @@ public class Logger extends Service implements Runnable {
 
 	@Override
 	public void onStart(Intent intent, int startId) {
+		if(intent == null) {
+			return;
+		}
 		String action = intent.getAction();
 		if(action == null) {
 		} else if(action.equals(ACTION_START_LOG)) {
@@ -390,6 +397,7 @@ public class Logger extends Service implements Runnable {
 						mClients.remove(i);
 					}
 				}
+				mGpsStatus = -1;
 				if(mUploadRun) {
 					mUploadRunOnce = true;
 					mUploadRunOnceStartId = startId;

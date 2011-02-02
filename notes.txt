@@ -1,0 +1,34 @@
+return if interrupted before main loop
+return if not running on database error (should I break instead?)
+otherwise, continue on database error
+break if not running
+
+need while loop on wait?
+do I need any action on InterruptedExceptions?
+check exception from ok to finish
+*check on cursor close
+check on get release
+better timing
+can updateLocation throw an exception?
+duplicate add gps location provider
+use ?s
+*preference changes aren't automatically detected
+support integers in preferences
+*update upload status on bind
+unbind when stopped
+*check for illegal state exceptions from sqlite
+unregister listeners in logger
+handle uploading last data on stop GPS
+save instance bundle
+keep upload thread running a short while after stopping GPS
+don't start thread on create if no data to upload
+don't start service on bind
+is registering Main twice with Service bad?
+fail proberly LogDbAdapter if database not open?
+support imperial/nautical/metric units
+check on SQLiteException: database is locked
+Update status when no fixes are coming in
+Fix current GPS status display
+Fix Satellites
+Image fails to load on file:// URIs
+*Low resolution upload data
