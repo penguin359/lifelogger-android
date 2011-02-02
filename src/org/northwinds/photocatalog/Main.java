@@ -90,7 +90,7 @@ public class Main extends Activity {
 		coordinate -= minutes;
 		coordinate *= 60.;
 		double seconds = coordinate;
-		return String.format("%s %d°  %d′  %.3f″", direction, degrees, minutes, seconds);
+		return String.format("%s  %d°  %d′  %.3f″", direction, degrees, minutes, seconds);
 	}
 
 	private static final int NAUTICAL_UNITS	= 0;
@@ -101,8 +101,8 @@ public class Main extends Activity {
 	private static final int SPEED_TYPE	= 1;
 
 	private static final double meters2feet = 3.2808399;
-	private static final double mps2mph = meters2feet/5280*60;
-	private static final double mps2knots = mps2mph*1.15077945;
+	private static final double mps2mph = meters2feet/5280*3600;
+	private static final double mps2knots = 3600/1852;
 
 	private String formatUnit(double value, int type) {
 		int units = Integer.parseInt(mPrefs.getString("units", "1"));
