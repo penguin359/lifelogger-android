@@ -2,11 +2,12 @@
 <PreferenceScreen
   xmlns:android="http://schemas.android.com/apk/res/android">
 <CheckBoxPreference android:summaryOff="PhotoCatalog will not run on boot" android:title="Start on Boot" android:summaryOn="PhotoCatalog will start logging on boot" android:key="onBoot"/>
-<CheckBoxPreference android:summary="Start GPS logger when app is started from launcher." android:defaultValue="false" android:title="Auto Start" android:key="autoStart"></CheckBoxPreference><CheckBoxPreference android:summaryOff="PhotoCatalog will not upload GPS log" android:title="Automatically Upload" android:summaryOn="PhotoCatalog will automaticaly upload GPS log" android:key="autoUpload"/>
+<CheckBoxPreference android:summary="Start GPS logger when app is started from launcher." android:defaultValue="false" android:title="Auto Start" android:key="autoStart"/>
+<CheckBoxPreference android:summaryOff="PhotoCatalog will not upload GPS log" android:title="Automatically Upload" android:summaryOn="PhotoCatalog will automaticaly upload GPS log" android:key="autoUpload"/>
 <EditTextPreference android:defaultValue="http://www.example.org/photocatalog/" android:key="url" android:title="Website" android:summary="URL for uploading data to"/>
 <EditTextPreference android:summary="ID of GPS Source to report" android:title="GPS Source" android:key="source" android:defaultValue="1"/>
 <EditTextPreference android:summary="in Meters" android:defaultValue="5" android:key="distance" android:title="Minimum Distance"/>
 <EditTextPreference android:summary="in Seconds" android:defaultValue="5" android:key="time" android:title="Minimum Time"/>
-<EditTextPreference android:summary="Minimum accuracy (maximum distance in meters) for a GPS fix to be recorded." android:title="Minimum Accuracy" android:defaultValue="200" android:key="accuracy"></EditTextPreference>
-
+<EditTextPreference android:summary="Minimum accuracy (maximum distance in meters) for a GPS fix to be recorded." android:title="Minimum Accuracy" android:defaultValue="200" android:key="accuracy"/>
+<ListPreference android:key="units" android:summary="Units for screen display." android:defaultValue="1" android:title="Display Units" android:entryValues="@array/unit_values" android:entries="@array/unit_names"/>
 </PreferenceScreen>

@@ -71,19 +71,72 @@ public class Main extends Activity {
 	private TextView mSpeed;
 	private TextView mSatellites;
 
-	private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd  HH:mm:ss");
+	private static final DateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd  HH:mm:ss");
 
-	private static String formatCoordinate(double coordinate) {
+	private static String formatCoordinate(double coordinate, boolean isLatitude) {
+		String direction = "N";
+		if(!isLatitude)
+			direction = "E";
+		if(coordinate < 0) {
+			direction = "S";
+			if(!isLatitude)
+				direction = "W";
+			coordinate *= -1;
+		}
 		int degrees = (int)coordinate;
 		coordinate -= degrees;
 		coordinate *= 60.;
-		if(coordinate < 0)
-			coordinate *= -1;
 		int minutes = (int)coordinate;
 		coordinate -= minutes;
 		coordinate *= 60.;
 		double seconds = coordinate;
-		return String.format("%d°  %d′  %.3f″", degrees, minutes, seconds);
+		return String.format("%s %d°  %d′  %.3f″", direction, degrees, minutes, seconds);
+	}
+
+	private static final int NAUTICAL_UNITS	= 0;
+	private static final int METRIC_UNITS	= 1;
+	private static final int STATUTE_UNITS	= 2;
+
+	private static final int DISTANCE_TYPE	= 0;
+	private static final int SPEED_TYPE	= 1;
+
+	private static final double meters2feet = 3.2808399;
+	private static final double mps2mph = meters2feet/5280*60;
+	private static final double mps2knots = mps2mph*1.15077945;
+
+	private String formatUnit(double value, int type) {
+		int units = Integer.parseInt(mPrefs.getString("units", "1"));
+		switch(units) {
+		case NAUTICAL_UNITS:
+			switch(type) {
+			case DISTANCE_TYPE:
+				return String.format("%.3f ft", value*meters2feet);
+			case SPEED_TYPE:
+				return String.format("%3.1f knots", value*mps2knots);
+			default:
+				return "Unknown value type";
+			}
+		case METRIC_UNITS:
+			switch(type) {
+			case DISTANCE_TYPE:
+				return String.format("%.3f m", value);
+			case SPEED_TYPE:
+				return String.format("%3.1f m/s", value);
+			default:
+				return "Unknown value type";
+			}
+		case STATUTE_UNITS:
+			switch(type) {
+			case DISTANCE_TYPE:
+				return String.format("%.3f ft", value*meters2feet);
+			case SPEED_TYPE:
+				return String.format("%3.1f mph", value*mps2mph);
+			default:
+				return "Unknown value type";
+			}
+		default:
+			return "Unknown unit type";
+		}
 	}
 
 	private final Messenger mMessenger = new Messenger(new Handler() {
@@ -99,13 +152,13 @@ public class Main extends Activity {
 					if(extras != null && extras.containsKey("satellites"))
 						satellites = String.format("%d", extras.getInt("satellites"));
 					//mGpsStatus.setText("Tracking...");
-					mTimestamp.setText(dateFormat.format(new Date()));
-					mLatitude.setText(formatCoordinate(loc.getLatitude()));
-					mLongitude.setText(formatCoordinate(loc.getLongitude()));
-					mAltitude.setText(String.format("%.3f m", loc.getAltitude()));
-					mAccuracy.setText(String.format("%.3f m", loc.getAccuracy()));
+					mTimestamp.setText(mDateFormat.format(new Date()));
+					mLatitude.setText(formatCoordinate(loc.getLatitude(), true));
+					mLongitude.setText(formatCoordinate(loc.getLongitude(), false));
+					mAltitude.setText(formatUnit(loc.getAltitude(), DISTANCE_TYPE));
+					mAccuracy.setText(formatUnit(loc.getAccuracy(), DISTANCE_TYPE));
 					mBearing.setText(String.format("%3.1f°", loc.getBearing()));
-					mSpeed.setText(String.format("%3.1f m/s", loc.getSpeed()));
+					mSpeed.setText(formatUnit(loc.getSpeed(), SPEED_TYPE));
 					mSatellites.setText(satellites);
 				}
 				break;
