@@ -2,3 +2,4 @@
 ^gen/
 \.swp$
 ^PhotoCatalog.apk$
+^PhotoCatalog-[^/]*.apk$

@@ -110,6 +110,16 @@ public class Logger extends Service implements Runnable {
 		@Override
 		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 				String key) {
+			if(key.equals("distance") || key.equals("time")) {
+				if(mIsStarted) {
+					mLM.removeUpdates(mLocationListener);
+					mLM.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+					    Long.parseLong(mPrefs.getString("time", "5"))*1000,
+					    Float.parseFloat(mPrefs.getString("distance", "5")),
+					    mLocationListener);
+				}
+				return;
+			}
 			if(!key.equals("autoUpload"))
 				return;
 			mAutoUpload = mPrefs.getBoolean("autoUpload", true);
@@ -182,24 +192,20 @@ public class Logger extends Service implements Runnable {
 
 		/* upload thread hasn't been started yet */
 		mUploadCount = mDbAdapter.countUploadLocations();
-		/* preferences can only be updated on the main thread so this
-		 * should be safe without synchronization
-		 */
 		mAutoUpload = mPrefs.getBoolean("autoUpload", true);
-		//if(mAutoUpload) {
-		//	mUploadRun = true;
-		//	mUploadRunOnce = false;
-		//	//mUpload = new Thread(this);
-		//	//mUpload.start();
-		//}
 		mPrefs.registerOnSharedPreferenceChangeListener(mPrefsChange);
+		//Toast.makeText(this, "Logger created", Toast.LENGTH_LONG).show();
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		mLM.removeUpdates(mLocationListener);
-		mLM.removeGpsStatusListener(mGpsListener);
+		if(mIsStarted) {
+			mLM.removeUpdates(mLocationListener);
+			mLM.removeGpsStatusListener(mGpsListener);
+			stopForeground(true);
+			mIsStarted = false;
+		}
 		mDbAdapter.close();
 		mNM.cancel(PHOTOCATALOG_ID);
 		mUploadRun = false;
@@ -211,6 +217,7 @@ public class Logger extends Service implements Runnable {
 			}
 		}
 		mPrefs.unregisterOnSharedPreferenceChangeListener(mPrefsChange);
+		//Toast.makeText(this, "Logger destroyed", Toast.LENGTH_LONG).show();
 	}
 
 	private LogDbAdapter mDbAdapter;
@@ -325,11 +332,9 @@ public class Logger extends Service implements Runnable {
 		@Override
 		public void onGpsStatusChanged(int event) {
 			status = mLM.getGpsStatus(status);
-			Iterator<GpsSatellite> i = status.getSatellites().iterator();
 			int nSat = 0;
 			int nUsed = 0;
-			while(i.hasNext()) {
-				GpsSatellite s = i.next();
+			for(GpsSatellite s: status.getSatellites()) {
 				nSat++;
 				if(s.usedInFix())
 					nUsed++;
@@ -350,6 +355,9 @@ public class Logger extends Service implements Runnable {
 	@Override
 	public void onStart(Intent intent, int startId) {
 		if(intent == null) {
+			Toast.makeText(this, "Logger restarted", Toast.LENGTH_LONG).show();
+			if(!mIsStarted)
+				stopSelfResult(startId);
 			return;
 		}
 		String action = intent.getAction();
@@ -361,7 +369,7 @@ public class Logger extends Service implements Runnable {
 				mNotification = new Notification(R.drawable.icon, "PhotoCatalog GPS Logging", System.currentTimeMillis());
 				PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Main.class), 0);
 				mNotification.setLatestEventInfo(getApplicationContext(), "PhotoCatalog", "Starting GPS...", contentIntent);
-				mNM.notify(PHOTOCATALOG_ID, mNotification);
+				startForeground(PHOTOCATALOG_ID, mNotification);
 				mIsStarted = true;
 				for(int i = mClients.size()-1; i >= 0; i--) {
 					try {
@@ -386,8 +394,8 @@ public class Logger extends Service implements Runnable {
 			if(mIsStarted) {
 				mLM.removeUpdates(mLocationListener);
 				mLM.removeGpsStatusListener(mGpsListener);
+				stopForeground(true);
 				mIsStarted = false;
-				mNM.cancel(PHOTOCATALOG_ID);
 				mLastLocation = null;
 				for(int i = mClients.size()-1; i >= 0; i--) {
 					try {
@@ -409,7 +417,8 @@ public class Logger extends Service implements Runnable {
 			}
 		} else if(action.equals(ACTION_UPLOAD_ONCE)) {
 			if(mUploadCount <= 0) {
-				stopSelfResult(startId);
+				if(!mIsStarted)
+					stopSelfResult(startId);
 				return;
 			}
 			if(!mUploadRun) {
@@ -424,8 +433,6 @@ public class Logger extends Service implements Runnable {
 				mUpload.interrupt();
 			}
 		}
-
-		return;
 	}
 
 	@Override
@@ -502,7 +509,7 @@ public class Logger extends Service implements Runnable {
 			}
 
 			String baseUrl = mPrefs.getString("url", "http://www.example.org/photocatalog/");
-			final String source = mPrefs.getString("source", "0");
+			final String source = mPrefs.getString("source", "1");
 			List<Integer> idList = new ArrayList<Integer>();
 			Multipart m = new Multipart(this);
 			m.put("response", "text");
@@ -606,7 +613,7 @@ public class Logger extends Service implements Runnable {
 			}
 		}
 		sendUploadStatus("Upload stopped.");
-		if(!mIsStarted && mUploadRunOnce)
+		if(mUploadRunOnce)
 			stopSelfResult(mUploadRunOnceStartId);
 		mUploadRunOnce = false;
 	}
