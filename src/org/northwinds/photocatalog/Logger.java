@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 //import java.util.Set;
 
@@ -60,7 +59,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 //import android.location.LocationProvider;
-//import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
