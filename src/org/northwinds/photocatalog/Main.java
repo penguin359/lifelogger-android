@@ -37,6 +37,7 @@ import java.util.Date;
 import android.app.Activity;
 import android.content.ComponentName;
 //import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -201,7 +202,7 @@ public class Main extends Activity {
 	private Messenger mService = null;
 
 	private ServiceConnection mConnection = new ServiceConnection() {
-		@Override
+		//@Override
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			mService = new Messenger(service);
 			try {
@@ -212,7 +213,7 @@ public class Main extends Activity {
 				mService = null;
 			}
 		}
-		@Override
+		////@Override
 		public void onServiceDisconnected(ComponentName className) {
 			mService = null;
 		}
@@ -223,14 +224,14 @@ public class Main extends Activity {
 	private final LogDbAdapter mDbAdapter = new LogDbAdapter(this);
 
 	private final View.OnClickListener mStartGpsOnClick = new View.OnClickListener() {
-		@Override
+		//@Override
 		public void onClick(View v) {
 			startService(new Intent(Logger.ACTION_START_LOG, null, Main.this, Logger.class));
 		}
 	};
 
 	private final View.OnClickListener mStopGpsOnClick = new View.OnClickListener() {
-		@Override
+		//@Override
 		public void onClick(View v) {
 			startService(new Intent(Logger.ACTION_STOP_LOG, null, Main.this, Logger.class));
 		}
@@ -272,7 +273,7 @@ public class Main extends Activity {
 
 		Button b = (Button)findViewById(R.id.status_but);
 		b.setOnClickListener(new View.OnClickListener() {
-			@Override
+			//@Override
 			public void onClick(View v) {
 				startActivity(new Intent(Main.this, Upload.class));
 			}
@@ -280,7 +281,7 @@ public class Main extends Activity {
 
 		b = (Button)findViewById(R.id.list_but);
 		b.setOnClickListener(new View.OnClickListener() {
-			@Override
+			//@Override
 			public void onClick(View v) {
 				startActivity(new Intent(Main.this, GPSList.class));
 			}
@@ -288,7 +289,7 @@ public class Main extends Activity {
 
 		b = (Button)findViewById(R.id.delete_uploaded_but);
 		b.setOnClickListener(new View.OnClickListener() {
-			@Override
+			//@Override
 			public void onClick(View v) {
 				mDbAdapter.deleteUploadedLocations();
 			}
@@ -296,7 +297,7 @@ public class Main extends Activity {
 
 		b = (Button)findViewById(R.id.delete_but);
 		b.setOnClickListener(new View.OnClickListener() {
-			@Override
+			//@Override
 			public void onClick(View v) {
 				mDbAdapter.deleteAllLocations();
 			}
@@ -304,7 +305,7 @@ public class Main extends Activity {
 
 		b = (Button)findViewById(R.id.upload_once_but);
 		b.setOnClickListener(new View.OnClickListener() {
-			@Override
+			//@Override
 			public void onClick(View v) {
 				startService(new Intent(Logger.ACTION_UPLOAD_ONCE, null, Main.this, Logger.class));
 			}
@@ -335,6 +336,21 @@ public class Main extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
+		case R.id.new_track:
+			long track = mDbAdapter.newTrack(new ContentValues());
+			SharedPreferences.Editor editor = mPrefs.edit();
+			editor.putLong("track", track);
+			editor.commit();
+			if(!mPrefs.getBoolean("editTrackAtStart", false))
+				return true;
+		case R.id.edit_track:
+			track = mPrefs.getLong("track", 0);
+			if(track <= 0)
+				return true;
+			Intent intent = new Intent(this, EditTrackActivity.class);
+			intent.putExtra("track", track);
+			startActivity(intent);
+			return true;
 		case R.id.settings:
 			startActivity(new Intent(this, PrefAct.class));
 			return true;

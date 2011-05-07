@@ -5,7 +5,7 @@
 <LinearLayout
   android:layout_height="wrap_content" android:orientation="vertical" android:layout_width="fill_parent">
   <ZoomButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/image" android:src="@drawable/icon" android:adjustViewBounds="true"/>
-  <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:enabled="true" android:text="Title"/><EditText android:layout_height="wrap_content" android:id="@+id/title" android:layout_width="fill_parent" android:contentDescription="Caption"/>
-  <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Description"/><EditText android:layout_height="wrap_content" android:id="@+id/description" android:minLines="4" android:layout_width="fill_parent"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/status"></TextView><Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:onClick="startUpload" android:text="Upload"/>
+  <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:enabled="true" android:text="@string/title"/><EditText android:layout_height="wrap_content" android:id="@+id/title" android:layout_width="fill_parent" android:contentDescription="@string/caption"/>
+  <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/description"/><EditText android:layout_height="wrap_content" android:id="@+id/description" android:minLines="4" android:layout_width="fill_parent"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/status"></TextView><Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:onClick="startUpload" android:text="Upload"/>
 </LinearLayout>
 </ScrollView>

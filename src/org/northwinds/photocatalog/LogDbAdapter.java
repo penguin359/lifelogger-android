@@ -44,6 +44,7 @@ public class LogDbAdapter {
 	private static final String TAG = "PhotoCatalog-LogDbAdapter";
 
 	public static final String KEY_ROWID     = "_id";
+	public static final String KEY_TRACK     = "track";
 	public static final String KEY_TIMESTAMP = "timestamp";
 	public static final String KEY_LATITUDE  = "latitude";
 	public static final String KEY_LONGITUDE = "longitude";
@@ -54,12 +55,19 @@ public class LogDbAdapter {
 	public static final String KEY_SATELLITES= "satellites";
 	public static final String KEY_UPLOADED  = "uploaded";
 
-	private static final String DATABASE_NAME = "data.db";
-	private static final String DATABASE_TABLE = "locations";
-	private static final int DATABASE_VERSION = 1;
+	public static final String KEY_NAME      = "name";
+	public static final String KEY_CMT       = "cmt";
+	public static final String KEY_DESC      = "desc";
+	public static final String KEY_TYPE      = "type";
 
-	private static final String DATABASE_CREATE = "CREATE TABLE " + DATABASE_TABLE + " (" +
+	private static final String DATABASE_NAME = "data.db";
+	private static final int DATABASE_VERSION = 2;
+	private static final String TABLE_LOCATION = "locations";
+	private static final String TABLE_TRACKS = "tracks";
+
+	private static final String TABLE_LOCATION_CREATE = "CREATE TABLE " + TABLE_LOCATION + " (" +
 			KEY_ROWID     + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+			KEY_TRACK     + " INTEGER NOT NULL DEFAULT 0, " +
 			KEY_TIMESTAMP + " INTEGER NOT NULL, " +
 			KEY_LATITUDE  + " DOUBLE NOT NULL, " +
 			KEY_LONGITUDE + " DOUBLE NOT NULL, " +
@@ -68,6 +76,14 @@ public class LogDbAdapter {
 			KEY_BEARING   + " REAL, " +
 			KEY_SPEED     + " REAL, " +
 			KEY_SATELLITES+ " INTEGER, " +
+			KEY_UPLOADED  + " BOOLEAN NOT NULL DEFAULT FALSE" +
+			")";
+	private static final String TABLE_TRACKS_CREATE = "CREATE TABLE " + TABLE_TRACKS + " (" +
+			KEY_ROWID     + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+			KEY_NAME      + " TEXT, " +
+			KEY_CMT       + " TEXT, " +
+			KEY_DESC      + " TEXT, " +
+			KEY_TYPE      + " TEXT, " +
 			KEY_UPLOADED  + " BOOLEAN NOT NULL DEFAULT FALSE" +
 			")";
 
@@ -83,14 +99,16 @@ public class LogDbAdapter {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			db.execSQL(DATABASE_CREATE);
+			db.execSQL(TABLE_LOCATION_CREATE);
+			db.execSQL(TABLE_TRACKS_CREATE);
 		}
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			Log.w(TAG, "Upgrading database from version " + oldVersion + " to " +
 					   newVersion + ", which will destroy all old data");
-			db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE);
+			db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOCATION);
+			db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRACKS);
 			onCreate(db);
 		}
 	}
@@ -110,7 +128,7 @@ public class LogDbAdapter {
 	}
 
 	public Cursor fetchLocation(long rowId) throws SQLException {
-		Cursor c = mDb.query(true, DATABASE_TABLE, new String[] {
+		Cursor c = mDb.query(true, TABLE_LOCATION, new String[] {
 			KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE
 		}, KEY_ROWID + "=" + rowId, null, null, null, null, null);
 		if (c != null) {
@@ -120,14 +138,14 @@ public class LogDbAdapter {
 	}
 
 	public Cursor fetchAllLocations() {
-		//return mDb.query(DATABASE_TABLE, new String[] {
+		//return mDb.query(TABLE_LOCATION, new String[] {
 		//	KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE
 		//}, null, null, null, null, null);
 		return mDb.rawQuery("SELECT _id, datetime(round(timestamp/1000), 'unixepoch') AS timestamp, latitude, longitude, uploaded FROM locations", null);
 	}
 
 	public Cursor fetchUploadLocations(String[] cols, String condition) {
-		return mDb.query(DATABASE_TABLE, cols, condition, null, null, null, null, "100");
+		return mDb.query(TABLE_LOCATION, cols, condition, null, null, null, null, "100");
 	}
 
 	public int countUploadLocations() {
@@ -139,8 +157,9 @@ public class LogDbAdapter {
 		return count;
 	}
 
-	public long insertLocation(Location location) {
+	public long insertLocation(long track, Location location) {
 		ContentValues values = new ContentValues();
+		values.put(KEY_TRACK,     track);
 		values.put(KEY_TIMESTAMP, location.getTime());
 		values.put(KEY_LATITUDE,  location.getLatitude());
 		values.put(KEY_LONGITUDE, location.getLongitude());
@@ -170,7 +189,7 @@ public class LogDbAdapter {
 		//Log.v(TAG, sb.toString());
 		//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
 
-		return mDb.insert(DATABASE_TABLE, null, values);
+		return mDb.insert(TABLE_LOCATION, null, values);
 	}
 
 	public boolean updateLocation(long rowId, Location location) {
@@ -179,22 +198,26 @@ public class LogDbAdapter {
 		args.put(KEY_LATITUDE, location.getLatitude());
 		args.put(KEY_LONGITUDE, location.getLongitude());
 
-		return mDb.update(DATABASE_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
+		return mDb.update(TABLE_LOCATION, args, KEY_ROWID + "=" + rowId, null) > 0;
 	}
 
 	public boolean updateLocation(long rowId, ContentValues args) {
-		return mDb.update(DATABASE_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
+		return mDb.update(TABLE_LOCATION, args, KEY_ROWID + "=" + rowId, null) > 0;
 	}
 
 	public boolean deleteLocation(long rowId) {
-		return mDb.delete(DATABASE_TABLE, KEY_ROWID + "=" + rowId, null) > 0;
+		return mDb.delete(TABLE_LOCATION, KEY_ROWID + "=" + rowId, null) > 0;
 	}
 
 	public boolean deleteUploadedLocations() {
-		return mDb.delete(DATABASE_TABLE, "uploaded = 1", null) > 0;
+		return mDb.delete(TABLE_LOCATION, "uploaded = 1", null) > 0;
 	}
 
 	public boolean deleteAllLocations() {
-		return mDb.delete(DATABASE_TABLE, null, null) > 0;
+		return mDb.delete(TABLE_LOCATION, null, null) > 0;
+	}
+
+	public long newTrack(ContentValues values) {
+		return mDb.insert(TABLE_TRACKS, KEY_NAME, values);
 	}
 }

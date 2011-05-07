@@ -104,8 +104,10 @@ public class Logger extends Service implements Runnable {
 
 	private SharedPreferences mPrefs = null;
 
+	private long mTrack = 0;
+
 	private final SharedPreferences.OnSharedPreferenceChangeListener mPrefsChange = new SharedPreferences.OnSharedPreferenceChangeListener() {
-		@Override
+		//@Override
 		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 				String key) {
 			if(key.equals("distance") || key.equals("time")) {
@@ -116,6 +118,10 @@ public class Logger extends Service implements Runnable {
 					    Float.parseFloat(mPrefs.getString("distance", "5")),
 					    mLocationListener);
 				}
+				return;
+			}
+			if(key.equals("track")) {
+				mTrack = mPrefs.getLong("track", 0);
 				return;
 			}
 			if(!key.equals("autoUpload"))
@@ -191,6 +197,7 @@ public class Logger extends Service implements Runnable {
 		/* upload thread hasn't been started yet */
 		mUploadCount = mDbAdapter.countUploadLocations();
 		mAutoUpload = mPrefs.getBoolean("autoUpload", true);
+		mTrack = mPrefs.getLong("track", 0);
 		mPrefs.registerOnSharedPreferenceChangeListener(mPrefsChange);
 		//Toast.makeText(this, "Logger created", Toast.LENGTH_LONG).show();
 	}
@@ -227,7 +234,7 @@ public class Logger extends Service implements Runnable {
 				Log.v(TAG, "Accuracy too low: " + loc.getAccuracy());
 				return;
 			}
-			mDbAdapter.insertLocation(loc);
+			mDbAdapter.insertLocation(mTrack, loc);
 			mLastLocation = loc;
 			for(int i = mClients.size()-1; i >= 0; i--) {
 				try {
@@ -327,7 +334,7 @@ public class Logger extends Service implements Runnable {
 	private GpsStatus.Listener mGpsListener = new GpsStatus.Listener() {
 		GpsStatus status = null;
 
-		@Override
+		//@Override
 		public void onGpsStatusChanged(int event) {
 			status = mLM.getGpsStatus(status);
 			int nSat = 0;
@@ -448,7 +455,7 @@ public class Logger extends Service implements Runnable {
 
 	//public final IBinder mBinder = new LoggerBinder();
 
-	@Override
+	//@Override
 	public void run() {
 		try {
 			Thread.sleep(2000);
@@ -456,6 +463,8 @@ public class Logger extends Service implements Runnable {
 			if(!mUploadRun)
 				return;
 		}
+		final LogDbAdapter dbAdapter = new LogDbAdapter(this);
+		dbAdapter.open();
 		while(mUploadRun) {
 			if(mUploadRunOnce)
 				mUploadRun = false;
@@ -475,6 +484,7 @@ public class Logger extends Service implements Runnable {
 			sendUploadStatus("Sending...");
 			final String[] cols = new String[] {
 				"_id",
+				"track",
 				"timestamp",
 				"latitude",
 				"longitude",
@@ -491,7 +501,7 @@ public class Logger extends Service implements Runnable {
 			//	return;
 			//}
 			//Cursor c = db.query("locations", cols, "uploaded != 1", null, null, null, null, "100");
-			Cursor c = mDbAdapter.fetchUploadLocations(cols, "uploaded != 1");
+			Cursor c = dbAdapter.fetchUploadLocations(cols, "uploaded != 1");
 			if(!c.moveToFirst()) {
 				c.close();
 				mUploadCount = 0;
@@ -500,8 +510,10 @@ public class Logger extends Service implements Runnable {
 				try {
 					Thread.sleep(5000);
 				} catch(InterruptedException ex) {
-					if(!mUploadRun)
+					if(!mUploadRun) {
+						dbAdapter.close();
 						return;
+					}
 				}
 				continue;
 			}
@@ -580,7 +592,7 @@ public class Logger extends Service implements Runnable {
 					values.put("uploaded", 1);
 					Integer ids[] = idList.toArray(new Integer[1]);
 					for(int i = 0; i < ids.length; i++)
-						mDbAdapter.updateLocation(ids[i], values);
+						dbAdapter.updateLocation(ids[i], values);
 					sendUploadStatus("Sent!");
 					ok = true;
 					synchronized(mUploadLock) {
@@ -614,5 +626,6 @@ public class Logger extends Service implements Runnable {
 		if(mUploadRunOnce)
 			stopSelfResult(mUploadRunOnceStartId);
 		mUploadRunOnce = false;
+		dbAdapter.close();
 	}
 }

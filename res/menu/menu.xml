@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu
   xmlns:android="http://schemas.android.com/apk/res/android">
-  <item android:title="Settings" android:id="@+id/settings"/>
-  <item android:title="Quit" android:id="@+id/quit"/>
-<item android:id="@+id/kill" android:title="Kill"></item>
+  <item android:id="@+id/new_track" android:title="@string/new_track"/>
+  <item android:id="@+id/edit_track" android:title="@string/edit_track"/>
+  <item android:id="@+id/continuous_record" android:title="@string/continuous_record"/>
+  <item android:id="@+id/settings" android:title="@string/settings"/>
+  <item android:id="@+id/quit"     android:title="@string/quit"/>
+  <item android:id="@+id/kill"     android:title="@string/kill"/>
 </menu>

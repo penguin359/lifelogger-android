@@ -64,7 +64,7 @@ public class GPSList extends ListActivity {
 		SimpleCursorAdapter entries =
 			new SimpleCursorAdapter(this, R.layout.gps_row, c, from, to);
 		entries.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-			@Override
+			//@Override
 			public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 				if(cursor.getColumnName(columnIndex).equals(LogDbAdapter.KEY_UPLOADED)) {
 					if(cursor.getInt(columnIndex) != 0)
@@ -80,7 +80,7 @@ public class GPSList extends ListActivity {
 
 		Button b = (Button)findViewById(R.id.delete_uploaded_but);
 		b.setOnClickListener(new View.OnClickListener() {
-			@Override
+			//@Override
 			public void onClick(View v) {
 				mDbAdapter.deleteUploadedLocations();
 			}
@@ -88,7 +88,7 @@ public class GPSList extends ListActivity {
 
 		b = (Button)findViewById(R.id.delete_but);
 		b.setOnClickListener(new View.OnClickListener() {
-			@Override
+			//@Override
 			public void onClick(View v) {
 				mDbAdapter.deleteAllLocations();
 			}

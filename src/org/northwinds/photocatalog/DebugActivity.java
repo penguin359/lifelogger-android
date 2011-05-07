@@ -27,7 +27,7 @@ public class DebugActivity extends Activity implements LocationListener {
 	/* (non-Javadoc)
 	 * @see android.location.LocationListener#onLocationChanged(android.location.Location)
 	 */
-	@Override
+	//@Override
 	public void onLocationChanged(Location location) {
 		// TODO Auto-generated method stub
 
@@ -36,7 +36,7 @@ public class DebugActivity extends Activity implements LocationListener {
 	/* (non-Javadoc)
 	 * @see android.location.LocationListener#onProviderDisabled(java.lang.String)
 	 */
-	@Override
+	//@Override
 	public void onProviderDisabled(String provider) {
 		Toast.makeText(this, provider + " disabled", Toast.LENGTH_SHORT).show();
 	}
@@ -44,7 +44,7 @@ public class DebugActivity extends Activity implements LocationListener {
 	/* (non-Javadoc)
 	 * @see android.location.LocationListener#onProviderEnabled(java.lang.String)
 	 */
-	@Override
+	//@Override
 	public void onProviderEnabled(String provider) {
 		Toast.makeText(this, provider + " disabled", Toast.LENGTH_SHORT).show();
 
@@ -53,7 +53,7 @@ public class DebugActivity extends Activity implements LocationListener {
 	/* (non-Javadoc)
 	 * @see android.location.LocationListener#onStatusChanged(java.lang.String, int, android.os.Bundle)
 	 */
-	@Override
+	//@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		// TODO Auto-generated method stub
 
