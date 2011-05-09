@@ -330,6 +330,15 @@ public class Main extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.menu, menu);
+		long track = mPrefs.getLong("track", 0);
+		if(track <= 0) {
+			MenuItem item = menu.findItem(R.id.edit_track);
+			if(item != null)
+				item.setEnabled(false);
+			item = menu.findItem(R.id.continuous_record);
+			if(item != null)
+				item.setEnabled(false);
+		}
 		return true;
 	}
 
@@ -350,6 +359,11 @@ public class Main extends Activity {
 			Intent intent = new Intent(this, EditTrackActivity.class);
 			intent.putExtra("track", track);
 			startActivity(intent);
+			return true;
+		case R.id.continuous_record:
+			editor = mPrefs.edit();
+			editor.putLong("track", 0);
+			editor.commit();
 			return true;
 		case R.id.settings:
 			startActivity(new Intent(this, PrefAct.class));
