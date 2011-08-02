@@ -105,7 +105,7 @@ public class Logger extends Service implements Runnable {
 	private SharedPreferences mPrefs = null;
 
 	private final SharedPreferences.OnSharedPreferenceChangeListener mPrefsChange = new SharedPreferences.OnSharedPreferenceChangeListener() {
-		@Override
+		//@Override
 		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 				String key) {
 			if(key.equals("distance") || key.equals("time")) {
@@ -327,7 +327,7 @@ public class Logger extends Service implements Runnable {
 	private GpsStatus.Listener mGpsListener = new GpsStatus.Listener() {
 		GpsStatus status = null;
 
-		@Override
+		//@Override
 		public void onGpsStatusChanged(int event) {
 			status = mLM.getGpsStatus(status);
 			int nSat = 0;
@@ -448,7 +448,7 @@ public class Logger extends Service implements Runnable {
 
 	//public final IBinder mBinder = new LoggerBinder();
 
-	@Override
+	//@Override
 	public void run() {
 		try {
 			Thread.sleep(2000);
