@@ -260,7 +260,7 @@ public class Logger extends Service implements Runnable {
 				}
 			}
 			if(mLastLocation != null) {
-				long timeDiff = Math.abs(mLastLocation.getTime() - loc.getTime());
+				long timeDiff = Math.abs(mLastLocation.getTime() - loc.getTime())/1000;
 				if(mFilterByDistance && mDroppedSamples < 10 && timeDiff < 300) {
 					float maxDist = 450; // 200 mph in 5 seconds
 					if(timeDiff > 5)
