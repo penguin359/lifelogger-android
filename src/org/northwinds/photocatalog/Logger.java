@@ -80,6 +80,12 @@ public class Logger extends Service implements Runnable {
 
 	private static final int PHOTOCATALOG_ID = 1;
 
+	private int mStatSamples = 0;
+	private int mStatSkippedSamples = 0;
+	private int mStatNoAccuracySamples = 0;
+	private int mStatInaccurateSamples = 0;
+	private int mStatDistantSamples = 0;
+
 	private int mSkipSamples = 0;
 	private int mDroppedSamples = 0;
 	private float mMinAccuracy = 0;
@@ -234,17 +240,21 @@ public class Logger extends Service implements Runnable {
 
 	private LocationListener mLocationListener = new LocationListener() {
 		public void onLocationChanged(Location loc) {
+			mStatSamples++;
 			if(mSkipSamples > 0) {
 				mSkipSamples--;
+				mStatSkippedSamples++;
 				Log.v(TAG, "Skipping sample: " + mSkipSamples);
 				return;
 			}
 			if(mMinAccuracy > 0) {
 				if(!loc.hasAccuracy()) {
+					mStatNoAccuracySamples++;
 					Log.v(TAG, "Location is missing accuracy information");
 					return;
 				}
 				if(loc.getAccuracy() > mMinAccuracy) {
+					mStatInaccurateSamples++;
 					Log.v(TAG, "Accuracy too low: " + loc.getAccuracy());
 					return;
 				}
@@ -263,8 +273,9 @@ public class Logger extends Service implements Runnable {
 						maxDist = -1; // Accept any distance
 					float dist = loc.distanceTo(mLastLocation);
 					if(maxDist >= 0 && dist > maxDist) {
-						Log.v(TAG, String.format("Skipping point with time difference: %d secs (Dist: %.2f m > Max Dist: %.2f m)", timeDiff, dist, maxDist));
 						mDroppedSamples++;
+						mStatDistantSamples++;
+						Log.v(TAG, String.format("Skipping point with time difference: %d secs (Dist: %.2f m > Max Dist: %.2f m)", timeDiff, dist, maxDist));
 						return;
 					}
 				}
