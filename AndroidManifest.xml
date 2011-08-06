@@ -32,6 +32,12 @@
 			</intent-filter>
 		</activity>
 		<activity android:name=".PrefAct"/>
+		<activity android:name=".ShortcutActivity" android:label="PhotoCatalog"><!-- android:launchMode="singleInstance">-->
+			<intent-filter>
+				<action android:name="android.intent.action.CREATE_SHORTCUT"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
 		<activity android:name=".Upload" android:label="PhotoCatalog">
 			<intent-filter>
 				<action android:name="android.intent.action.SEND"/>
