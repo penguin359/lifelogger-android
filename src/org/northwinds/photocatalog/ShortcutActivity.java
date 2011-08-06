@@ -25,7 +25,7 @@ public class ShortcutActivity extends Activity {
 		Intent intent = getIntent();
 		if(intent != null && ACTION_START_LOG.equals(intent.getAction())) {
 			startService(new Intent(Logger.ACTION_START_LOG, null, this, Logger.class));
-			Toast.makeText(this, "GPS Logger started", Toast.LENGTH_SHORT);
+			Toast.makeText(this, "GPS Logger started", Toast.LENGTH_SHORT).show();
 			finish();
 		}
 		if(intent != null && ACTION_START_LOG_AND_PHOTOCATALOG.equals(intent.getAction())) {
@@ -39,7 +39,7 @@ public class ShortcutActivity extends Activity {
 		}
 		if(intent != null && ACTION_STOP_LOG.equals(intent.getAction())) {
 			startService(new Intent(Logger.ACTION_STOP_LOG, null, this, Logger.class));
-			Toast.makeText(this, "GPS Logger stopped", Toast.LENGTH_SHORT);
+			Toast.makeText(this, "GPS Logger stopped", Toast.LENGTH_SHORT).show();
 			finish();
 		}
 

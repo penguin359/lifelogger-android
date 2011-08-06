@@ -30,6 +30,11 @@ package org.northwinds.photocatalog;
 
 //import java.io.InputStream;
 //import java.io.InputStreamReader;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -40,11 +45,12 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-//import android.database.Cursor;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationProvider;
 //import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -59,7 +65,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-//import android.widget.Toast;
+import android.widget.Toast;
 
 public class Main extends Activity {
 	private TextView mTimestamp;
@@ -72,6 +78,8 @@ public class Main extends Activity {
 	private TextView mSatellites;
 
 	private static final DateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd  HH:mm:ss");
+	private static final DateFormat mFilenameFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+	private static final DateFormat mGpxFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
 	private static String formatCoordinate(double coordinate, boolean isLatitude) {
 		String direction = "N";
@@ -345,6 +353,9 @@ public class Main extends Activity {
 		case R.id.kill:
 			Process.killProcess(Process.myPid());
 			return true;
+		case R.id.save:
+			dumpGPX();
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -382,5 +393,58 @@ public class Main extends Activity {
 		super.onDestroy();
 		unbindService(mConnection);
 		mDbAdapter.close();
+	}
+
+	private void dumpGPX() {
+		String state = Environment.getExternalStorageState();
+		if(!Environment.MEDIA_MOUNTED.equals(state)) {
+			Toast.makeText(this, "No writable SD Card found.", Toast.LENGTH_LONG).show();
+			return;
+		}
+		File root = Environment.getExternalStorageDirectory();
+		// /Android/data/<package_name>/files/
+		String date = mFilenameFormat.format(new Date());
+		String filename = "photocatalog-" + date + ".gpx";
+		File file = new File(root, filename);
+		try {
+			file.createNewFile();
+		} catch(IOException ex) {
+		}
+		if(!file.canRead()) {
+			Toast.makeText(this, "Can't read " + file.toString() + " file!", Toast.LENGTH_LONG).show();
+			return;
+		}
+		if(!file.canWrite()) {
+			Toast.makeText(this, "Can't write file!", Toast.LENGTH_LONG).show();
+			return;
+		}
+		try {
+			OutputStream os = new BufferedOutputStream(new FileOutputStream(file));
+			os.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".getBytes());
+			os.write("<gpx creator=\"PhotoCatalog\" version=\"1.1\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\" xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n".getBytes());
+			os.write("  <trk>\n    <trkseg>\n".getBytes());
+			//Cursor c = mDbAdapter.fetchUploadLocations(cols, "uploaded != 1");
+			//Cursor c = mDbAdapter.fetchAllLocations();
+			Cursor c = mDbAdapter.fetchAllLocations2();
+			int latCol = c.getColumnIndexOrThrow("latitude");
+			int lonCol = c.getColumnIndexOrThrow("longitude");
+			int altCol = c.getColumnIndexOrThrow("altitude");
+			int timeCol = c.getColumnIndexOrThrow("timestamp");
+			while(c.moveToNext()) {
+				double lat = c.getDouble(latCol);
+				double lon = c.getDouble(lonCol);
+				double alt = c.getDouble(altCol);
+				Date gDate = new Date(c.getLong(timeCol) * 1000);
+				String time = mGpxFormat.format(gDate);
+				String line = String.format("      <trkpt lat=\"%f\" lon=\"%f\"><ele>%f</ele><time>%s</time></trkpt>\n", lat, lon, alt, time);
+				os.write(line.getBytes());
+			}
+			c.close();
+			os.write("    </trkseg>\n  </trk>\n</gpx>\n".getBytes());
+			os.close();
+		} catch(IOException ex) {
+			Toast.makeText(this, "Exception writing to file: " + ex.toString(), Toast.LENGTH_LONG).show();
+		}
+		Toast.makeText(this, "Saved GPX log to " + file.toString(), Toast.LENGTH_LONG).show();
 	}
 }
