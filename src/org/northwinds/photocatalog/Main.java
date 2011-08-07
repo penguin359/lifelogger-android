@@ -213,7 +213,7 @@ public class Main extends Activity {
 				mService = null;
 			}
 		}
-		////@Override
+		//@Override
 		public void onServiceDisconnected(ComponentName className) {
 			mService = null;
 		}
