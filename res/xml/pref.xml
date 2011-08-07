@@ -10,4 +10,6 @@
 <EditTextPreference android:summary="in Seconds" android:defaultValue="5" android:key="time" android:title="Minimum Time"/>
 <EditTextPreference android:summary="Minimum accuracy (maximum distance in meters) for a GPS fix to be recorded." android:title="Minimum Accuracy" android:defaultValue="200" android:key="accuracy"/>
 <ListPreference android:key="units" android:summary="Units for screen display." android:defaultValue="1" android:title="Display Units" android:entryValues="@array/unit_values" android:entries="@array/unit_names"/>
+<CheckBoxPreference android:summaryOff="PhotoCatalog will allow SMS activation" android:title="SMS Activation" android:summaryOn="PhotoCatalog will allow SMS activation" android:key="sms"/>
+<EditTextPreference android:defaultValue="1234567890" android:key="smsKey" android:title="SMS Activation Code" android:summary="Use this code in SMS messages to activate PhotoCatalog" android:editable="false"/>
 </PreferenceScreen>

@@ -28,8 +28,12 @@
 
 package org.northwinds.photocatalog;
 
+import java.util.UUID;
+
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 
 /**
  * @author Loren M. Lang
@@ -38,6 +42,12 @@ import android.preference.PreferenceActivity;
 public class PrefAct extends PreferenceActivity {
 	protected void onCreate(Bundle b) {
 		super.onCreate(b);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		if(!prefs.contains("smsKey")) {
+			SharedPreferences.Editor editor = prefs.edit();
+			editor.putString("smsKey", UUID.randomUUID().toString());
+			editor.commit();
+		}
 		addPreferencesFromResource(R.xml.pref);
 	}
 }
