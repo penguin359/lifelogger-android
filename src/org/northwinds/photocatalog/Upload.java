@@ -252,7 +252,7 @@ public class Upload extends Activity implements Runnable {
 		//Toast.makeText(this, "Upload started", Toast.LENGTH_SHORT).show();
 	}
 
-	@Override
+	//@Override
 	public void run() {
 		StringBuilder sb = new StringBuilder();
 		//try {
@@ -280,7 +280,7 @@ public class Upload extends Activity implements Runnable {
 			//if(is != null)
 			//	m.put("file", is);
 			m.setProgressUpdate(new Multipart.ProgressUpdate() {
-				@Override
+				//@Override
 				public void onUpdate(int progress, int max) {
 					updateUI.sendMessage(Message.obtain(updateUI, MSG_PROGRESSBAR_UPDATE, progress, max));
 				}
