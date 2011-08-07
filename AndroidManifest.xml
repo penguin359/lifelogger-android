@@ -33,6 +33,12 @@
 			</intent-filter>
 		</activity>
 		<activity android:name=".PrefAct"/>
+		<activity android:name=".ShortcutActivity" android:label="PhotoCatalog"><!-- android:launchMode="singleInstance">-->
+			<intent-filter>
+				<action android:name="android.intent.action.CREATE_SHORTCUT"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
 		<activity android:name=".Upload" android:label="PhotoCatalog">
 			<intent-filter>
 				<action android:name="android.intent.action.SEND"/>
@@ -50,14 +56,15 @@
 		<receiver android:name=".Receiver">
 			<intent-filter>
 				<action android:name="android.intent.action.BOOT_COMPLETED"/>
-			</intent-filter>
-			<intent-filter>
 				<action android:name="android.intent.action.BATTERY_LOW"/>
+				<action android:name="android.provider.Telephony.SMS_RECEIVED"/>
 			</intent-filter>
 		</receiver>
 	</application>
 	<uses-sdk android:targetSdkVersion="7" android:minSdkVersion="7"/>
-	<uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+	<uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+	<uses-permission android:name="android.permission.RECEIVE_SMS"/>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 </manifest>

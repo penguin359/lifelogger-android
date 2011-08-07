@@ -141,7 +141,13 @@ public class LogDbAdapter {
 		//return mDb.query(TABLE_LOCATION, new String[] {
 		//	KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE
 		//}, null, null, null, null, null);
-		return mDb.rawQuery("SELECT _id, datetime(round(timestamp/1000), 'unixepoch') AS timestamp, latitude, longitude, uploaded FROM locations", null);
+		return mDb.rawQuery("SELECT _id, datetime(round(timestamp), 'unixepoch') AS timestamp, latitude, longitude, uploaded, altitude FROM locations", null);
+	}
+
+	public Cursor fetchAllLocations2() {
+		return mDb.query(TABLE_LOCATION, new String[] {
+			KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE, KEY_ALTITUDE
+		}, null, null, null, null, null);
 	}
 
 	public Cursor fetchUploadLocations(String[] cols, String condition) {
@@ -160,7 +166,7 @@ public class LogDbAdapter {
 	public long insertLocation(long track, Location location) {
 		ContentValues values = new ContentValues();
 		values.put(KEY_TRACK,     track);
-		values.put(KEY_TIMESTAMP, location.getTime());
+		values.put(KEY_TIMESTAMP, location.getTime()/1000);
 		values.put(KEY_LATITUDE,  location.getLatitude());
 		values.put(KEY_LONGITUDE, location.getLongitude());
 		if(location.hasAltitude())
@@ -194,7 +200,7 @@ public class LogDbAdapter {
 
 	public boolean updateLocation(long rowId, Location location) {
 		ContentValues args = new ContentValues();
-		args.put(KEY_TIMESTAMP, location.getTime());
+		args.put(KEY_TIMESTAMP, location.getTime()/1000);
 		args.put(KEY_LATITUDE, location.getLatitude());
 		args.put(KEY_LONGITUDE, location.getLongitude());
 

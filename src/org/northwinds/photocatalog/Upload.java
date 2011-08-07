@@ -58,10 +58,13 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.MediaColumns;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * @author Loren M. Lang
@@ -140,6 +143,44 @@ public class Upload extends Activity implements Runnable {
 			return mProgressbar;
 		default:
 			return super.onCreateDialog(id);
+		}
+	}
+
+	private static final int IMAGE_MENU = 0;
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		menu.add(Menu.NONE, IMAGE_MENU, Menu.NONE, "Add Image");
+		return true;
+	}
+
+	private static final int ACTIVITY_SELECT_IMAGE = 0;
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()) {
+		case IMAGE_MENU:
+			Intent i = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+			startActivityForResult(i, ACTIVITY_SELECT_IMAGE);
+			break;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+		return true;
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		super.onActivityResult(requestCode, resultCode, intent);
+
+		switch(requestCode) {
+		case ACTIVITY_SELECT_IMAGE:
+			if(resultCode == RESULT_OK) {
+				Uri imageUri = intent.getData();
+				Toast.makeText(this, "Image " + imageUri.toString() + " added.", Toast.LENGTH_SHORT).show();
+			}
+			break;
 		}
 	}
 
