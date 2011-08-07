@@ -1,0 +1,14 @@
+Add Google Maps
+Add Google Analytics
+Add Admob
+Add Error reporting service
+Add multi-track
+Dynamic API endpoints
+built-in image picker
+multi-image picking
+GPS stats
+GPS list more details on rotation
+No restart on rotate
+Shortcuts
+widget
+support milliseconds

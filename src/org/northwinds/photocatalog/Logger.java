@@ -32,6 +32,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
 //import java.util.Set;
@@ -79,6 +80,16 @@ public class Logger extends Service implements Runnable {
 
 	private static final int PHOTOCATALOG_ID = 1;
 
+	private int mStatSamples = 0;
+	private int mStatSkippedSamples = 0;
+	private int mStatNoAccuracySamples = 0;
+	private int mStatInaccurateSamples = 0;
+	private int mStatDistantSamples = 0;
+
+	private int mSkipSamples = 0;
+	private int mDroppedSamples = 0;
+	private float mMinAccuracy = 0;
+	private boolean mFilterByDistance = false;
 	private boolean mIsStarted = false;
 
 	private boolean mAutoUpload = false;
@@ -118,6 +129,10 @@ public class Logger extends Service implements Runnable {
 				}
 				return;
 			}
+			if(key.equals("accuracy"))
+				mMinAccuracy = Float.parseFloat(mPrefs.getString("accuracy", "200"));
+			if(key.equals("filterByDistance"))
+				mFilterByDistance = mPrefs.getBoolean("filterByDistance", false);
 			if(!key.equals("autoUpload"))
 				return;
 			mAutoUpload = mPrefs.getBoolean("autoUpload", true);
@@ -188,6 +203,9 @@ public class Logger extends Service implements Runnable {
 		mDbAdapter = new LogDbAdapter(this);
 		mDbAdapter.open();
 
+		mMinAccuracy = Float.parseFloat(mPrefs.getString("accuracy", "200"));
+		mFilterByDistance = mPrefs.getBoolean("filterByDistance", false);
+
 		/* upload thread hasn't been started yet */
 		mUploadCount = mDbAdapter.countUploadLocations();
 		mAutoUpload = mPrefs.getBoolean("autoUpload", true);
@@ -222,13 +240,49 @@ public class Logger extends Service implements Runnable {
 
 	private LocationListener mLocationListener = new LocationListener() {
 		public void onLocationChanged(Location loc) {
-			if(loc.hasAccuracy() &&
-			   loc.getAccuracy() > Float.parseFloat(mPrefs.getString("accuracy", "200"))) {
-				Log.v(TAG, "Accuracy too low: " + loc.getAccuracy());
+			mStatSamples++;
+			if(mSkipSamples > 0) {
+				mSkipSamples--;
+				mStatSkippedSamples++;
+				Log.v(TAG, "Skipping sample: " + mSkipSamples);
 				return;
+			}
+			if(mMinAccuracy > 0) {
+				if(!loc.hasAccuracy()) {
+					mStatNoAccuracySamples++;
+					Log.v(TAG, "Location is missing accuracy information");
+					return;
+				}
+				if(loc.getAccuracy() > mMinAccuracy) {
+					mStatInaccurateSamples++;
+					Log.v(TAG, "Accuracy too low: " + loc.getAccuracy());
+					return;
+				}
+			}
+			if(mLastLocation != null) {
+				long timeDiff = Math.abs(mLastLocation.getTime() - loc.getTime())/1000;
+				if(mFilterByDistance && mDroppedSamples < 10 && timeDiff < 300) {
+					float maxDist = 450; // 200 mph in 5 seconds
+					if(timeDiff > 5)
+						maxDist = 1350; // 200 mph in 15 seconds
+					else if(timeDiff > 15)
+						maxDist = 5364; // 200 mph in 60 seconds
+					else if(timeDiff > 60)
+						maxDist = 26822; // 200 mph in 5 minutes
+					else if(timeDiff > 300)
+						maxDist = -1; // Accept any distance
+					float dist = loc.distanceTo(mLastLocation);
+					if(maxDist >= 0 && dist > maxDist) {
+						mDroppedSamples++;
+						mStatDistantSamples++;
+						Log.v(TAG, String.format("Skipping point with time difference: %d secs (Dist: %.2f m > Max Dist: %.2f m)", timeDiff, dist, maxDist));
+						return;
+					}
+				}
 			}
 			mDbAdapter.insertLocation(loc);
 			mLastLocation = loc;
+			mDroppedSamples = 0;
 			for(int i = mClients.size()-1; i >= 0; i--) {
 				try {
 					mClients.get(i).send(Message.obtain(null, MSG_LOCATION, loc));
@@ -368,6 +422,8 @@ public class Logger extends Service implements Runnable {
 				PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Main.class), 0);
 				mNotification.setLatestEventInfo(getApplicationContext(), "PhotoCatalog", "Starting GPS...", contentIntent);
 				startForeground(PHOTOCATALOG_ID, mNotification);
+				mSkipSamples = Integer.parseInt(mPrefs.getString("skip", "0"));
+				mDroppedSamples = 0;
 				mIsStarted = true;
 				for(int i = mClients.size()-1; i >= 0; i--) {
 					try {
