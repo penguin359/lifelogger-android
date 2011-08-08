@@ -17,3 +17,5 @@ application icons
 theme out shortcut blip
 edit details at start
 preference screens
+shortcuts to start gps on new track
+start gps logger on new track preference

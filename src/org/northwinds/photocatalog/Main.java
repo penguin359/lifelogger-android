@@ -377,6 +377,9 @@ public class Main extends Activity {
 			editor.putLong("track", 0);
 			editor.commit();
 			return true;
+		case R.id.manage_tracks:
+			startActivity(new Intent(this, TrackListActivity.class));
+			return true;
 		case R.id.settings:
 			startActivity(new Intent(this, PrefAct.class));
 			return true;
