@@ -37,6 +37,8 @@ import android.app.AlertDialog;
 //import android.content.ServiceConnection;
 //import android.content.SharedPreferences;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.SQLException;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Path;
@@ -56,6 +58,7 @@ import com.google.android.maps.OverlayItem;
 import com.google.android.maps.Projection;
 
 public class MapViewActivity extends MapActivity {
+	private final LogDbAdapter mDbAdapter = new LogDbAdapter(this);
 	private Projection mProjection;
 
 	private static class MapItemizedOverlay extends ItemizedOverlay<OverlayItem> {
@@ -99,8 +102,10 @@ public class MapViewActivity extends MapActivity {
 		public PathOverlay() {
 			mPaint = new Paint();
 			mPaint.setDither(true);
-			mPaint.setColor(Color.RED);
-			mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+			//mPaint.setColor(Color.RED);
+			//mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+			mPaint.setColor(Color.GREEN);
+			mPaint.setStyle(Paint.Style.STROKE);
 			mPaint.setStrokeJoin(Paint.Join.ROUND);
 			mPaint.setStrokeCap(Paint.Cap.ROUND);
 			mPaint.setStrokeWidth(2);
@@ -109,18 +114,43 @@ public class MapViewActivity extends MapActivity {
 		public void draw(Canvas canvas, MapView mapView, boolean shadow) {
 			super.draw(canvas, mapView, shadow);
 
-			GeoPoint point = new GeoPoint(19240000,-99120000);
-			GeoPoint point2 = new GeoPoint(35410000, 139460000);
-
-			Point p1 = new Point();
-			Point p2 = new Point();
 			Path path = new Path();
+			try {
+				Cursor c = mDbAdapter.fetchAllLocations2();
+				int latCol = c.getColumnIndexOrThrow("latitude");
+				int lonCol = c.getColumnIndexOrThrow("longitude");
+				if(c.moveToFirst()) {
+					int lat = (int)(c.getDouble(latCol)*1000000.);
+					int lon = (int)(c.getDouble(lonCol)*1000000.);
+					GeoPoint point = new GeoPoint(lat, lon);
+					Point p1 = new Point();
+					mProjection.toPixels(point, p1);
+					path.moveTo(p1.x, p1.y);
+				}
+				while(c.moveToNext()) {
+					int lat = (int)(c.getDouble(latCol)*1000000.);
+					int lon = (int)(c.getDouble(lonCol)*1000000.);
+					GeoPoint point = new GeoPoint(lat, lon);
+					Point p1 = new Point();
+					mProjection.toPixels(point, p1);
+					path.lineTo(p1.x, p1.y);
+				}
+				c.close();
+			} catch(SQLException ex) {
+			}
 
-			mProjection.toPixels(point, p1);
-			mProjection.toPixels(point2, p2);
+			//GeoPoint point = new GeoPoint(19240000,-99120000);
+			//GeoPoint point2 = new GeoPoint(35410000, 139460000);
 
-			path.moveTo(p2.x, p2.y);
-			path.lineTo(p1.x, p1.y);
+			//Point p1 = new Point();
+			//Point p2 = new Point();
+			//Path path = new Path();
+
+			//mProjection.toPixels(point, p1);
+			//mProjection.toPixels(point2, p2);
+
+			//path.moveTo(p2.x, p2.y);
+			//path.lineTo(p1.x, p1.y);
 
 			canvas.drawPath(path, mPaint);
 		}
@@ -135,6 +165,9 @@ public class MapViewActivity extends MapActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map_view);
+
+		mDbAdapter.open();
+
 		MapView mapView = (MapView)findViewById(R.id.map_view);
 		mapView.setBuiltInZoomControls(true);
 		List<Overlay> mapOverlays = mapView.getOverlays();
@@ -161,8 +194,9 @@ public class MapViewActivity extends MapActivity {
 	//	super.onStop();
 	//}
 
-	//@Override
-	//protected void onDestroy() {
-	//	super.onDestroy();
-	//}
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		mDbAdapter.close();
+	}
 }
