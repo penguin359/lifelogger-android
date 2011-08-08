@@ -95,6 +95,7 @@ public class EditTrackActivity extends Activity {
 		args.put(LogDbAdapter.KEY_TYPE, mType.getText().toString());
 		args.put(LogDbAdapter.KEY_DESC, mDescription.getText().toString());
 		mDbAdapter.updateTrack(mTrack, args);
+		super.onPause();
 	}
 
 	@Override
