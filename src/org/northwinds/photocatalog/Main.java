@@ -362,7 +362,7 @@ public class Main extends Activity {
 			SharedPreferences.Editor editor = mPrefs.edit();
 			editor.putLong("track", track);
 			editor.commit();
-			if(!mPrefs.getBoolean("editTrackAtStart", false))
+			if(!mPrefs.getBoolean("editDetailsAtStart", false))
 				return true;
 		case R.id.edit_track:
 			track = mPrefs.getLong("track", 0);
