@@ -390,6 +390,9 @@ public class Main extends Activity {
 		case R.id.save:
 			dumpGPX();
 			return true;
+		case R.id.maps:
+			startActivity(new Intent(this, MapViewActivity.class));
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
