@@ -37,6 +37,11 @@ import android.app.AlertDialog;
 //import android.content.ServiceConnection;
 //import android.content.SharedPreferences;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Path;
+import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 //import android.preference.PreferenceManager;
@@ -48,8 +53,11 @@ import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
+import com.google.android.maps.Projection;
 
 public class MapViewActivity extends MapActivity {
+	private Projection mProjection;
+
 	private static class MapItemizedOverlay extends ItemizedOverlay<OverlayItem> {
 		private ArrayList<OverlayItem> mOverlays = new ArrayList<OverlayItem>();
 		private Context mContext;
@@ -85,6 +93,39 @@ public class MapViewActivity extends MapActivity {
 		}
 	}
 
+	private class PathOverlay extends Overlay {
+		Paint mPaint;
+
+		public PathOverlay() {
+			mPaint = new Paint();
+			mPaint.setDither(true);
+			mPaint.setColor(Color.RED);
+			mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+			mPaint.setStrokeJoin(Paint.Join.ROUND);
+			mPaint.setStrokeCap(Paint.Cap.ROUND);
+			mPaint.setStrokeWidth(2);
+		}
+
+		public void draw(Canvas canvas, MapView mapView, boolean shadow) {
+			super.draw(canvas, mapView, shadow);
+
+			GeoPoint point = new GeoPoint(19240000,-99120000);
+			GeoPoint point2 = new GeoPoint(35410000, 139460000);
+
+			Point p1 = new Point();
+			Point p2 = new Point();
+			Path path = new Path();
+
+			mProjection.toPixels(point, p1);
+			mProjection.toPixels(point2, p2);
+
+			path.moveTo(p2.x, p2.y);
+			path.lineTo(p1.x, p1.y);
+
+			canvas.drawPath(path, mPaint);
+		}
+	}
+
 	@Override
 	protected boolean isRouteDisplayed() {
 		return false;
@@ -97,6 +138,7 @@ public class MapViewActivity extends MapActivity {
 		MapView mapView = (MapView)findViewById(R.id.map_view);
 		mapView.setBuiltInZoomControls(true);
 		List<Overlay> mapOverlays = mapView.getOverlays();
+		mProjection = mapView.getProjection();
 		Drawable drawable = getResources().getDrawable(R.drawable.androidmarker);
 		MapItemizedOverlay itemizedOverlay = new MapItemizedOverlay(drawable, this);
 		GeoPoint point = new GeoPoint(19240000,-99120000);
@@ -106,6 +148,7 @@ public class MapViewActivity extends MapActivity {
 		OverlayItem overlayItem2 = new OverlayItem(point2, "Sekai, konichiwa!", "I'm in Japan!");
 		itemizedOverlay.addOverlay(overlayItem2);
 		mapOverlays.add(itemizedOverlay);
+		mapOverlays.add(new PathOverlay());
 	}
 
 	//@Override
