@@ -338,15 +338,19 @@ public class Main extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
 		long track = mPrefs.getLong("track", 0);
-		if(track <= 0) {
-			MenuItem item = menu.findItem(R.id.edit_track);
-			if(item != null)
-				item.setEnabled(false);
-			item = menu.findItem(R.id.continuous_record);
-			if(item != null)
-				item.setEnabled(false);
-		}
+		boolean isATrack = track > 0;
+		MenuItem item = menu.findItem(R.id.edit_track);
+		if(item != null)
+			item.setEnabled(isATrack);
+		item = menu.findItem(R.id.continuous_record);
+		if(item != null)
+			item.setEnabled(isATrack);
 		return true;
 	}
 

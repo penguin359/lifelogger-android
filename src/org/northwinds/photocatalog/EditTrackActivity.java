@@ -30,10 +30,21 @@ package org.northwinds.photocatalog;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.SQLException;
 import android.os.Bundle;
+import android.widget.EditText;
 
 public class EditTrackActivity extends Activity {
 	private long mTrack = 0;
+
+	EditText mName;
+	EditText mComment;
+	EditText mType;
+	EditText mDescription;
+
+	LogDbAdapter mDbAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -47,5 +58,48 @@ public class EditTrackActivity extends Activity {
 			finish();
 			return;
 		}
+
+		mName = (EditText)findViewById(R.id.name);
+		mComment = (EditText)findViewById(R.id.comment);
+		mType = (EditText)findViewById(R.id.type);
+		mDescription = (EditText)findViewById(R.id.description);
+
+		mDbAdapter = new LogDbAdapter(this);
+		mDbAdapter.open();
+		Cursor c = null;
+		try {
+			c = mDbAdapter.fetchTrack(mTrack);
+
+			int nameCol = c.getColumnIndexOrThrow(LogDbAdapter.KEY_NAME);
+			int commentCol = c.getColumnIndexOrThrow(LogDbAdapter.KEY_CMT);
+			int typeCol = c.getColumnIndexOrThrow(LogDbAdapter.KEY_TYPE);
+			int descriptionCol = c.getColumnIndexOrThrow(LogDbAdapter.KEY_DESC);
+			if(c.moveToFirst()) {
+				mName.setText(c.getString(nameCol));
+				mComment.setText(c.getString(commentCol));
+				mType.setText(c.getString(typeCol));
+				mDescription.setText(c.getString(descriptionCol));
+			}
+		} catch(SQLException ex) {
+		} finally {
+			if(c != null)
+				c.close();
+		}
+	}
+
+	@Override
+	public void onPause() {
+		ContentValues args = new ContentValues();
+		args.put(LogDbAdapter.KEY_NAME, mName.getText().toString());
+		args.put(LogDbAdapter.KEY_CMT, mComment.getText().toString());
+		args.put(LogDbAdapter.KEY_TYPE, mType.getText().toString());
+		args.put(LogDbAdapter.KEY_DESC, mDescription.getText().toString());
+		mDbAdapter.updateTrack(mTrack, args);
+	}
+
+	@Override
+	public void onDestroy() {
+		mDbAdapter.close();
+		super.onDestroy();
 	}
 }

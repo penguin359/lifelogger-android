@@ -12,3 +12,8 @@ No restart on rotate
 Shortcuts
 widget
 support milliseconds
+menu icons
+application icons
+theme out shortcut blip
+edit details at start
+preference screens

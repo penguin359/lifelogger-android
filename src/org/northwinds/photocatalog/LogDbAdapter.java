@@ -127,6 +127,16 @@ public class LogDbAdapter {
 		mDbHelper.close();
 	}
 
+	public Cursor fetchTrack(long rowId) throws SQLException {
+		Cursor c = mDb.query(true, TABLE_TRACKS, new String[] {
+			KEY_ROWID, KEY_NAME, KEY_CMT, KEY_TYPE, KEY_DESC
+		}, KEY_ROWID + "=" + rowId, null, null, null, null, null);
+		if (c != null) {
+			c.moveToFirst();
+		}
+		return c;
+	}
+
 	public Cursor fetchLocation(long rowId) throws SQLException {
 		Cursor c = mDb.query(true, TABLE_LOCATION, new String[] {
 			KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE
@@ -196,6 +206,10 @@ public class LogDbAdapter {
 		//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
 
 		return mDb.insert(TABLE_LOCATION, null, values);
+	}
+
+	public boolean updateTrack(long rowId, ContentValues values) {
+		return mDb.update(TABLE_TRACKS, values, KEY_ROWID + "=" + rowId, null) > 0;
 	}
 
 	public boolean updateLocation(long rowId, Location location) {
