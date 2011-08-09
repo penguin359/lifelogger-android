@@ -109,6 +109,11 @@ public class TrackListActivity extends ListActivity {
 		case R.id.save:
 			Toast.makeText(this, "Feature coming soon...", Toast.LENGTH_SHORT).show();
 			return true;
+		case R.id.map:
+			intent = new Intent(this, MapViewActivity.class);
+			intent.putExtra(LogDbAdapter.KEY_ROWID, info.id);
+			startActivity(intent);
+			return true;
 		}
 		return super.onContextItemSelected(item);
 	}

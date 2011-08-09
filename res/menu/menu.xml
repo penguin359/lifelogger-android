@@ -9,5 +9,5 @@
   <item android:id="@+id/quit"     android:title="@string/quit"/>
   <item android:id="@+id/kill"     android:title="@string/kill"/>
   <item android:id="@+id/save"     android:title="@string/save"/>
-  <item android:id="@+id/maps"     android:title="Maps"/>
+  <item android:id="@+id/maps"     android:title="@string/view_map"/>
 </menu>

@@ -61,6 +61,8 @@ public class MapViewActivity extends MapActivity {
 	private final LogDbAdapter mDbAdapter = new LogDbAdapter(this);
 	private Projection mProjection;
 
+	private long mTrack = 0;
+
 	private static class MapItemizedOverlay extends ItemizedOverlay<OverlayItem> {
 		private ArrayList<OverlayItem> mOverlays = new ArrayList<OverlayItem>();
 		private Context mContext;
@@ -104,7 +106,7 @@ public class MapViewActivity extends MapActivity {
 			mPaint.setDither(true);
 			//mPaint.setColor(Color.RED);
 			//mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-			mPaint.setColor(Color.GREEN);
+			mPaint.setColor(Color.CYAN);
 			mPaint.setStyle(Paint.Style.STROKE);
 			mPaint.setStrokeJoin(Paint.Join.ROUND);
 			mPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -116,7 +118,7 @@ public class MapViewActivity extends MapActivity {
 
 			Path path = new Path();
 			try {
-				Cursor c = mDbAdapter.fetchAllLocations2();
+				Cursor c = mDbAdapter.fetchLocationsByTrack(mTrack);
 				int latCol = c.getColumnIndexOrThrow("latitude");
 				int lonCol = c.getColumnIndexOrThrow("longitude");
 				if(c.moveToFirst()) {
@@ -165,6 +167,8 @@ public class MapViewActivity extends MapActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map_view);
+
+		mTrack = getIntent().getLongExtra(LogDbAdapter.KEY_ROWID, 0);
 
 		mDbAdapter.open();
 

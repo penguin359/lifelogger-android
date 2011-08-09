@@ -20,5 +20,6 @@
     <string name="delete">Delete</string>
     <string name="select">Select</string>
     <string name="save">Save</string>
+    <string name="view_map">View Map</string>
     <string name="manage_tracks">Manage Tracks</string>
 </resources>
