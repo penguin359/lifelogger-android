@@ -167,6 +167,14 @@ public class LogDbAdapter {
 		}, null, null, null, null, null);
 	}
 
+	public Cursor fetchLocationsByTrack(long track) {
+		if(track == 0)
+			return fetchAllLocations2();
+		return mDb.query(TABLE_LOCATION, new String[] {
+			KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE, KEY_ALTITUDE
+		}, KEY_TRACK + " = " + track, null, null, null, null);
+	}
+
 	public Cursor fetchUploadLocations(String[] cols, String condition) {
 		return mDb.query(TABLE_LOCATION, cols, condition, null, null, null, null, "100");
 	}

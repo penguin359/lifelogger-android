@@ -107,7 +107,8 @@ public class TrackListActivity extends ListActivity {
 			editor.commit();
 			return true;
 		case R.id.save:
-			Toast.makeText(this, "Feature coming soon...", Toast.LENGTH_SHORT).show();
+			ExportGPS exportGPS = new ExportGPS(this);
+			exportGPS.exportAsGPX(info.id);
 			return true;
 		}
 		return super.onContextItemSelected(item);
