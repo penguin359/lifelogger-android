@@ -251,10 +251,15 @@ public class Main extends Activity {
 
 	private Button mStartButton;
 
+	//private static class ActivityState {
+	//	private boolean isRestart = false;
+	//}
+
 	private void parseIntent(Intent intent) {
 		String action = intent.getAction();
 		if(action != null && action.equals(Intent.ACTION_MAIN) &&
 		   intent.hasCategory(Intent.CATEGORY_LAUNCHER) &&
+		   getLastNonConfigurationInstance() == null &&
 		   mPrefs.getBoolean("autoStart", false))
 			startService(new Intent(Logger.ACTION_START_LOG, null, this, Logger.class));
 	}
@@ -332,6 +337,11 @@ public class Main extends Activity {
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		//parseIntent(intent);
+	}
+
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		return new Object();
 	}
 
 	@Override
