@@ -16,4 +16,9 @@
     <string name="track_name">Track Name</string>
     <string name="track_type">Track Type</string>
     <string name="walking_driving">walking, driving, hiking, etc.</string>
+    <string name="no_tracks_listed">No tracks created yet!</string>
+    <string name="delete">Delete</string>
+    <string name="select">Select</string>
+    <string name="save">Save</string>
+    <string name="manage_tracks">Manage Tracks</string>
 </resources>

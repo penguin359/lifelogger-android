@@ -4,9 +4,10 @@
   <item android:id="@+id/new_track" android:title="@string/new_track"/>
   <item android:id="@+id/edit_track" android:title="@string/edit_track"/>
   <item android:id="@+id/continuous_record" android:title="@string/continuous_record"/>
+  <item android:id="@+id/manage_tracks" android:title="@string/manage_tracks"/>
   <item android:id="@+id/settings" android:title="@string/settings"/>
   <item android:id="@+id/quit"     android:title="@string/quit"/>
   <item android:id="@+id/kill"     android:title="@string/kill"/>
-  <item android:id="@+id/save"     android:title="Save"/>
+  <item android:id="@+id/save"     android:title="@string/save"/>
   <item android:id="@+id/maps"     android:title="Maps"/>
 </menu>

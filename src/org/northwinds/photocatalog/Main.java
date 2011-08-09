@@ -251,10 +251,15 @@ public class Main extends Activity {
 
 	private Button mStartButton;
 
+	//private static class ActivityState {
+	//	private boolean isRestart = false;
+	//}
+
 	private void parseIntent(Intent intent) {
 		String action = intent.getAction();
 		if(action != null && action.equals(Intent.ACTION_MAIN) &&
 		   intent.hasCategory(Intent.CATEGORY_LAUNCHER) &&
+		   getLastNonConfigurationInstance() == null &&
 		   mPrefs.getBoolean("autoStart", false))
 			startService(new Intent(Logger.ACTION_START_LOG, null, this, Logger.class));
 	}
@@ -335,6 +340,11 @@ public class Main extends Activity {
 	}
 
 	@Override
+	public Object onRetainNonConfigurationInstance() {
+		return new Object();
+	}
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.menu, menu);
@@ -376,6 +386,9 @@ public class Main extends Activity {
 			editor = mPrefs.edit();
 			editor.putLong("track", 0);
 			editor.commit();
+			return true;
+		case R.id.manage_tracks:
+			startActivity(new Intent(this, TrackListActivity.class));
 			return true;
 		case R.id.settings:
 			startActivity(new Intent(this, PrefAct.class));
