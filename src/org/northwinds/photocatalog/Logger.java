@@ -287,19 +287,19 @@ public class Logger extends Service implements Runnable {
 					}
 				}
 			}
-			mDbAdapter.insertLocation(mTrack, loc);
-			mLastLocation = loc;
-			mDroppedSamples = 0;
+			synchronized(mUploadLock) {
+				mDbAdapter.insertLocation(mTrack, loc);
+				mLastLocation = loc;
+				mDroppedSamples = 0;
+				mUploadCount++;
+				mUploadLock.notify();
+			}
 			for(int i = mClients.size()-1; i >= 0; i--) {
 				try {
 					mClients.get(i).send(Message.obtain(null, MSG_LOCATION, loc));
 				} catch(RemoteException ex) {
 					mClients.remove(i);
 				}
-			}
-			synchronized(mUploadLock) {
-				mUploadCount++;
-				mUploadLock.notify();
 			}
 			if(mUpload == null || mUpload.getState() == Thread.State.TERMINATED) {
 				if(mAutoUpload) {
@@ -647,11 +647,11 @@ public class Logger extends Service implements Runnable {
 					ContentValues values = new ContentValues();
 					values.put("uploaded", 1);
 					Integer ids[] = idList.toArray(new Integer[1]);
-					for(int i = 0; i < ids.length; i++)
-						dbAdapter.updateLocation(ids[i], values);
-					sendUploadStatus("Sent!");
-					ok = true;
 					synchronized(mUploadLock) {
+						for(int i = 0; i < ids.length; i++)
+							dbAdapter.updateLocation(ids[i], values);
+						sendUploadStatus("Sent!");
+						ok = true;
 						int uploadedCount = ids.length;
 						if(uploadedCount > mUploadCount)
 							uploadedCount = mUploadCount;
