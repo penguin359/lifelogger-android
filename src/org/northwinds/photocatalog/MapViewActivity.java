@@ -117,28 +117,16 @@ public class MapViewActivity extends MapActivity {
 			super.draw(canvas, mapView, shadow);
 
 			Path path = new Path();
-			try {
-				Cursor c = mDbAdapter.fetchLocationsByTrack(mTrack);
-				int latCol = c.getColumnIndexOrThrow("latitude");
-				int lonCol = c.getColumnIndexOrThrow("longitude");
-				if(c.moveToFirst()) {
-					int lat = (int)(c.getDouble(latCol)*1000000.);
-					int lon = (int)(c.getDouble(lonCol)*1000000.);
-					GeoPoint point = new GeoPoint(lat, lon);
-					Point p1 = new Point();
-					mProjection.toPixels(point, p1);
-					path.moveTo(p1.x, p1.y);
-				}
-				while(c.moveToNext()) {
-					int lat = (int)(c.getDouble(latCol)*1000000.);
-					int lon = (int)(c.getDouble(lonCol)*1000000.);
-					GeoPoint point = new GeoPoint(lat, lon);
-					Point p1 = new Point();
-					mProjection.toPixels(point, p1);
-					path.lineTo(p1.x, p1.y);
-				}
-				c.close();
-			} catch(SQLException ex) {
+			if(mFirstPoint != null) {
+				Point p1 = new Point();
+				mProjection.toPixels(mFirstPoint, p1);
+				path.moveTo(p1.x, p1.y);
+			}
+
+			for(GeoPoint point: mPathList) {
+				Point p1 = new Point();
+				mProjection.toPixels(point, p1);
+				path.lineTo(p1.x, p1.y);
 			}
 
 			//GeoPoint point = new GeoPoint(19240000,-99120000);
@@ -163,6 +151,9 @@ public class MapViewActivity extends MapActivity {
 		return false;
 	}
 
+	private GeoPoint mFirstPoint = null;
+	private GeoPoint[] mPathList;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -171,6 +162,27 @@ public class MapViewActivity extends MapActivity {
 		mTrack = getIntent().getLongExtra(LogDbAdapter.KEY_ROWID, 0);
 
 		mDbAdapter.open();
+		ArrayList<GeoPoint> pathList = new ArrayList<GeoPoint>();
+		try {
+			Cursor c = mDbAdapter.fetchLocationsByTrack(mTrack);
+			int latCol = c.getColumnIndexOrThrow("latitude");
+			int lonCol = c.getColumnIndexOrThrow("longitude");
+			if(c.moveToFirst()) {
+				int lat = (int)(c.getDouble(latCol)*1000000.);
+				int lon = (int)(c.getDouble(lonCol)*1000000.);
+				mFirstPoint = new GeoPoint(lat, lon);
+			}
+			while(c.moveToNext()) {
+				int lat = (int)(c.getDouble(latCol)*1000000.);
+				int lon = (int)(c.getDouble(lonCol)*1000000.);
+				GeoPoint point = new GeoPoint(lat, lon);
+				pathList.add(point);
+			}
+			c.close();
+		} catch(SQLException ex) {
+		}
+
+		mPathList = pathList.toArray(new GeoPoint[pathList.size()]);
 
 		MapView mapView = (MapView)findViewById(R.id.map_view);
 		mapView.setBuiltInZoomControls(true);
