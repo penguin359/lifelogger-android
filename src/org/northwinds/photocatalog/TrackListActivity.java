@@ -40,6 +40,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 public class TrackListActivity extends ListActivity {
@@ -78,6 +79,15 @@ public class TrackListActivity extends ListActivity {
 	}
 
 	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		super.onListItemClick(l, v, position, id);
+		SharedPreferences.Editor editor = mPrefs.edit();
+		editor.putLong("track", id);
+		editor.commit();
+		finish();
+	}
+
+	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater inflater = getMenuInflater();
@@ -97,11 +107,6 @@ public class TrackListActivity extends ListActivity {
 		case R.id.delete:
 			mDbAdapter.deleteTrack(info.id);
 			refreshTracks();
-			return true;
-		case R.id.select:
-			SharedPreferences.Editor editor = mPrefs.edit();
-			editor.putLong("track", info.id);
-			editor.commit();
 			return true;
 		case R.id.save:
 			ExportGPS exportGPS = new ExportGPS(this);
