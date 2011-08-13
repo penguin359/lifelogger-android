@@ -124,7 +124,6 @@ public class Logger extends Service implements Runnable {
 	private long mTrack = 0;
 
 	private final SharedPreferences.OnSharedPreferenceChangeListener mPrefsChange = new SharedPreferences.OnSharedPreferenceChangeListener() {
-		//@Override
 		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 				String key) {
 			if(key.equals("distance") || key.equals("time")) {
@@ -399,10 +398,11 @@ public class Logger extends Service implements Runnable {
 			}
 			if(mSmsAddress != null) {
 				StringBuilder sb = new StringBuilder();
-				sb.append(loc.getLatitude());
-				sb.append(",");
-				sb.append(loc.getLongitude());
-				sb.append(" http://maps.google.com/?q=");
+				sb.append("[ ");
+				sb.append(Main.formatCoordinate(loc.getLatitude(), true, false));
+				sb.append(", ");
+				sb.append(Main.formatCoordinate(loc.getLongitude(), false, false));
+				sb.append(" ] http://maps.google.com/?q=");
 				sb.append(loc.getLatitude());
 				sb.append(",");
 				sb.append(loc.getLongitude());
@@ -493,8 +493,9 @@ public class Logger extends Service implements Runnable {
 	private GpsStatus.Listener mGpsListener = new GpsStatus.Listener() {
 		GpsStatus status = null;
 
-		//@Override
 		public void onGpsStatusChanged(int event) {
+			if(!mIsStarted)
+				return;
 			status = mLM.getGpsStatus(status);
 			int nSat = 0;
 			int nUsed = 0;
@@ -552,17 +553,7 @@ public class Logger extends Service implements Runnable {
 	@Override
 	public IBinder onBind(Intent intent) {
 		return mMessenger.getBinder();
-		//return mBinder;
 	}
-
-	@Override
-	public boolean onUnbind(Intent intent) {
-		//mListener = null;
-		//return super.onUnbind(intent);
-		return false;
-	}
-
-	//public final IBinder mBinder = new LoggerBinder();
 
 	public void run() {
 		try {
@@ -676,8 +667,6 @@ public class Logger extends Service implements Runnable {
 			m.put("file", new MyProducer(c, idList));
 			m.put("finish", "1");
 
-			//StringBuilder sb = new StringBuilder();
-			//sb.append(mUploadBaseUrl).append("cgi/test-android.pl?loc=").append("123").append(",").append(c.getCount());
 			String uri = mUploadBaseUrl + "upload.pl";
 			HttpClient client = new DefaultHttpClient();
 			HttpPost post = new HttpPost(uri);

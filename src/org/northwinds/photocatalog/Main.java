@@ -67,7 +67,7 @@ public class Main extends Activity {
 
 	private static final DateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd  HH:mm:ss");
 
-	private static String formatCoordinate(double coordinate, boolean isLatitude) {
+	static String formatCoordinate(double coordinate, boolean isLatitude, boolean unicode) {
 		String direction = "N";
 		if(!isLatitude)
 			direction = "E";
@@ -84,7 +84,9 @@ public class Main extends Activity {
 		coordinate -= minutes;
 		coordinate *= 60.;
 		double seconds = coordinate;
-		return String.format("%s  %d°  %d′  %.3f″", direction, degrees, minutes, seconds);
+		if(unicode)
+			return String.format("%s  %d°  %d′  %.3f″", direction, degrees, minutes, seconds);
+		return String.format("%s  %d deg  %d'  %.3f\"", direction, degrees, minutes, seconds);
 	}
 
 	private static final int NAUTICAL_UNITS	= 0;
@@ -147,8 +149,8 @@ public class Main extends Activity {
 						satellites = String.format("%d", extras.getInt("satellites"));
 					//mGpsStatus.setText("Tracking...");
 					mTimestamp.setText(mDateFormat.format(new Date()));
-					mLatitude.setText(formatCoordinate(loc.getLatitude(), true));
-					mLongitude.setText(formatCoordinate(loc.getLongitude(), false));
+					mLatitude.setText(formatCoordinate(loc.getLatitude(), true, true));
+					mLongitude.setText(formatCoordinate(loc.getLongitude(), false, true));
 					mAltitude.setText(formatUnit(loc.getAltitude(), DISTANCE_TYPE));
 					mAccuracy.setText(formatUnit(loc.getAccuracy(), DISTANCE_TYPE));
 					mBearing.setText(String.format("%3.1f°", loc.getBearing()));
@@ -205,7 +207,6 @@ public class Main extends Activity {
 				mService = null;
 			}
 		}
-		//@Override
 		public void onServiceDisconnected(ComponentName className) {
 			mService = null;
 		}
@@ -216,14 +217,12 @@ public class Main extends Activity {
 	private final LogDbAdapter mDbAdapter = new LogDbAdapter(this);
 
 	private final View.OnClickListener mStartGpsOnClick = new View.OnClickListener() {
-		//@Override
 		public void onClick(View v) {
 			startService(new Intent(Logger.ACTION_START_LOG, null, Main.this, Logger.class));
 		}
 	};
 
 	private final View.OnClickListener mStopGpsOnClick = new View.OnClickListener() {
-		//@Override
 		public void onClick(View v) {
 			startService(new Intent(Logger.ACTION_STOP_LOG, null, Main.this, Logger.class));
 		}
@@ -270,7 +269,6 @@ public class Main extends Activity {
 
 		Button b = (Button)findViewById(R.id.status_but);
 		b.setOnClickListener(new View.OnClickListener() {
-			//@Override
 			public void onClick(View v) {
 				startActivity(new Intent(Main.this, Upload.class));
 			}
@@ -278,7 +276,6 @@ public class Main extends Activity {
 
 		b = (Button)findViewById(R.id.list_but);
 		b.setOnClickListener(new View.OnClickListener() {
-			//@Override
 			public void onClick(View v) {
 				startActivity(new Intent(Main.this, GPSList.class));
 			}
@@ -286,7 +283,6 @@ public class Main extends Activity {
 
 		b = (Button)findViewById(R.id.delete_uploaded_but);
 		b.setOnClickListener(new View.OnClickListener() {
-			//@Override
 			public void onClick(View v) {
 				mDbAdapter.deleteUploadedLocations();
 			}
@@ -294,7 +290,6 @@ public class Main extends Activity {
 
 		b = (Button)findViewById(R.id.delete_but);
 		b.setOnClickListener(new View.OnClickListener() {
-			//@Override
 			public void onClick(View v) {
 				mDbAdapter.deleteAllLocations();
 			}
@@ -302,7 +297,6 @@ public class Main extends Activity {
 
 		b = (Button)findViewById(R.id.upload_once_but);
 		b.setOnClickListener(new View.OnClickListener() {
-			//@Override
 			public void onClick(View v) {
 				startService(new Intent(Logger.ACTION_UPLOAD_ONCE, null, Main.this, Logger.class));
 			}
