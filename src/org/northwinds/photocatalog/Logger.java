@@ -68,6 +68,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -91,6 +92,8 @@ public class Logger extends Service implements Runnable {
 	private float mMinAccuracy = 0;
 	private boolean mFilterByDistance = false;
 	private boolean mIsStarted = false;
+	private boolean mStopOnFirstFix = false;
+	private String mSmsAddress = null;
 
 	/* All state used by upload thread */
 	private boolean mAutoUpload = false;
@@ -231,6 +234,7 @@ public class Logger extends Service implements Runnable {
 		mDroppedSamples = 0;
 		mStartTime = SystemClock.uptimeMillis();
 		mIsStarted = true;
+		mStopOnFirstFix = false;
 		for(int i = mClients.size()-1; i >= 0; i--) {
 			try {
 				mClients.get(i).send(Message.obtain(null, MSG_STATUS, 1, 0));
@@ -393,7 +397,19 @@ public class Logger extends Service implements Runnable {
 					mClients.remove(i);
 				}
 			}
-			startUpload();
+			if(mSmsAddress != null) {
+				StringBuilder sb = new StringBuilder();
+				sb.append(loc.getLatitude());
+				sb.append(",");
+				sb.append(loc.getLongitude());
+				sb.append(" http://maps.google.com/?q=");
+				sb.append(loc.getLatitude());
+				sb.append(",");
+				sb.append(loc.getLongitude());
+				SmsManager smsManager = SmsManager.getDefault();
+				smsManager.sendTextMessage(mSmsAddress, null, sb.toString(), null, null);
+				mSmsAddress = null;
+			}
 			if(mStartTime != 0) {
 				Long timeDiff = SystemClock.uptimeMillis() - mStartTime;
 				StringBuilder sb = new StringBuilder();
@@ -403,6 +419,10 @@ public class Logger extends Service implements Runnable {
 				Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_LONG).show();
 				mStartTime = 0L;
 			}
+			if(mStopOnFirstFix)
+				stopGps();
+			else
+				startUpload();
 		}
 
 		public void onProviderDisabled(String provider) {
@@ -493,6 +513,9 @@ public class Logger extends Service implements Runnable {
 	public static final String ACTION_START_LOG = "org.northwinds.android.intent.START_LOG";
 	public static final String ACTION_STOP_LOG = "org.northwinds.android.intent.STOP_LOG";
 	public static final String ACTION_UPLOAD_ONCE = "org.northwinds.android.intent.UPLOAD_ONCE";
+	public static final String ACTION_RETRIEVE_LOCATION = "org.northwinds.android.intent.RETRIEVE_LOCATION";
+
+	public static final String EXTRA_SMS_ADDRESS = "org.northwinds.android.extra.SMS_ADDRESS";
 
 	private Long mStartTime = 0L;
 
@@ -517,6 +540,12 @@ public class Logger extends Service implements Runnable {
 				stopSelfResult(startId);
 		} else if(action.equals(ACTION_UPLOAD_ONCE)) {
 			startUploadOnce(startId, false);
+		} else if(action.equals(ACTION_RETRIEVE_LOCATION)) {
+			mSmsAddress = intent.getStringExtra(EXTRA_SMS_ADDRESS);
+			if(!mIsStarted) {
+				startGps();
+				mStopOnFirstFix = true;
+			}
 		}
 	}
 
@@ -616,6 +645,8 @@ public class Logger extends Service implements Runnable {
 							os.write(cols[i].getBytes());
 					}
 					os.write("\n".getBytes());
+					if(!mC.moveToFirst())
+						return;
 					do {
 						mIdList.add(mC.getInt(0));
 						os.write(mUploadSource.getBytes());
