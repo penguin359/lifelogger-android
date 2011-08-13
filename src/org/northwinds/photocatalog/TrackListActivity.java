@@ -107,6 +107,11 @@ public class TrackListActivity extends ListActivity {
 			ExportGPS exportGPS = new ExportGPS(this);
 			exportGPS.exportAsGPX(info.id);
 			return true;
+		case R.id.gps_list:
+			intent = new Intent(this, GPSList.class);
+			intent.putExtra(LogDbAdapter.KEY_ROWID, info.id);
+			startActivity(intent);
+			return true;
 		}
 		return super.onContextItemSelected(item);
 	}
