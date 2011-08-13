@@ -28,8 +28,6 @@
 
 package org.northwinds.photocatalog;
 
-//import java.io.InputStream;
-//import java.io.InputStreamReader;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,34 +37,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import android.app.Activity;
-import android.content.ComponentName;
-//import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.location.Location;
-import android.location.LocationProvider;
-//import android.net.Uri;
-import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.Process;
-import android.os.RemoteException;
-import android.preference.PreferenceManager;
-//import android.provider.MediaStore.MediaColumns;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 class ExportGPS {
