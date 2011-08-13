@@ -36,16 +36,21 @@ import android.widget.Button;
 import android.widget.SimpleCursorAdapter;
 
 public class GPSList extends ListActivity {
-	LogDbAdapter mDbAdapter;
+	private LogDbAdapter mDbAdapter;
+
+	private long mTrack = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gps_list);
 
+		mTrack = getIntent().getLongExtra(LogDbAdapter.KEY_ROWID, 0);
+
 		mDbAdapter = new LogDbAdapter(this);
 		mDbAdapter.open();
-		Cursor c = mDbAdapter.fetchAllLocations();
+		//Cursor c = mDbAdapter.fetchAllLocations();
+		Cursor c = mDbAdapter.fetchLocationsByTrackF(mTrack);
 		startManagingCursor(c);
 
 		String[] from = new String[] {

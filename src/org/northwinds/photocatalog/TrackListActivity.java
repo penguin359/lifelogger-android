@@ -36,14 +36,12 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-//import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-//import android.widget.ListView;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.Toast;
 
 public class TrackListActivity extends ListActivity {
 	private SharedPreferences mPrefs = null;
@@ -81,6 +79,15 @@ public class TrackListActivity extends ListActivity {
 	}
 
 	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		super.onListItemClick(l, v, position, id);
+		SharedPreferences.Editor editor = mPrefs.edit();
+		editor.putLong("track", id);
+		editor.commit();
+		finish();
+	}
+
+	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater inflater = getMenuInflater();
@@ -101,14 +108,14 @@ public class TrackListActivity extends ListActivity {
 			mDbAdapter.deleteTrack(info.id);
 			refreshTracks();
 			return true;
-		case R.id.select:
-			SharedPreferences.Editor editor = mPrefs.edit();
-			editor.putLong("track", info.id);
-			editor.commit();
-			return true;
 		case R.id.save:
 			ExportGPS exportGPS = new ExportGPS(this);
 			exportGPS.exportAsGPX(info.id);
+			return true;
+		case R.id.gps_list:
+			intent = new Intent(this, GPSList.class);
+			intent.putExtra(LogDbAdapter.KEY_ROWID, info.id);
+			startActivity(intent);
 			return true;
 		case R.id.map:
 			intent = new Intent(this, MapViewActivity.class);

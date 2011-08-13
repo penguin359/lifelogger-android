@@ -16,6 +16,7 @@ public class Receiver extends BroadcastReceiver {
 	private static final String SMS_START_LOG = "PHOTOCATALOG_START_LOG ";
 	private static final String SMS_STOP_LOG = "PHOTOCATALOG_STOP_LOG ";
 	private static final String SMS_UPLOAD_ONCE = "PHOTOCATALOG_UPLOAD_ONCE ";
+	private static final String SMS_RETRIEVE_LOCATION = "PHOTOCATALOG_RETRIEVE_LOCATION ";
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
@@ -43,6 +44,7 @@ public class Receiver extends BroadcastReceiver {
 			String smsStartLog = SMS_START_LOG + smsKey;
 			String smsStopLog = SMS_STOP_LOG + smsKey;
 			String smsUploadOnce = SMS_UPLOAD_ONCE + smsKey;
+			String smsRetrieveLocation = SMS_RETRIEVE_LOCATION + smsKey;
 			Bundle extras = intent.getExtras();
 			Object[] pdus = (Object[])extras.get("pdus");
 			//SmsMessage[] messages = new SmsMessage[pdus.length];
@@ -71,6 +73,14 @@ public class Receiver extends BroadcastReceiver {
 						       null,
 						       context,
 						       Logger.class));
+				else if(smsRetrieveLocation.equals(msg)) {
+					Intent i = new Intent(Logger.ACTION_RETRIEVE_LOCATION,
+						       null,
+						       context,
+						       Logger.class);
+					i.putExtra(Logger.EXTRA_SMS_ADDRESS, sms.getOriginatingAddress());
+					context.startService(i);
+				}
 			}
 		}
 	}

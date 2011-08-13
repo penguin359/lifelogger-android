@@ -20,6 +20,7 @@
     <string name="delete">Delete</string>
     <string name="select">Select</string>
     <string name="save">Save</string>
+    <string name="gps_list">GPS List</string>
     <string name="view_map">View Map</string>
-    <string name="manage_tracks">Manage Tracks</string>
+    <string name="manage_tracks">Select/Manage Tracks</string>
 </resources>

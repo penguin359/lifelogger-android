@@ -41,7 +41,7 @@
 				<category android:name="android.intent.category.DEFAULT"/>
 			</intent-filter>
 		</activity>
-		<activity android:name=".TrackListActivity"/>
+		<activity android:name=".TrackListActivity" android:label="@string/manage_tracks"/>
 		<activity android:name=".Upload" android:label="PhotoCatalog">
 			<intent-filter>
 				<action android:name="android.intent.action.SEND"/>
@@ -70,5 +70,6 @@
 	<uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 	<uses-permission android:name="android.permission.RECEIVE_SMS"/>
+	<uses-permission android:name="android.permission.SEND_SMS"/>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 </manifest>

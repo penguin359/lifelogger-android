@@ -154,7 +154,7 @@ public class LogDbAdapter {
 		return c;
 	}
 
-	public Cursor fetchAllLocations() {
+	public Cursor fetchAllLocationsF() {
 		//return mDb.query(TABLE_LOCATION, new String[] {
 		//	KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE
 		//}, null, null, null, null, null);
@@ -173,6 +173,12 @@ public class LogDbAdapter {
 		return mDb.query(TABLE_LOCATION, new String[] {
 			KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE, KEY_ALTITUDE
 		}, KEY_TRACK + " = " + track, null, null, null, null);
+	}
+
+	public Cursor fetchLocationsByTrackF(long track) {
+		if(track == 0)
+			return fetchAllLocationsF();
+		return mDb.rawQuery("SELECT _id, datetime(round(timestamp), 'unixepoch') AS timestamp, latitude, longitude, uploaded, altitude FROM locations WHERE " + KEY_TRACK + " = " + track, null);
 	}
 
 	public Cursor fetchUploadLocations(String[] cols, String condition) {
