@@ -7,11 +7,11 @@
   <EditTextPreference android:defaultValue="http://www.example.org/photocatalog/" android:key="url" android:title="Website" android:summary="URL for uploading data to"/>
   <EditTextPreference android:summary="ID of GPS Source to report" android:title="GPS Source" android:key="source" android:defaultValue="1"/>
   <PreferenceScreen android:title="GPS Parameters">
-    <EditTextPreference android:summary="in Meters" android:defaultValue="5" android:key="distance" android:title="Minimum Distance"/>
-    <EditTextPreference android:summary="in Seconds" android:defaultValue="5" android:key="time" android:title="Minimum Time"/>
+    <EditTextPreference android:summary="in Meters" android:defaultValue="50" android:key="distance" android:title="Minimum Distance"/>
+    <EditTextPreference android:summary="in Seconds" android:defaultValue="60" android:key="time" android:title="Minimum Time"/>
     <EditTextPreference android:summary="Minimum accuracy (maximum distance in meters) for a GPS fix to be recorded." android:title="Minimum Accuracy" android:defaultValue="200" android:key="accuracy"/>
-    <EditTextPreference android:summary="Skip the first few GPS samples." android:title="Skip Samples" android:defaultValue="10" android:key="skip"/>
-    <CheckBoxPreference android:summaryOff="All points logged regardless of distance between them." android:title="Filter by distance" android:summaryOn="Distant points will be dropped." android:key="filterByDistance"/>
+    <EditTextPreference android:summary="Skip the first few GPS samples." android:title="Skip Samples" android:defaultValue="3" android:key="skip"/>
+    <CheckBoxPreference android:summaryOff="All points logged regardless of distance between them." android:title="Filter by distance" android:summaryOn="Distant points will be dropped." android:defaultValue="true" android:key="filterByDistance"/>
   </PreferenceScreen>
   <ListPreference android:key="units" android:summary="Units for screen display." android:defaultValue="1" android:title="Display Units" android:entryValues="@array/unit_values" android:entries="@array/unit_names"/>
   <CheckBoxPreference android:summaryOff="PhotoCatalog will allow SMS activation" android:title="SMS Activation" android:summaryOn="PhotoCatalog will allow SMS activation" android:key="sms"/>
