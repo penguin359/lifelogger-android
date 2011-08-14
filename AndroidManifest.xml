@@ -33,7 +33,10 @@
 			</intent-filter>
 		</activity>
 		<activity android:name=".PrefAct"/>
-		<activity android:name=".ShortcutActivity" android:label="PhotoCatalog"><!-- android:launchMode="singleInstance">-->
+		<activity android:name=".ShortcutActivity" android:label="PhotoCatalog"
+			  android:theme="@android:style/Theme.Dialog"
+			  android:taskAffinity=""
+			  android:excludeFromRecents="true">
 			<intent-filter>
 				<action android:name="android.intent.action.CREATE_SHORTCUT"/>
 				<category android:name="android.intent.category.DEFAULT"/>

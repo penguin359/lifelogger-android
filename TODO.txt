@@ -21,3 +21,12 @@ shortcuts to start gps on new track
 start gps logger on new track preference
 de-localize dates
 localize text
+note at start for getting PhotoCatalog
+note at start for analytics
+Notification buttons
+Background file uploading (service)
+Recording uploads in database
+ContentProvider
+Preference for time to fix toast
+Backport to cupcake and beyond
+Buttons in GPS list broken
