@@ -49,7 +49,26 @@ public class GPSList extends ListActivity {
 
 		mDbAdapter = new LogDbAdapter(this);
 		mDbAdapter.open();
-		//Cursor c = mDbAdapter.fetchAllLocations();
+		fillData();
+
+		Button b = (Button)findViewById(R.id.delete_uploaded_but);
+		b.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				mDbAdapter.deleteUploadedLocationsByTrack(mTrack);
+				fillData();
+			}
+		});
+
+		b = (Button)findViewById(R.id.delete_but);
+		b.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				mDbAdapter.deleteAllLocationsByTrack(mTrack);
+				fillData();
+			}
+		});
+	}
+
+	private void fillData() {
 		Cursor c = mDbAdapter.fetchLocationsByTrackF(mTrack);
 		startManagingCursor(c);
 
@@ -57,19 +76,20 @@ public class GPSList extends ListActivity {
 			LogDbAdapter.KEY_TIMESTAMP,
 			LogDbAdapter.KEY_LATITUDE,
 			LogDbAdapter.KEY_LONGITUDE,
+			LogDbAdapter.KEY_ACCURACY,
 			LogDbAdapter.KEY_UPLOADED
 		};
 		int[] to = new int[] {
 			R.id.timestamp,
 			R.id.latitude,
 			R.id.longitude,
+			R.id.accuracy,
 			R.id.row
 		};
 
 		SimpleCursorAdapter entries =
 			new SimpleCursorAdapter(this, R.layout.gps_row, c, from, to);
 		entries.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-			//@Override
 			public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 				if(cursor.getColumnName(columnIndex).equals(LogDbAdapter.KEY_UPLOADED)) {
 					if(cursor.getInt(columnIndex) != 0)
@@ -82,27 +102,11 @@ public class GPSList extends ListActivity {
 			}
 		});
 		setListAdapter(entries);
-
-		Button b = (Button)findViewById(R.id.delete_uploaded_but);
-		b.setOnClickListener(new View.OnClickListener() {
-			//@Override
-			public void onClick(View v) {
-				mDbAdapter.deleteUploadedLocations();
-			}
-		});
-
-		b = (Button)findViewById(R.id.delete_but);
-		b.setOnClickListener(new View.OnClickListener() {
-			//@Override
-			public void onClick(View v) {
-				mDbAdapter.deleteAllLocations();
-			}
-		});
 	}
 
 	@Override
 	public void onDestroy() {
-		super.onDestroy();
 		mDbAdapter.close();
+		super.onDestroy();
 	}
 }

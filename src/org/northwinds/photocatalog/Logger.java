@@ -513,6 +513,7 @@ public class Logger extends Service implements Runnable {
 
 	public static final String ACTION_START_LOG = "org.northwinds.android.intent.START_LOG";
 	public static final String ACTION_STOP_LOG = "org.northwinds.android.intent.STOP_LOG";
+	public static final String ACTION_TOGGLE_LOG = "org.northwinds.android.intent.TOGGLE_LOG";
 	public static final String ACTION_UPLOAD_ONCE = "org.northwinds.android.intent.UPLOAD_ONCE";
 	public static final String ACTION_RETRIEVE_LOCATION = "org.northwinds.android.intent.RETRIEVE_LOCATION";
 
@@ -539,6 +540,17 @@ public class Logger extends Service implements Runnable {
 				startUploadOnce(startId, true);
 			else
 				stopSelfResult(startId);
+		} else if(action.equals(ACTION_TOGGLE_LOG)) {
+			if(!mIsStarted) {
+				startGps();
+				startUpload();
+			} else {
+				stopGps();
+				if(mUploadRun)
+					startUploadOnce(startId, true);
+				else
+					stopSelfResult(startId);
+			}
 		} else if(action.equals(ACTION_UPLOAD_ONCE)) {
 			startUploadOnce(startId, false);
 		} else if(action.equals(ACTION_RETRIEVE_LOCATION)) {
