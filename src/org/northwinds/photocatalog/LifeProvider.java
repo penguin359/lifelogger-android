@@ -74,6 +74,16 @@ public class LifeProvider extends ContentProvider {
 
 		sLocationsProjectionMap = new HashMap<String, String>();
 		sLocationsProjectionMap.put(LifeLog.Locations._ID, LifeLog.Locations._ID);
+		sLocationsProjectionMap.put(LifeLog.Locations.TRACK, LifeLog.Locations.TRACK);
+		sLocationsProjectionMap.put(LifeLog.Locations.TIMESTAMP, LifeLog.Locations.TIMESTAMP);
+		sLocationsProjectionMap.put(LifeLog.Locations.LATITUDE, LifeLog.Locations.LATITUDE);
+		sLocationsProjectionMap.put(LifeLog.Locations.LONGITUDE, LifeLog.Locations.LONGITUDE);
+		sLocationsProjectionMap.put(LifeLog.Locations.ALTITUDE, LifeLog.Locations.ALTITUDE);
+		sLocationsProjectionMap.put(LifeLog.Locations.ACCURACY, LifeLog.Locations.ACCURACY);
+		sLocationsProjectionMap.put(LifeLog.Locations.BEARING, LifeLog.Locations.BEARING);
+		sLocationsProjectionMap.put(LifeLog.Locations.SPEED, LifeLog.Locations.SPEED);
+		sLocationsProjectionMap.put(LifeLog.Locations.SATELLITES, LifeLog.Locations.SATELLITES);
+		sLocationsProjectionMap.put(LifeLog.Locations.UPLOADED, LifeLog.Locations.UPLOADED);
 	}
 
 	private static final String TABLE_LOCATION_CREATE = "CREATE TABLE " + TABLE_LOCATIONS + " (" +

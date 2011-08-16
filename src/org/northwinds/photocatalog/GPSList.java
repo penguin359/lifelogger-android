@@ -29,6 +29,7 @@
 package org.northwinds.photocatalog;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
@@ -36,25 +37,21 @@ import android.widget.Button;
 import android.widget.SimpleCursorAdapter;
 
 public class GPSList extends ListActivity {
-	private LogDbAdapter mDbAdapter;
-
-	private long mTrack = 0;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gps_list);
 
-		mTrack = getIntent().getLongExtra(LogDbAdapter.KEY_ROWID, 0);
+		Intent intent = getIntent();
+		if(intent.getData() == null)
+			intent.setData(LifeLog.Locations.CONTENT_URI);
 
-		mDbAdapter = new LogDbAdapter(this);
-		mDbAdapter.open();
 		fillData();
 
 		Button b = (Button)findViewById(R.id.delete_uploaded_but);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				mDbAdapter.deleteUploadedLocationsByTrack(mTrack);
+				getContentResolver().delete(getIntent().getData(), LifeLog.Locations.UPLOADED + "=1", null);
 				fillData();
 			}
 		});
@@ -62,51 +59,46 @@ public class GPSList extends ListActivity {
 		b = (Button)findViewById(R.id.delete_but);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				mDbAdapter.deleteAllLocationsByTrack(mTrack);
+				getContentResolver().delete(getIntent().getData(), null, null);
 				fillData();
 			}
 		});
 	}
 
-	private void fillData() {
-		Cursor c = mDbAdapter.fetchLocationsByTrackF(mTrack);
-		startManagingCursor(c);
-
-		String[] from = new String[] {
-			LogDbAdapter.KEY_TIMESTAMP,
-			LogDbAdapter.KEY_LATITUDE,
-			LogDbAdapter.KEY_LONGITUDE,
-			LogDbAdapter.KEY_ACCURACY,
-			LogDbAdapter.KEY_UPLOADED
-		};
-		int[] to = new int[] {
-			R.id.timestamp,
-			R.id.latitude,
-			R.id.longitude,
-			R.id.accuracy,
-			R.id.row
-		};
-
-		SimpleCursorAdapter entries =
-			new SimpleCursorAdapter(this, R.layout.gps_row, c, from, to);
-		entries.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-			public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-				if(cursor.getColumnName(columnIndex).equals(LogDbAdapter.KEY_UPLOADED)) {
-					if(cursor.getInt(columnIndex) != 0)
-						view.setBackgroundColor(0xff008000);
-					else
-						view.setBackgroundColor(0xff800000);
-					return true;
-				}
-				return false;
+	static final SimpleCursorAdapter.ViewBinder sBinder = new SimpleCursorAdapter.ViewBinder() {
+		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+			if(cursor.getColumnName(columnIndex).equals(LifeLog.Locations.UPLOADED)) {
+				if(cursor.getInt(columnIndex) != 0)
+					view.setBackgroundColor(0xff008000);
+				else
+					view.setBackgroundColor(0xff800000);
+				return true;
 			}
-		});
-		setListAdapter(entries);
-	}
+			return false;
+		}
+	};
+	static final String[] sFrom = new String[] {
+		LifeLog.Locations._ID,
+		LifeLog.Locations.TIMESTAMP,
+		LifeLog.Locations.LATITUDE,
+		LifeLog.Locations.LONGITUDE,
+		LifeLog.Locations.ACCURACY,
+		LifeLog.Locations.UPLOADED
+	};
+	static final int[] sTo = new int[] {
+		0,
+		R.id.timestamp,
+		R.id.latitude,
+		R.id.longitude,
+		R.id.accuracy,
+		R.id.row
+	};
 
-	@Override
-	public void onDestroy() {
-		mDbAdapter.close();
-		super.onDestroy();
+	private void fillData() {
+		Cursor c = managedQuery(getIntent().getData(), sFrom, null, null, null);
+		SimpleCursorAdapter entries =
+			new SimpleCursorAdapter(this, R.layout.gps_row, c, sFrom, sTo);
+		entries.setViewBinder(sBinder);
+		setListAdapter(entries);
 	}
 }
