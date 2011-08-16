@@ -30,3 +30,6 @@ ContentProvider
 Preference for time to fix toast
 Backport to cupcake and beyond
 Buttons in GPS list broken
+Crash reports
+Deleting track should delete/fix GPS locations
+The great renaming
