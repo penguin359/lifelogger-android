@@ -114,7 +114,7 @@ public class TrackListActivity extends ListActivity {
 			getContentResolver()
 			    .delete(ContentUris
 				.withAppendedId(LifeLog.Tracks.CONTENT_URI,
-						info.id));
+						info.id), null, null);
 			refreshTracks();
 			return true;
 		case R.id.save:

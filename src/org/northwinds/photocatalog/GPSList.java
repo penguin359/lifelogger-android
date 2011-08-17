@@ -55,7 +55,7 @@ public class GPSList extends ListActivity {
 		R.id.row,
 	};
 
-	private static final SimpleCursorAdapter.ViewBinder sBinder =
+	private final SimpleCursorAdapter.ViewBinder mBinder =
 	    new SimpleCursorAdapter.ViewBinder() {
 		private final int uploadedColor =
 		    getResources().getColor(R.color.uploaded);
@@ -83,7 +83,7 @@ public class GPSList extends ListActivity {
 		   managedQuery(getIntent().getData(), FROM, null, null, null);
 		SimpleCursorAdapter entries =
 		   new SimpleCursorAdapter(this, R.layout.gps_row, c, FROM, TO);
-		entries.setViewBinder(sBinder);
+		entries.setViewBinder(mBinder);
 		setListAdapter(entries);
 	}
 
