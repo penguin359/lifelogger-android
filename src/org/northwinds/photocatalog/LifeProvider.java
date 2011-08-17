@@ -53,6 +53,8 @@ public class LifeProvider extends ContentProvider {
 	private static final String TABLE_TRACKS = "tracks";
 
 	private static HashMap<String, String> sLocationsProjectionMap;
+	private static HashMap<String, String> sLocationsPrettyProjectionMap;
+	private static HashMap<String, String> sTracksProjectionMap;
 
 	private static final int LOCATIONS = 1;
 	private static final int LOCATIONS_ID = 2;
@@ -72,8 +74,9 @@ public class LifeProvider extends ContentProvider {
 		sUriMatcher.addURI(LifeLog.AUTHORITY, "tracks/#/locations", TRACKS_LOCATIONS);
 		sUriMatcher.addURI(LifeLog.AUTHORITY, "tracks/#/locations/#", TRACKS_LOCATIONS_ID);
 
-		sLocationsProjectionMap = new HashMap<String, String>();
+		sLocationsProjectionMap = new HashMap<String, String>(12);
 		sLocationsProjectionMap.put(LifeLog.Locations._ID, LifeLog.Locations._ID);
+		sLocationsProjectionMap.put(LifeLog.Locations._COUNT, "count(*) AS " + LifeLog.Locations._COUNT);
 		sLocationsProjectionMap.put(LifeLog.Locations.TRACK, LifeLog.Locations.TRACK);
 		sLocationsProjectionMap.put(LifeLog.Locations.TIMESTAMP, LifeLog.Locations.TIMESTAMP);
 		sLocationsProjectionMap.put(LifeLog.Locations.LATITUDE, LifeLog.Locations.LATITUDE);
@@ -84,6 +87,18 @@ public class LifeProvider extends ContentProvider {
 		sLocationsProjectionMap.put(LifeLog.Locations.SPEED, LifeLog.Locations.SPEED);
 		sLocationsProjectionMap.put(LifeLog.Locations.SATELLITES, LifeLog.Locations.SATELLITES);
 		sLocationsProjectionMap.put(LifeLog.Locations.UPLOADED, LifeLog.Locations.UPLOADED);
+
+		sLocationsPrettyProjectionMap = new HashMap<String, String>(sLocationsProjectionMap);
+		sLocationsPrettyProjectionMap.put(LifeLog.Locations.TIMESTAMP, "datetime(round(timestamp), 'unixepoch') AS " + LifeLog.Locations.TIMESTAMP);
+
+		sTracksProjectionMap = new HashMap<String, String>(7);
+		sTracksProjectionMap.put(LifeLog.Tracks._ID, LifeLog.Tracks._ID);
+		sTracksProjectionMap.put(LifeLog.Tracks._COUNT, "count(*) AS " + LifeLog.Tracks._COUNT);
+		sTracksProjectionMap.put(LifeLog.Tracks.NAME, LifeLog.Tracks.NAME);
+		sTracksProjectionMap.put(LifeLog.Tracks.CMT, LifeLog.Tracks.CMT);
+		sTracksProjectionMap.put(LifeLog.Tracks.DESC, LifeLog.Tracks.DESC);
+		sTracksProjectionMap.put(LifeLog.Tracks.TYPE, LifeLog.Tracks.TYPE);
+		sTracksProjectionMap.put(LifeLog.Tracks.UPLOADED, LifeLog.Tracks.UPLOADED);
 	}
 
 	private static final String TABLE_LOCATION_CREATE = "CREATE TABLE " + TABLE_LOCATIONS + " (" +
@@ -144,35 +159,47 @@ public class LifeProvider extends ContentProvider {
 		switch(sUriMatcher.match(uri)) {
 		case LOCATIONS:
 			qb.setTables(TABLE_LOCATIONS);
-			qb.setProjectionMap(sLocationsProjectionMap);
+			if(LifeLog.FORMAT_PRETTY.equals(uri.getQueryParameter(LifeLog.PARAM_FORMAT)))
+				qb.setProjectionMap(sLocationsPrettyProjectionMap);
+			else
+				qb.setProjectionMap(sLocationsProjectionMap);
 			break;
 
 		case LOCATIONS_ID:
 			qb.setTables(TABLE_LOCATIONS);
-			qb.setProjectionMap(sLocationsProjectionMap);
+			if(LifeLog.FORMAT_PRETTY.equals(uri.getQueryParameter(LifeLog.PARAM_FORMAT)))
+				qb.setProjectionMap(sLocationsPrettyProjectionMap);
+			else
+				qb.setProjectionMap(sLocationsProjectionMap);
 			qb.appendWhere(LifeLog.Locations._ID + "=" + uri.getPathSegments().get(1));
 			break;
 
 		case TRACKS:
 			qb.setTables(TABLE_TRACKS);
-			qb.setProjectionMap(sLocationsProjectionMap);
+			qb.setProjectionMap(sTracksProjectionMap);
 			break;
 
 		case TRACKS_ID:
 			qb.setTables(TABLE_TRACKS);
-			qb.setProjectionMap(sLocationsProjectionMap);
+			qb.setProjectionMap(sTracksProjectionMap);
 			qb.appendWhere(LifeLog.Tracks._ID + "=" + uri.getPathSegments().get(1));
 			break;
 
 		case TRACKS_LOCATIONS:
 			qb.setTables(TABLE_LOCATIONS);
-			qb.setProjectionMap(sLocationsProjectionMap);
+			if(LifeLog.FORMAT_PRETTY.equals(uri.getQueryParameter(LifeLog.PARAM_FORMAT)))
+				qb.setProjectionMap(sLocationsPrettyProjectionMap);
+			else
+				qb.setProjectionMap(sLocationsProjectionMap);
 			qb.appendWhere(LifeLog.Locations.TRACK + "=" + uri.getPathSegments().get(1));
 			break;
 
 		case TRACKS_LOCATIONS_ID:
 			qb.setTables(TABLE_LOCATIONS);
-			qb.setProjectionMap(sLocationsProjectionMap);
+			if(LifeLog.FORMAT_PRETTY.equals(uri.getQueryParameter(LifeLog.PARAM_FORMAT)))
+				qb.setProjectionMap(sLocationsPrettyProjectionMap);
+			else
+				qb.setProjectionMap(sLocationsProjectionMap);
 			qb.appendWhere(LifeLog.Locations._ID + "=" + uri.getPathSegments().get(3));
 			break;
 
@@ -250,7 +277,7 @@ public class LifeProvider extends ContentProvider {
 
 		case LOCATIONS_ID:
 			String locationId = uri.getPathSegments().get(1);
-			count = db.update(TABLE_LOCATIONS, values, LifeLog.Locations._ID + "=" + locationId + (!TextUtils.isEmpty(selection) ? "AND (" + selection + ")" : "" ), selectionArgs);
+			count = db.update(TABLE_LOCATIONS, values, LifeLog.Locations._ID + "=" + locationId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
 		case TRACKS:
@@ -259,17 +286,17 @@ public class LifeProvider extends ContentProvider {
 
 		case TRACKS_ID:
 			String trackId = uri.getPathSegments().get(1);
-			count = db.update(TABLE_TRACKS, values, LifeLog.Tracks._ID + "=" + trackId + (!TextUtils.isEmpty(selection) ? "AND (" + selection + ")" : "" ), selectionArgs);
+			count = db.update(TABLE_TRACKS, values, LifeLog.Tracks._ID + "=" + trackId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
 		case TRACKS_LOCATIONS:
 			trackId = uri.getPathSegments().get(1);
-			count = db.update(TABLE_LOCATIONS, values, LifeLog.Locations.TRACK + "=" + trackId + (!TextUtils.isEmpty(selection) ? "AND (" + selection + ")" : "" ), selectionArgs);
+			count = db.update(TABLE_LOCATIONS, values, LifeLog.Locations.TRACK + "=" + trackId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
 		case TRACKS_LOCATIONS_ID:
 			locationId = uri.getPathSegments().get(3);
-			count = db.update(TABLE_LOCATIONS, values, LifeLog.Locations._ID + "=" + locationId + (!TextUtils.isEmpty(selection) ? "AND (" + selection + ")" : "" ), selectionArgs);
+			count = db.update(TABLE_LOCATIONS, values, LifeLog.Locations._ID + "=" + locationId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
 		default:
@@ -291,28 +318,28 @@ public class LifeProvider extends ContentProvider {
 
 		case LOCATIONS_ID:
 			String locationId = uri.getPathSegments().get(1);
-			count = db.delete(TABLE_LOCATIONS, LifeLog.Locations._ID + "=" + locationId + (!TextUtils.isEmpty(selection) ? "AND (" + selection + ")" : "" ), selectionArgs);
+			count = db.delete(TABLE_LOCATIONS, LifeLog.Locations._ID + "=" + locationId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
 		case TRACKS:
 			count = db.delete(TABLE_TRACKS, selection, selectionArgs);
-			count = db.delete(TABLE_LOCATIONS, LifeLog.Locations.TRACK + "!=0" + (!TextUtils.isEmpty(selection) ? "AND (" + selection + ")" : "" ), selectionArgs);
+			count = db.delete(TABLE_LOCATIONS, LifeLog.Locations.TRACK + "!=0" + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
 		case TRACKS_ID:
 			String trackId = uri.getPathSegments().get(1);
-			count = db.delete(TABLE_TRACKS, LifeLog.Tracks._ID + "=" + trackId + (!TextUtils.isEmpty(selection) ? "AND (" + selection + ")" : "" ), selectionArgs);
-			count = db.delete(TABLE_LOCATIONS, LifeLog.Locations.TRACK + "=" + trackId + (!TextUtils.isEmpty(selection) ? "AND (" + selection + ")" : "" ), selectionArgs);
+			count = db.delete(TABLE_TRACKS, LifeLog.Tracks._ID + "=" + trackId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
+			count = db.delete(TABLE_LOCATIONS, LifeLog.Locations.TRACK + "=" + trackId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
 		case TRACKS_LOCATIONS:
 			trackId = uri.getPathSegments().get(1);
-			count = db.delete(TABLE_LOCATIONS, LifeLog.Locations.TRACK + "=" + trackId + (!TextUtils.isEmpty(selection) ? "AND (" + selection + ")" : "" ), selectionArgs);
+			count = db.delete(TABLE_LOCATIONS, LifeLog.Locations.TRACK + "=" + trackId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
 		case TRACKS_LOCATIONS_ID:
 			locationId = uri.getPathSegments().get(3);
-			count = db.delete(TABLE_LOCATIONS, LifeLog.Locations._ID + "=" + locationId + (!TextUtils.isEmpty(selection) ? "AND (" + selection + ")" : "" ), selectionArgs);
+			count = db.delete(TABLE_LOCATIONS, LifeLog.Locations._ID + "=" + locationId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
 		default:

@@ -31,6 +31,7 @@ package org.northwinds.photocatalog;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -43,8 +44,14 @@ public class GPSList extends ListActivity {
 		setContentView(R.layout.gps_list);
 
 		Intent intent = getIntent();
-		if(intent.getData() == null)
-			intent.setData(LifeLog.Locations.CONTENT_URI);
+		Uri uri = intent.getData();
+		if(uri == null)
+			uri = LifeLog.Locations.CONTENT_URI;
+		uri = uri.buildUpon()
+		         .appendQueryParameter(LifeLog.PARAM_FORMAT,
+					       LifeLog.FORMAT_PRETTY)
+			 .build();
+		intent.setData(uri);
 
 		fillData();
 

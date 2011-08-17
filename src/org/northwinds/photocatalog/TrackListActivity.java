@@ -29,9 +29,11 @@
 package org.northwinds.photocatalog;
 
 import android.app.ListActivity;
+import android.content.ContentUris;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.ContextMenu;
@@ -113,8 +115,8 @@ public class TrackListActivity extends ListActivity {
 			exportGPS.exportAsGPX(info.id);
 			return true;
 		case R.id.gps_list:
-			intent = new Intent(this, GPSList.class);
-			intent.putExtra(LogDbAdapter.KEY_ROWID, info.id);
+			Uri uri = ContentUris.appendId(LifeLog.Tracks.CONTENT_URI.buildUpon(), info.id).appendPath("locations").build();
+			intent = new Intent(Intent.ACTION_VIEW, uri, this, GPSList.class);
 			startActivity(intent);
 			return true;
 		}
