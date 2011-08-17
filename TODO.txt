@@ -33,3 +33,14 @@ Buttons in GPS list broken
 Crash reports
 Deleting track should delete/fix GPS locations
 The great renaming
+develop test suite
+thourghly test content provider
+  test upload count
+  make _COUNT behavior match other content providers
+  projection map for CSV
+  projection map for GPX/KML?
+  prettify GPSList
+  change calling activities to using getData() instead of getExtraLong()
+send (via email) exported GPS log
+Add current track info
+Add track details to list

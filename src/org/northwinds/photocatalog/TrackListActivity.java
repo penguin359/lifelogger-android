@@ -46,23 +46,21 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 public class TrackListActivity extends ListActivity {
-	private SharedPreferences mPrefs = null;
-
-	private LogDbAdapter mDbAdapter;
+	private static final String[] FROM = new String[] {
+		LifeLog.Tracks._ID,
+		LifeLog.Tracks.NAME,
+	};
+	private static final int[] TO = new int[] {
+		0,
+		R.id.name,
+	};
 
 	private void refreshTracks() {
-		Cursor c = mDbAdapter.fetchAllTracks();
-		startManagingCursor(c);
-
-		String[] from = new String[] {
-			LogDbAdapter.KEY_NAME
-		};
-		int[] to = new int[] {
-			R.id.name
-		};
-
+		Cursor c = managedQuery(LifeLog.Tracks.CONTENT_URI, FROM,
+					null, null, null);
 		SimpleCursorAdapter entries =
-			new SimpleCursorAdapter(this, R.layout.track_row, c, from, to);
+		    new SimpleCursorAdapter(this, R.layout.track_row,
+				    	    c, FROM, TO);
 		setListAdapter(entries);
 	}
 
@@ -71,26 +69,31 @@ public class TrackListActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.track_list);
 
-		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-		mDbAdapter = new LogDbAdapter(this);
-		mDbAdapter.open();
-		refreshTracks();
-
 		registerForContextMenu(getListView());
 	}
 
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
+	protected void onResume() {
+		super.onResume();
+		refreshTracks();
+	}
+
+	@Override
+	protected void onListItemClick(ListView l, View v,
+				       int position, long id) {
 		super.onListItemClick(l, v, position, id);
-		SharedPreferences.Editor editor = mPrefs.edit();
+
+		SharedPreferences.Editor editor =
+		    PreferenceManager.getDefaultSharedPreferences(this).edit();
 		editor.putLong("track", id);
 		editor.commit();
+
 		finish();
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+	public void onCreateContextMenu(ContextMenu menu, View v,
+					ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.track, menu);
@@ -98,16 +101,20 @@ public class TrackListActivity extends ListActivity {
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo)item.getMenuInfo();
+		AdapterContextMenuInfo info =
+		    (AdapterContextMenuInfo)item.getMenuInfo();
 		switch(item.getItemId()) {
 		case R.id.edit:
-			Intent intent = new Intent(this, EditTrackActivity.class);
+			Intent intent =
+			    new Intent(this, EditTrackActivity.class);
 			intent.putExtra("track", info.id);
 			startActivity(intent);
-			refreshTracks();
 			return true;
 		case R.id.delete:
-			mDbAdapter.deleteTrack(info.id);
+			getContentResolver()
+			    .delete(ContentUris
+				.withAppendedId(LifeLog.Tracks.CONTENT_URI,
+						info.id));
 			refreshTracks();
 			return true;
 		case R.id.save:
@@ -115,17 +122,14 @@ public class TrackListActivity extends ListActivity {
 			exportGPS.exportAsGPX(info.id);
 			return true;
 		case R.id.gps_list:
-			Uri uri = ContentUris.appendId(LifeLog.Tracks.CONTENT_URI.buildUpon(), info.id).appendPath("locations").build();
-			intent = new Intent(Intent.ACTION_VIEW, uri, this, GPSList.class);
+			Uri uri = ContentUris
+			    .appendId(LifeLog.Tracks.CONTENT_URI.buildUpon(),
+				      info.id).appendPath("locations").build();
+			intent = new Intent(Intent.ACTION_VIEW, uri,
+					    this, GPSList.class);
 			startActivity(intent);
 			return true;
 		}
 		return super.onContextItemSelected(item);
-	}
-
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		mDbAdapter.close();
 	}
 }

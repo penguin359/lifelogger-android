@@ -4,9 +4,9 @@
   android:layout_height="fill_parent" android:layout_width="fill_parent">
 <LinearLayout android:id="@+id/header"
   android:layout_height="wrap_content" android:layout_width="fill_parent">
-<TextView android:layout_weight="2" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="Time" android:background="#008000"/>
-<TextView android:layout_weight="3" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="Latitude" android:background="#008000"/>
-<TextView android:layout_weight="3" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="Longitude" android:background="#008000"/>
+  <TextView android:layout_weight="2" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="Time" android:background="@color/uploaded"/>
+  <TextView android:layout_weight="3" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="Latitude" android:background="@color/uploaded"/>
+  <TextView android:layout_weight="3" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="Longitude" android:background="@color/uploaded"/>
 </LinearLayout>
 <LinearLayout android:id="@+id/footer"
   android:layout_height="wrap_content" android:layout_width="fill_parent"

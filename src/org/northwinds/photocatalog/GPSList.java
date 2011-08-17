@@ -38,6 +38,55 @@ import android.widget.Button;
 import android.widget.SimpleCursorAdapter;
 
 public class GPSList extends ListActivity {
+	private static final String[] FROM = new String[] {
+		LifeLog.Locations._ID,
+		LifeLog.Locations.TIMESTAMP,
+		LifeLog.Locations.LATITUDE,
+		LifeLog.Locations.LONGITUDE,
+		LifeLog.Locations.ACCURACY,
+		LifeLog.Locations.UPLOADED,
+	};
+	private static final int[] TO = new int[] {
+		0,
+		R.id.timestamp,
+		R.id.latitude,
+		R.id.longitude,
+		R.id.accuracy,
+		R.id.row,
+	};
+
+	private static final SimpleCursorAdapter.ViewBinder sBinder =
+	    new SimpleCursorAdapter.ViewBinder() {
+		private final int uploadedColor =
+		    getResources().getColor(R.color.uploaded);
+
+		private final int notUploadedColor =
+		    getResources().getColor(R.color.not_uploaded);
+
+		public boolean setViewValue(View view,
+					    Cursor cursor,
+					    int columnIndex) {
+			if(cursor.getColumnName(columnIndex)
+				 .equals(LifeLog.Locations.UPLOADED)) {
+				if(cursor.getInt(columnIndex) != 0)
+				      view.setBackgroundColor(uploadedColor);
+				else
+				      view.setBackgroundColor(notUploadedColor);
+				return true;
+			}
+			return false;
+		}
+	};
+
+	private void refreshLocations() {
+		Cursor c =
+		   managedQuery(getIntent().getData(), FROM, null, null, null);
+		SimpleCursorAdapter entries =
+		   new SimpleCursorAdapter(this, R.layout.gps_row, c, FROM, TO);
+		entries.setViewBinder(sBinder);
+		setListAdapter(entries);
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -53,59 +102,32 @@ public class GPSList extends ListActivity {
 			 .build();
 		intent.setData(uri);
 
-		fillData();
-
 		Button b = (Button)findViewById(R.id.delete_uploaded_but);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				getContentResolver().delete(getIntent().getData(), LifeLog.Locations.UPLOADED + "=1", null);
-				fillData();
+				getContentResolver()
+				    .delete(getIntent().getData(),
+					    LifeLog.Locations.UPLOADED + "=1",
+					    null);
+				refreshLocations();
 			}
 		});
 
 		b = (Button)findViewById(R.id.delete_but);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				getContentResolver().delete(getIntent().getData(), null, null);
-				fillData();
+				getContentResolver()
+				    .delete(getIntent().getData(),
+					    null,
+					    null);
+				refreshLocations();
 			}
 		});
 	}
 
-	static final SimpleCursorAdapter.ViewBinder sBinder = new SimpleCursorAdapter.ViewBinder() {
-		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-			if(cursor.getColumnName(columnIndex).equals(LifeLog.Locations.UPLOADED)) {
-				if(cursor.getInt(columnIndex) != 0)
-					view.setBackgroundColor(0xff008000);
-				else
-					view.setBackgroundColor(0xff800000);
-				return true;
-			}
-			return false;
-		}
-	};
-	static final String[] sFrom = new String[] {
-		LifeLog.Locations._ID,
-		LifeLog.Locations.TIMESTAMP,
-		LifeLog.Locations.LATITUDE,
-		LifeLog.Locations.LONGITUDE,
-		LifeLog.Locations.ACCURACY,
-		LifeLog.Locations.UPLOADED
-	};
-	static final int[] sTo = new int[] {
-		0,
-		R.id.timestamp,
-		R.id.latitude,
-		R.id.longitude,
-		R.id.accuracy,
-		R.id.row
-	};
-
-	private void fillData() {
-		Cursor c = managedQuery(getIntent().getData(), sFrom, null, null, null);
-		SimpleCursorAdapter entries =
-			new SimpleCursorAdapter(this, R.layout.gps_row, c, sFrom, sTo);
-		entries.setViewBinder(sBinder);
-		setListAdapter(entries);
+	@Override
+	protected void onResume() {
+		super.onResume();
+		refreshLocations();
 	}
 }
