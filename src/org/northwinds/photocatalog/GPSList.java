@@ -43,6 +43,7 @@ public class GPSList extends ListActivity {
 		LifeLog.Locations.TIMESTAMP,
 		LifeLog.Locations.LATITUDE,
 		LifeLog.Locations.LONGITUDE,
+		LifeLog.Locations.ALTITUDE,
 		LifeLog.Locations.ACCURACY,
 		LifeLog.Locations.UPLOADED,
 	};
@@ -51,31 +52,9 @@ public class GPSList extends ListActivity {
 		R.id.timestamp,
 		R.id.latitude,
 		R.id.longitude,
+		R.id.altitude,
 		R.id.accuracy,
 		R.id.row,
-	};
-
-	private final SimpleCursorAdapter.ViewBinder mBinder =
-	    new SimpleCursorAdapter.ViewBinder() {
-		private final int uploadedColor =
-		    getResources().getColor(R.color.uploaded);
-
-		private final int notUploadedColor =
-		    getResources().getColor(R.color.not_uploaded);
-
-		public boolean setViewValue(View view,
-					    Cursor cursor,
-					    int columnIndex) {
-			if(cursor.getColumnName(columnIndex)
-				 .equals(LifeLog.Locations.UPLOADED)) {
-				if(cursor.getInt(columnIndex) != 0)
-				      view.setBackgroundColor(uploadedColor);
-				else
-				      view.setBackgroundColor(notUploadedColor);
-				return true;
-			}
-			return false;
-		}
 	};
 
 	private void refreshLocations() {
@@ -83,7 +62,27 @@ public class GPSList extends ListActivity {
 		   managedQuery(getIntent().getData(), FROM, null, null, null);
 		SimpleCursorAdapter entries =
 		   new SimpleCursorAdapter(this, R.layout.gps_row, c, FROM, TO);
-		entries.setViewBinder(mBinder);
+		entries.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+		    private final int uploadedColor =
+			getResources().getColor(R.color.uploaded);
+
+		    private final int notUploadedColor =
+			getResources().getColor(R.color.not_uploaded);
+
+		    public boolean setViewValue(View view,
+						Cursor cursor,
+						int columnIndex) {
+			if(cursor.getColumnName(columnIndex)
+				 .equals(LifeLog.Locations.UPLOADED)) {
+			    if(cursor.getInt(columnIndex) != 0)
+				view.setBackgroundColor(uploadedColor);
+			    else
+				view.setBackgroundColor(notUploadedColor);
+			    return true;
+			}
+			return false;
+		    }
+		});
 		setListAdapter(entries);
 	}
 
@@ -102,6 +101,8 @@ public class GPSList extends ListActivity {
 			 .build();
 		intent.setData(uri);
 
+		refreshLocations();
+
 		Button b = (Button)findViewById(R.id.delete_uploaded_but);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -109,7 +110,7 @@ public class GPSList extends ListActivity {
 				    .delete(getIntent().getData(),
 					    LifeLog.Locations.UPLOADED + "=1",
 					    null);
-				refreshLocations();
+				//refreshLocations();
 			}
 		});
 
@@ -120,7 +121,7 @@ public class GPSList extends ListActivity {
 				    .delete(getIntent().getData(),
 					    null,
 					    null);
-				refreshLocations();
+				//refreshLocations();
 			}
 		});
 	}
@@ -128,6 +129,6 @@ public class GPSList extends ListActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		refreshLocations();
+		//refreshLocations();
 	}
 }
