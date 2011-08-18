@@ -34,12 +34,13 @@ import java.util.Date;
 
 import android.app.Activity;
 import android.content.ComponentName;
-import android.content.ContentValues;
+import android.content.ContentUris;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationProvider;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -214,17 +215,17 @@ public class Main extends Activity {
 
 	private SharedPreferences mPrefs = null;
 
-	private final LogDbAdapter mDbAdapter = new LogDbAdapter(this);
-
 	private final View.OnClickListener mStartGpsOnClick = new View.OnClickListener() {
 		public void onClick(View v) {
-			startService(new Intent(Logger.ACTION_START_LOG, null, Main.this, Logger.class));
+			startService(new Intent(Logger.ACTION_START_LOG, null,
+						Main.this, Logger.class));
 		}
 	};
 
 	private final View.OnClickListener mStopGpsOnClick = new View.OnClickListener() {
 		public void onClick(View v) {
-			startService(new Intent(Logger.ACTION_STOP_LOG, null, Main.this, Logger.class));
+			startService(new Intent(Logger.ACTION_STOP_LOG, null,
+						Main.this, Logger.class));
 		}
 	};
 
@@ -284,14 +285,20 @@ public class Main extends Activity {
 		b = (Button)findViewById(R.id.delete_uploaded_but);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				mDbAdapter.deleteUploadedLocations();
+				getContentResolver()
+				    .delete(LifeLog.Locations.CONTENT_URI,
+					    LifeLog.Locations.UPLOADED + "=1",
+					    null);
 			}
 		});
 
 		b = (Button)findViewById(R.id.delete_but);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				mDbAdapter.deleteAllLocations();
+				getContentResolver()
+				    .delete(LifeLog.Locations.CONTENT_URI,
+					    null,
+					    null);
 			}
 		});
 
@@ -305,7 +312,6 @@ public class Main extends Activity {
 		mStartButton = (Button)findViewById(R.id.start_but);
 		mStartButton.setOnClickListener(mStartGpsOnClick);
 
-		mDbAdapter.open();
 		bindService(new Intent(this, Logger.class), mConnection, BIND_AUTO_CREATE);
 
 		parseIntent(getIntent());
@@ -346,7 +352,8 @@ public class Main extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
 		case R.id.new_track:
-			long track = mDbAdapter.newTrack(new ContentValues());
+			Uri trackUri = getContentResolver().insert(LifeLog.Tracks.CONTENT_URI, null);
+			long track = ContentUris.parseId(trackUri);
 			SharedPreferences.Editor editor = mPrefs.edit();
 			editor.putLong("track", track);
 			editor.commit();
@@ -356,9 +363,10 @@ public class Main extends Activity {
 			track = mPrefs.getLong("track", 0);
 			if(track <= 0)
 				return true;
-			Intent intent = new Intent(this, EditTrackActivity.class);
-			intent.putExtra("track", track);
-			startActivity(intent);
+			startActivity(
+			    new Intent(Intent.ACTION_EDIT,
+				       ContentUris.withAppendedId(LifeLog.Tracks.CONTENT_URI, track),
+				       this, EditTrackActivity.class));
 			return true;
 		case R.id.continuous_record:
 			editor = mPrefs.edit();
@@ -366,13 +374,15 @@ public class Main extends Activity {
 			editor.commit();
 			return true;
 		case R.id.manage_tracks:
-			startActivity(new Intent(this, TrackListActivity.class));
+			startActivity(
+			    new Intent(this, TrackListActivity.class));
 			return true;
 		case R.id.settings:
 			startActivity(new Intent(this, PrefAct.class));
 			return true;
 		case R.id.quit:
-			startService(new Intent(Logger.ACTION_STOP_LOG, null, this, Logger.class));
+			startService(new Intent(Logger.ACTION_STOP_LOG, null,
+						this, Logger.class));
 			finish();
 			return true;
 		case R.id.kill:
@@ -380,7 +390,7 @@ public class Main extends Activity {
 			return true;
 		case R.id.save:
 			ExportGPS exportGPS = new ExportGPS(this);
-			exportGPS.exportAsGPX(0);
+			exportGPS.exportAsGPX(LifeLog.Locations.CONTENT_URI);
 			return true;
 		case R.id.maps:
 			startActivity(new Intent(this, MapViewActivity.class));
@@ -421,6 +431,5 @@ public class Main extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		unbindService(mConnection);
-		mDbAdapter.close();
 	}
 }

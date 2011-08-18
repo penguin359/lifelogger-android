@@ -39,6 +39,7 @@ import java.util.Date;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Environment;
 import android.widget.Toast;
 
@@ -52,9 +53,7 @@ class ExportGPS {
 		mCtx = ctx;
 	}
 
-	public void exportAsGPX(long track) {
-		LogDbAdapter dbAdapter = new LogDbAdapter(mCtx);
-		dbAdapter.open();
+	public void exportAsGPX(Uri track) {
 		String state = Environment.getExternalStorageState();
 		if(Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
 			Toast.makeText(mCtx, "SD Card is read-only.", Toast.LENGTH_LONG).show();
@@ -85,9 +84,7 @@ class ExportGPS {
 			os.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".getBytes());
 			os.write("<gpx creator=\"PhotoCatalog\" version=\"1.1\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\" xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n".getBytes());
 			os.write("  <trk>\n    <trkseg>\n".getBytes());
-			//Cursor c = dbAdapter.fetchUploadLocations(cols, "uploaded != 1");
-			//Cursor c = dbAdapter.fetchAllLocations();
-			Cursor c = dbAdapter.fetchLocationsByTrack(track);
+			Cursor c = mCtx.getContentResolver().query(track, null, null, null, null);
 			int latCol = c.getColumnIndexOrThrow("latitude");
 			int lonCol = c.getColumnIndexOrThrow("longitude");
 			int altCol = c.getColumnIndexOrThrow("altitude");
@@ -108,6 +105,5 @@ class ExportGPS {
 			Toast.makeText(mCtx, "Exception writing to file: " + ex.toString(), Toast.LENGTH_LONG).show();
 		}
 		Toast.makeText(mCtx, "Saved GPX log to " + file.toString(), Toast.LENGTH_LONG).show();
-		dbAdapter.close();
 	}
 }

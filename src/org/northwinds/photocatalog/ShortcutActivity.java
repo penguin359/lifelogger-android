@@ -17,6 +17,7 @@ public class ShortcutActivity extends Activity {
 	private static final String ACTION_START_LOG_AND_PHOTOCATALOG = "org.northwinds.android.intent.START_LOG_AND_PHOTOCATALOG";
 	private static final String ACTION_START_PHOTOCATALOG = "org.northwinds.android.intent.START_PHOTOCATALOG";
 	private static final String ACTION_STOP_LOG = "org.northwinds.android.intent.STOP_LOG";
+	private static final String ACTION_TOGGLE_LOG = "org.northwinds.android.intent.TOGGLE_LOG";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +36,11 @@ public class ShortcutActivity extends Activity {
 		}
 		if(intent != null && ACTION_START_PHOTOCATALOG.equals(intent.getAction())) {
 			startActivity(new Intent(this, Main.class));
+			finish();
+		}
+		if(intent != null && ACTION_TOGGLE_LOG.equals(intent.getAction())) {
+			startService(new Intent(Logger.ACTION_TOGGLE_LOG, null, this, Logger.class));
+			Toast.makeText(this, "GPS Logger toggled", Toast.LENGTH_SHORT).show();
 			finish();
 		}
 		if(intent != null && ACTION_STOP_LOG.equals(intent.getAction())) {
@@ -57,6 +63,9 @@ public class ShortcutActivity extends Activity {
 		final RadioButton openRadio = new RadioButton(this);
 		openRadio.setText("Open PhotoCatalog");
 		radioGroup.addView(openRadio);
+		final RadioButton toggleRadio = new RadioButton(this);
+		toggleRadio.setText("Toggle GPS");
+		radioGroup.addView(toggleRadio);
 		final RadioButton stopRadio = new RadioButton(this);
 		stopRadio.setText("Stop GPS");
 		radioGroup.addView(stopRadio);
@@ -73,6 +82,9 @@ public class ShortcutActivity extends Activity {
 				} else if(openRadio.isChecked()) {
 					shortcutIntent = new Intent(ACTION_START_PHOTOCATALOG, null, ShortcutActivity.this, ShortcutActivity.class);
 					intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, "Start PC");
+				} else if(toggleRadio.isChecked()) {
+					shortcutIntent = new Intent(ACTION_TOGGLE_LOG, null, ShortcutActivity.this, ShortcutActivity.class);
+					intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, "Toggle GPS");
 				} else if(stopRadio.isChecked()) {
 					shortcutIntent = new Intent(ACTION_STOP_LOG, null, ShortcutActivity.this, ShortcutActivity.class);
 					intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, "Stop GPS");
@@ -94,6 +106,5 @@ public class ShortcutActivity extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		//finish();
 	}
 }

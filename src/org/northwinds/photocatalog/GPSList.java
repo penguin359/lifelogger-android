@@ -29,80 +29,106 @@
 package org.northwinds.photocatalog;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SimpleCursorAdapter;
 
 public class GPSList extends ListActivity {
-	private LogDbAdapter mDbAdapter;
+	private static final String[] FROM = new String[] {
+		LifeLog.Locations._ID,
+		LifeLog.Locations.TIMESTAMP,
+		LifeLog.Locations.LATITUDE,
+		LifeLog.Locations.LONGITUDE,
+		LifeLog.Locations.ALTITUDE,
+		LifeLog.Locations.ACCURACY,
+		LifeLog.Locations.UPLOADED,
+	};
+	private static final int[] TO = new int[] {
+		0,
+		R.id.timestamp,
+		R.id.latitude,
+		R.id.longitude,
+		R.id.altitude,
+		R.id.accuracy,
+		R.id.row,
+	};
 
-	private long mTrack = 0;
+	private void refreshLocations() {
+		Cursor c =
+		   managedQuery(getIntent().getData(), FROM, null, null, null);
+		SimpleCursorAdapter entries =
+		   new SimpleCursorAdapter(this, R.layout.gps_row, c, FROM, TO);
+		entries.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+		    private final int uploadedColor =
+			getResources().getColor(R.color.uploaded);
+
+		    private final int notUploadedColor =
+			getResources().getColor(R.color.not_uploaded);
+
+		    public boolean setViewValue(View view,
+						Cursor cursor,
+						int columnIndex) {
+			if(cursor.getColumnName(columnIndex)
+				 .equals(LifeLog.Locations.UPLOADED)) {
+			    if(cursor.getInt(columnIndex) != 0)
+				view.setBackgroundColor(uploadedColor);
+			    else
+				view.setBackgroundColor(notUploadedColor);
+			    return true;
+			}
+			return false;
+		    }
+		});
+		setListAdapter(entries);
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gps_list);
 
-		mTrack = getIntent().getLongExtra(LogDbAdapter.KEY_ROWID, 0);
+		Intent intent = getIntent();
+		Uri uri = intent.getData();
+		if(uri == null)
+			uri = LifeLog.Locations.CONTENT_URI;
+		uri = uri.buildUpon()
+		         .appendQueryParameter(LifeLog.PARAM_FORMAT,
+					       LifeLog.FORMAT_PRETTY)
+			 .build();
+		intent.setData(uri);
 
-		mDbAdapter = new LogDbAdapter(this);
-		mDbAdapter.open();
-		//Cursor c = mDbAdapter.fetchAllLocations();
-		Cursor c = mDbAdapter.fetchLocationsByTrackF(mTrack);
-		startManagingCursor(c);
-
-		String[] from = new String[] {
-			LogDbAdapter.KEY_TIMESTAMP,
-			LogDbAdapter.KEY_LATITUDE,
-			LogDbAdapter.KEY_LONGITUDE,
-			LogDbAdapter.KEY_UPLOADED
-		};
-		int[] to = new int[] {
-			R.id.timestamp,
-			R.id.latitude,
-			R.id.longitude,
-			R.id.row
-		};
-
-		SimpleCursorAdapter entries =
-			new SimpleCursorAdapter(this, R.layout.gps_row, c, from, to);
-		entries.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-			//@Override
-			public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-				if(cursor.getColumnName(columnIndex).equals(LogDbAdapter.KEY_UPLOADED)) {
-					if(cursor.getInt(columnIndex) != 0)
-						view.setBackgroundColor(0xff008000);
-					else
-						view.setBackgroundColor(0xff800000);
-					return true;
-				}
-				return false;
-			}
-		});
-		setListAdapter(entries);
+		refreshLocations();
 
 		Button b = (Button)findViewById(R.id.delete_uploaded_but);
 		b.setOnClickListener(new View.OnClickListener() {
-			//@Override
 			public void onClick(View v) {
-				mDbAdapter.deleteUploadedLocations();
+				getContentResolver()
+				    .delete(getIntent().getData(),
+					    LifeLog.Locations.UPLOADED + "=1",
+					    null);
+				//refreshLocations();
 			}
 		});
 
 		b = (Button)findViewById(R.id.delete_but);
 		b.setOnClickListener(new View.OnClickListener() {
-			//@Override
 			public void onClick(View v) {
-				mDbAdapter.deleteAllLocations();
+				getContentResolver()
+				    .delete(getIntent().getData(),
+					    null,
+					    null);
+				//refreshLocations();
 			}
 		});
 	}
 
 	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		mDbAdapter.close();
+	protected void onResume() {
+		super.onResume();
+		//refreshLocations();
 	}
 }

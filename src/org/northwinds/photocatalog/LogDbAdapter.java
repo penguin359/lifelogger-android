@@ -146,7 +146,8 @@ public class LogDbAdapter {
 
 	public Cursor fetchLocation(long rowId) throws SQLException {
 		Cursor c = mDb.query(true, TABLE_LOCATION, new String[] {
-			KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE
+			KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE,
+			KEY_ACCURACY
 		}, KEY_ROWID + "=" + rowId, null, null, null, null, null);
 		if (c != null) {
 			c.moveToFirst();
@@ -158,7 +159,7 @@ public class LogDbAdapter {
 		//return mDb.query(TABLE_LOCATION, new String[] {
 		//	KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE
 		//}, null, null, null, null, null);
-		return mDb.rawQuery("SELECT _id, datetime(round(timestamp), 'unixepoch') AS timestamp, latitude, longitude, uploaded, altitude FROM locations", null);
+		return mDb.rawQuery("SELECT _id, datetime(round(timestamp), 'unixepoch') AS timestamp, latitude, longitude, uploaded, altitude, accuracy FROM locations", null);
 	}
 
 	public Cursor fetchAllLocations2() {
@@ -171,14 +172,14 @@ public class LogDbAdapter {
 		if(track == 0)
 			return fetchAllLocations2();
 		return mDb.query(TABLE_LOCATION, new String[] {
-			KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE, KEY_ALTITUDE
+			KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE, KEY_ALTITUDE, KEY_ACCURACY
 		}, KEY_TRACK + " = " + track, null, null, null, null);
 	}
 
 	public Cursor fetchLocationsByTrackF(long track) {
 		if(track == 0)
 			return fetchAllLocationsF();
-		return mDb.rawQuery("SELECT _id, datetime(round(timestamp), 'unixepoch') AS timestamp, latitude, longitude, uploaded, altitude FROM locations WHERE " + KEY_TRACK + " = " + track, null);
+		return mDb.rawQuery("SELECT _id, datetime(round(timestamp), 'unixepoch') AS timestamp, latitude, longitude, uploaded, altitude, accuracy FROM locations WHERE " + KEY_TRACK + " = " + track, null);
 	}
 
 	public Cursor fetchUploadLocations(String[] cols, String condition) {
@@ -260,6 +261,18 @@ public class LogDbAdapter {
 
 	public boolean deleteAllLocations() {
 		return mDb.delete(TABLE_LOCATION, null, null) > 0;
+	}
+
+	public boolean deleteUploadedLocationsByTrack(long rowId) {
+		if(rowId == 0)
+			return deleteUploadedLocations();
+		return mDb.delete(TABLE_LOCATION, "uploaded = 1 AND " + KEY_TRACK + " = " + rowId, null) > 0;
+	}
+
+	public boolean deleteAllLocationsByTrack(long rowId) {
+		if(rowId == 0)
+			return deleteAllLocations();
+		return mDb.delete(TABLE_LOCATION, KEY_TRACK + " = " + rowId, null) > 0;
 	}
 
 	public long newTrack(ContentValues values) {

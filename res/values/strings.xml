@@ -2,7 +2,14 @@
 <resources>
     <string name="hello">Hello World, Main!</string>
     <string name="app_name">PhotoCatalog</string>
+    <string name="latitude">Latitude</string>
+    <string name="time">Time</string>
+    <string name="longitude">Longitude</string>
+    <string name="altitude">Altitude</string>
+    <string name="accuracy">Accuracy</string>
     <string name="no_gps">No GPS Coordinates Logged</string>
+    <string name="delete_all">Delete All</string>
+    <string name="delete_uploaded">Delete Uploaded</string>
     <string name="new_track">New Track</string>
     <string name="edit_track">Edit Track</string>
     <string name="continuous_record">Continuous Record</string>
