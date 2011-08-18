@@ -390,7 +390,7 @@ public class Main extends Activity {
 			return true;
 		case R.id.save:
 			ExportGPS exportGPS = new ExportGPS(this);
-			exportGPS.exportAsGPX(0);
+			exportGPS.exportAsGPX(LifeLog.Locations.CONTENT_URI);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

@@ -354,74 +354,6 @@ public class LifeProvider extends ContentProvider {
 	}
 
 	/*
-	public Cursor fetchTrack(long rowId) throws SQLException {
-		Cursor c = mDb.query(true, TABLE_TRACKS, new String[] {
-			KEY_ROWID, KEY_NAME, KEY_CMT, KEY_TYPE, KEY_DESC
-		}, KEY_ROWID + "=" + rowId, null, null, null, null, null);
-		if (c != null) {
-			c.moveToFirst();
-		}
-		return c;
-	}
-
-	public Cursor fetchAllTracks() throws SQLException {
-		Cursor c = mDb.query(true, TABLE_TRACKS, new String[] {
-			KEY_ROWID, KEY_NAME, KEY_CMT, KEY_TYPE, KEY_DESC
-		}, null, null, null, null, null, null);
-		return c;
-	}
-
-	public Cursor fetchLocation(long rowId) throws SQLException {
-		Cursor c = mDb.query(true, TABLE_LOCATIONS, new String[] {
-			KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE,
-			KEY_ACCURACY
-		}, KEY_ROWID + "=" + rowId, null, null, null, null, null);
-		if (c != null) {
-			c.moveToFirst();
-		}
-		return c;
-	}
-
-	public Cursor fetchAllLocationsF() {
-		//return mDb.query(TABLE_LOCATIONS, new String[] {
-		//	KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE
-		//}, null, null, null, null, null);
-		return mDb.rawQuery("SELECT _id, datetime(round(timestamp), 'unixepoch') AS timestamp, latitude, longitude, uploaded, altitude, accuracy FROM locations", null);
-	}
-
-	public Cursor fetchAllLocations2() {
-		return mDb.query(TABLE_LOCATIONS, new String[] {
-			KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE, KEY_ALTITUDE
-		}, null, null, null, null, null);
-	}
-
-	public Cursor fetchLocationsByTrack(long track) {
-		if(track == 0)
-			return fetchAllLocations2();
-		return mDb.query(TABLE_LOCATIONS, new String[] {
-			KEY_ROWID, KEY_TIMESTAMP, KEY_LATITUDE, KEY_LONGITUDE, KEY_ALTITUDE, KEY_ACCURACY
-		}, KEY_TRACK + " = " + track, null, null, null, null);
-	}
-
-	public Cursor fetchLocationsByTrackF(long track) {
-		if(track == 0)
-			return fetchAllLocationsF();
-		return mDb.rawQuery("SELECT _id, datetime(round(timestamp), 'unixepoch') AS timestamp, latitude, longitude, uploaded, altitude, accuracy FROM locations WHERE " + KEY_TRACK + " = " + track, null);
-	}
-
-	public Cursor fetchUploadLocations(String[] cols, String condition) {
-		return mDb.query(TABLE_LOCATIONS, cols, condition, null, null, null, null, "100");
-	}
-
-	public int countUploadLocations() {
-		Cursor c = mDb.rawQuery("SELECT count(*) FROM locations WHERE uploaded != 1", null);
-		int count = 0;
-		if(c.moveToFirst())
-			count = c.getInt(0);
-		c.close();
-		return count;
-	}
-
 	public long insertLocation(long track, Location location) {
 		ContentValues values = new ContentValues();
 		values.put(KEY_TRACK,     track);
@@ -455,55 +387,6 @@ public class LifeProvider extends ContentProvider {
 		//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
 
 		return mDb.insert(TABLE_LOCATIONS, null, values);
-	}
-
-	public boolean updateTrack(long rowId, ContentValues values) {
-		return mDb.update(TABLE_TRACKS, values, KEY_ROWID + "=" + rowId, null) > 0;
-	}
-
-	public boolean updateLocation(long rowId, Location location) {
-		ContentValues args = new ContentValues();
-		args.put(KEY_TIMESTAMP, location.getTime()/1000);
-		args.put(KEY_LATITUDE, location.getLatitude());
-		args.put(KEY_LONGITUDE, location.getLongitude());
-
-		return mDb.update(TABLE_LOCATIONS, args, KEY_ROWID + "=" + rowId, null) > 0;
-	}
-
-	public boolean updateLocation(long rowId, ContentValues args) {
-		return mDb.update(TABLE_LOCATIONS, args, KEY_ROWID + "=" + rowId, null) > 0;
-	}
-
-	public boolean deleteTrack(long rowId) {
-		return mDb.delete(TABLE_TRACKS, KEY_ROWID + "=" + rowId, null) > 0;
-	}
-
-	public boolean deleteLocation(long rowId) {
-		return mDb.delete(TABLE_LOCATIONS, KEY_ROWID + "=" + rowId, null) > 0;
-	}
-
-	public boolean deleteUploadedLocations() {
-		return mDb.delete(TABLE_LOCATIONS, "uploaded = 1", null) > 0;
-	}
-
-	public boolean deleteAllLocations() {
-		return mDb.delete(TABLE_LOCATIONS, null, null) > 0;
-	}
-
-	public boolean deleteUploadedLocationsByTrack(long rowId) {
-		if(rowId == 0)
-			return deleteUploadedLocations();
-		return mDb.delete(TABLE_LOCATIONS, "uploaded = 1 AND " + KEY_TRACK + " = " + rowId, null) > 0;
-	}
-
-	public boolean deleteAllLocationsByTrack(long rowId) {
-		if(rowId == 0)
-			return deleteAllLocations();
-		return mDb.delete(TABLE_LOCATIONS, KEY_TRACK + " = " + rowId, null) > 0;
-	}
-
-	public long newTrack(ContentValues values) {
-		return mDb.insert(TABLE_TRACKS, KEY_NAME, values);
 	}
 	*/
 }

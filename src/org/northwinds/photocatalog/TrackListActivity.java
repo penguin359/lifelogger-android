@@ -119,7 +119,7 @@ public class TrackListActivity extends ListActivity {
 			return true;
 		case R.id.save:
 			ExportGPS exportGPS = new ExportGPS(this);
-			exportGPS.exportAsGPX(info.id);
+			exportGPS.exportAsGPX(uri.appendPath("locations").build());
 			return true;
 		case R.id.gps_list:
 			startActivity(
