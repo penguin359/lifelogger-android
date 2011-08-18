@@ -29,6 +29,8 @@
 package org.northwinds.photocatalog;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -144,11 +146,42 @@ public class LifeProvider extends ContentProvider {
 		}
 	}
 
+	private Set<Uri> notifyUris = new HashSet<Uri>();
+
+	private Thread notifyThread = new Thread(new Runnable() {
+		public void run() {
+			while(notifyThread != null) {
+				synchronized(notifyUris) {
+					for(Uri uri: notifyUris) {
+						getContext().getContentResolver().notifyChange(uri, null);
+					}
+					notifyUris.clear();
+				}
+				try {
+					Thread.sleep(5000);
+				} catch(InterruptedException ex) {}
+				synchronized(notifyUris) {
+					try {
+						notifyUris.wait();
+					} catch(InterruptedException ex) {}
+				}
+			}
+		}
+	});
+
+	private void addNotifyUri(Uri uri) {
+		synchronized(notifyUris) {
+			notifyUris.add(uri);
+			notifyUris.notify();
+		}
+	}
+
 	private DatabaseHelper mDbHelper;
 
 	@Override
 	public boolean onCreate() {
 		mDbHelper = new DatabaseHelper(getContext());
+		notifyThread.start();
 		return true;
 	}
 
@@ -262,7 +295,7 @@ public class LifeProvider extends ContentProvider {
 		long rowId = db.insert(tableName, nullColumn, values);
 		if(rowId > 0) {
 			Uri rowUri = ContentUris.withAppendedId(LifeLog.Locations.CONTENT_URI, rowId);
-			getContext().getContentResolver().notifyChange(rowUri, null);
+			addNotifyUri(rowUri);
 			return rowUri;
 		}
 
@@ -306,7 +339,7 @@ public class LifeProvider extends ContentProvider {
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
 
-		getContext().getContentResolver().notifyChange(uri, null);
+		addNotifyUri(uri);
 		return count;
 	}
 
@@ -349,7 +382,7 @@ public class LifeProvider extends ContentProvider {
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
 
-		getContext().getContentResolver().notifyChange(uri, null);
+		addNotifyUri(uri);
 		return count;
 	}
 
