@@ -32,10 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
-//import android.app.Activity;
-//import android.content.Intent;
-//import android.content.ServiceConnection;
-//import android.content.SharedPreferences;
+import android.content.Intent;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -46,8 +43,6 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-//import android.preference.PreferenceManager;
-//import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
@@ -58,10 +53,7 @@ import com.google.android.maps.OverlayItem;
 import com.google.android.maps.Projection;
 
 public class MapViewActivity extends MapActivity {
-	private final LogDbAdapter mDbAdapter = new LogDbAdapter(this);
 	private Projection mProjection;
-
-	private long mTrack = 0;
 
 	private static class MapItemizedOverlay extends ItemizedOverlay<OverlayItem> {
 		private ArrayList<OverlayItem> mOverlays = new ArrayList<OverlayItem>();
@@ -110,7 +102,7 @@ public class MapViewActivity extends MapActivity {
 			mPaint.setStyle(Paint.Style.STROKE);
 			mPaint.setStrokeJoin(Paint.Join.ROUND);
 			mPaint.setStrokeCap(Paint.Cap.ROUND);
-			mPaint.setStrokeWidth(2);
+			mPaint.setStrokeWidth(5);
 		}
 
 		public void draw(Canvas canvas, MapView mapView, boolean shadow) {
@@ -159,12 +151,12 @@ public class MapViewActivity extends MapActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map_view);
 
-		mTrack = getIntent().getLongExtra(LogDbAdapter.KEY_ROWID, 0);
-
-		mDbAdapter.open();
+		Intent intent = getIntent();
+		if(intent.getData() == null)
+			intent.setData(LifeLog.Locations.CONTENT_URI);
 		ArrayList<GeoPoint> pathList = new ArrayList<GeoPoint>();
 		try {
-			Cursor c = mDbAdapter.fetchLocationsByTrack(mTrack);
+			Cursor c = getContentResolver().query(intent.getData(), null, null, null, null);
 			int latCol = c.getColumnIndexOrThrow("latitude");
 			int lonCol = c.getColumnIndexOrThrow("longitude");
 			if(c.moveToFirst()) {
@@ -198,21 +190,5 @@ public class MapViewActivity extends MapActivity {
 		itemizedOverlay.addOverlay(overlayItem2);
 		mapOverlays.add(itemizedOverlay);
 		mapOverlays.add(new PathOverlay());
-	}
-
-	//@Override
-	//protected void onStart() {
-	//	super.onStart();
-	//}
-
-	//@Override
-	//protected void onStop() {
-	//	super.onStop();
-	//}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		mDbAdapter.close();
 	}
 }

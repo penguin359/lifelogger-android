@@ -128,9 +128,10 @@ public class TrackListActivity extends ListActivity {
 				       this, GPSList.class));
 			return true;
 		case R.id.map:
-			Intent intent = new Intent(this, MapViewActivity.class);
-			intent.putExtra(LogDbAdapter.KEY_ROWID, info.id);
-			startActivity(intent);
+			startActivity(
+			    new Intent(Intent.ACTION_VIEW,
+				       uri.appendPath("locations").build(),
+				       this, MapViewActivity.class));
 			return true;
 		}
 		return super.onContextItemSelected(item);
