@@ -34,6 +34,7 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Canvas;
@@ -42,7 +43,10 @@ import android.graphics.Path;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
@@ -108,10 +112,13 @@ public class MapViewActivity extends MapActivity {
 		public void draw(Canvas canvas, MapView mapView, boolean shadow) {
 			super.draw(canvas, mapView, shadow);
 
+			if(mPathList == null)
+				return;
+
 			Path path = new Path();
-			if(mFirstPoint != null) {
+			if(mPathList.length > 0) {
 				Point p1 = new Point();
-				mProjection.toPixels(mFirstPoint, p1);
+				mProjection.toPixels(mPathList[0], p1);
 				path.moveTo(p1.x, p1.y);
 			}
 
@@ -143,27 +150,20 @@ public class MapViewActivity extends MapActivity {
 		return false;
 	}
 
-	private GeoPoint mFirstPoint = null;
 	private GeoPoint[] mPathList;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.map_view);
-
-		Intent intent = getIntent();
-		if(intent.getData() == null)
-			intent.setData(LifeLog.Locations.CONTENT_URI);
+	private GeoPoint[] refreshPath() {
 		ArrayList<GeoPoint> pathList = new ArrayList<GeoPoint>();
 		try {
-			Cursor c = getContentResolver().query(intent.getData(), null, null, null, null);
+			Cursor c = getContentResolver().query(getIntent().getData(), new String[] { LifeLog.Locations.LATITUDE, LifeLog.Locations.LONGITUDE, }, null, null, null);
 			int latCol = c.getColumnIndexOrThrow("latitude");
 			int lonCol = c.getColumnIndexOrThrow("longitude");
-			if(c.moveToFirst()) {
-				int lat = (int)(c.getDouble(latCol)*1000000.);
-				int lon = (int)(c.getDouble(lonCol)*1000000.);
-				mFirstPoint = new GeoPoint(lat, lon);
-			}
+			//if(c.moveToFirst()) {
+			//	int lat = (int)(c.getDouble(latCol)*1000000.);
+			//	int lon = (int)(c.getDouble(lonCol)*1000000.);
+			//	GeoPoint point = new GeoPoint(lat, lon);
+			//	pathList.add(point);
+			//}
 			while(c.moveToNext()) {
 				int lat = (int)(c.getDouble(latCol)*1000000.);
 				int lon = (int)(c.getDouble(lonCol)*1000000.);
@@ -174,12 +174,73 @@ public class MapViewActivity extends MapActivity {
 		} catch(SQLException ex) {
 		}
 
-		mPathList = pathList.toArray(new GeoPoint[pathList.size()]);
+		return pathList.toArray(new GeoPoint[pathList.size()]);
+	}
 
-		MapView mapView = (MapView)findViewById(R.id.map_view);
-		mapView.setBuiltInZoomControls(true);
-		List<Overlay> mapOverlays = mapView.getOverlays();
-		mProjection = mapView.getProjection();
+	private boolean mIsRefreshing = false;
+	private MapView mMapView;
+
+	private class RefreshTask extends AsyncTask<Void, Void, GeoPoint[]> {
+		protected void onPreExecute() {
+			mIsRefreshing = true;
+		}
+
+		protected GeoPoint[] doInBackground(Void... obj) {
+			try {
+				Thread.sleep(2000);
+			} catch(InterruptedException ex) {}
+			return refreshPath();
+		}
+
+		protected void onPostExecute(GeoPoint[] pathList) {
+			mPathList = pathList;
+			mMapView.invalidate();
+			mIsRefreshing = false;
+		}
+	}
+
+	private ContentObserver mObserver = new ContentObserver(null) {
+		@Override
+		public boolean deliverSelfNotifications() {
+			return true;
+		}
+
+		Handler mHandler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				mPathList = (GeoPoint[])msg.obj;
+				mMapView.invalidate();
+			}
+		};
+
+		@Override
+		public void onChange(boolean selfChange) {
+			super.onChange(selfChange);
+			//if(!mIsRefreshing) {
+			//	new RefreshTask().execute();
+			//}
+			try {
+				Thread.sleep(2000);
+			} catch(InterruptedException ex) {}
+			mHandler.sendMessage(Message.obtain(null, 0, refreshPath()));
+		}
+	};
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.map_view);
+
+		Intent intent = getIntent();
+		if(intent.getData() == null)
+			intent.setData(LifeLog.Locations.CONTENT_URI);
+
+		mPathList = refreshPath();
+
+		mMapView = (MapView)findViewById(R.id.map_view);
+		mMapView.setBuiltInZoomControls(true);
+		List<Overlay> mapOverlays = mMapView.getOverlays();
+		mProjection = mMapView.getProjection();
 		Drawable drawable = getResources().getDrawable(R.drawable.androidmarker);
 		MapItemizedOverlay itemizedOverlay = new MapItemizedOverlay(drawable, this);
 		GeoPoint point = new GeoPoint(19240000,-99120000);
@@ -190,5 +251,13 @@ public class MapViewActivity extends MapActivity {
 		itemizedOverlay.addOverlay(overlayItem2);
 		mapOverlays.add(itemizedOverlay);
 		mapOverlays.add(new PathOverlay());
+
+		getContentResolver().registerContentObserver(getIntent().getData(), true, mObserver);
+	}
+
+	@Override
+	protected void onDestroy() {
+		getContentResolver().unregisterContentObserver(mObserver);
+		super.onDestroy();
 	}
 }
