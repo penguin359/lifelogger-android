@@ -50,6 +50,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -59,7 +60,7 @@ import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-//import android.location.LocationProvider;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -204,14 +205,17 @@ public class Logger extends Service implements Runnable {
 		mLM = (LocationManager)getSystemService(LOCATION_SERVICE);
 		mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		mDbAdapter = new LogDbAdapter(this);
-		mDbAdapter.open();
 
 		mMinAccuracy = Float.parseFloat(mPrefs.getString("accuracy", "200"));
 		mFilterByDistance = mPrefs.getBoolean("filterByDistance", false);
 
 		/* upload thread hasn't been started yet */
-		mUploadCount = mDbAdapter.countUploadLocations();
+		Cursor c = getContentResolver().query(LifeLog.Locations.CONTENT_URI, new String[] { LifeLog.Locations._COUNT }, LifeLog.Locations.UPLOADED + "!=1", null, null);
+		if(c.moveToFirst()) {
+			int countCol = c.getColumnIndexOrThrow(LifeLog.Locations._COUNT);
+			mUploadCount = c.getInt(countCol);
+		}
+		c.close();
 		mAutoUpload = mPrefs.getBoolean("autoUpload", true);
 		mTrack = mPrefs.getLong("track", 0);
 		mUploadBaseUrl = mPrefs.getString("url", "http://www.example.org/photocatalog/");
@@ -333,12 +337,9 @@ public class Logger extends Service implements Runnable {
 		mPrefs.unregisterOnSharedPreferenceChangeListener(mPrefsChange);
 		stopGps();
 		stopUpload(true);
-		mDbAdapter.close();
 		//Toast.makeText(this, "Logger destroyed", Toast.LENGTH_LONG).show();
 		super.onDestroy();
 	}
-
-	private LogDbAdapter mDbAdapter;
 
 	private LocationListener mLocationListener = new LocationListener() {
 		public void onLocationChanged(Location loc) {
@@ -383,7 +384,23 @@ public class Logger extends Service implements Runnable {
 				}
 			}
 			synchronized(mUploadLock) {
-				mDbAdapter.insertLocation(mTrack, loc);
+				ContentValues values = new ContentValues(9);
+				values.put(LifeLog.Locations.TRACK,     mTrack);
+				values.put(LifeLog.Locations.TIMESTAMP, loc.getTime()/1000);
+				values.put(LifeLog.Locations.LATITUDE,  loc.getLatitude());
+				values.put(LifeLog.Locations.LONGITUDE, loc.getLongitude());
+				if(loc.hasAltitude())
+					values.put(LifeLog.Locations.ALTITUDE, loc.getAltitude());
+				if(loc.hasAccuracy())
+					values.put(LifeLog.Locations.ACCURACY, loc.getAccuracy());
+				if(loc.hasBearing())
+					values.put(LifeLog.Locations.BEARING,  loc.getBearing());
+				if(loc.hasSpeed())
+					values.put(LifeLog.Locations.SPEED,    loc.getSpeed());
+				Bundle extras = loc.getExtras();
+				if(extras != null && extras.containsKey("satellites"))
+					values.put(LifeLog.Locations.SATELLITES, extras.getInt("satellites"));
+				getContentResolver().insert(LifeLog.Locations.CONTENT_URI, values);
 				mLastLocation = loc;
 				mDroppedSamples = 0;
 				mUploadCount++;
@@ -575,9 +592,6 @@ public class Logger extends Service implements Runnable {
 				return;
 		}
 
-		final LogDbAdapter dbAdapter = new LogDbAdapter(this);
-		dbAdapter.open();
-
 		while(mUploadRun) {
 			if(mUploadRunOnce)
 				mUploadRun = false;
@@ -596,16 +610,16 @@ public class Logger extends Service implements Runnable {
 			}
 			sendUploadStatus("Sending...");
 			final String[] cols = new String[] {
-				"_id",
-				"track",
-				"timestamp",
-				"latitude",
-				"longitude",
-				"altitude",
-				"accuracy",
-				"bearing",
-				"speed",
-				"satellites"
+				LifeLog.Locations._ID,
+				LifeLog.Locations.TRACK,
+				LifeLog.Locations.TIMESTAMP,
+				LifeLog.Locations.LATITUDE,
+				LifeLog.Locations.LONGITUDE,
+				LifeLog.Locations.ALTITUDE,
+				LifeLog.Locations.ACCURACY,
+				LifeLog.Locations.BEARING,
+				LifeLog.Locations.SPEED,
+				LifeLog.Locations.SATELLITES,
 			};
 			//try {
 			//	db = SQLiteDatabase.openDatabase("databases/data.db", null, SQLiteDatabase.OPEN_READWRITE);
@@ -614,7 +628,7 @@ public class Logger extends Service implements Runnable {
 			//	return;
 			//}
 			//Cursor c = db.query("locations", cols, "uploaded != 1", null, null, null, null, "100");
-			Cursor c = dbAdapter.fetchUploadLocations(cols, "uploaded != 1");
+			Cursor c = getContentResolver().query(LifeLog.Locations.CONTENT_URI, cols, LifeLog.Locations.UPLOADED + "!=1", null, null);
 			if(!c.moveToFirst()) {
 				c.close();
 				mUploadCount = 0;
@@ -699,8 +713,10 @@ public class Logger extends Service implements Runnable {
 					values.put("uploaded", 1);
 					Integer ids[] = idList.toArray(new Integer[1]);
 					synchronized(mUploadLock) {
-						for(int i = 0; i < ids.length; i++)
-							dbAdapter.updateLocation(ids[i], values);
+						for(int i = 0; i < ids.length; i++) {
+							Uri updateUri = ContentUris.withAppendedId(LifeLog.Locations.CONTENT_URI, ids[i]);
+							getContentResolver().update(updateUri, values, null, null);
+						}
 						sendUploadStatus("Sent!");
 						ok = true;
 						int uploadedCount = ids.length;
@@ -735,6 +751,5 @@ public class Logger extends Service implements Runnable {
 			stopSelfResult(mUploadRunOnceStartId);
 		mUploadRun = false;
 		mUploadRunOnce = false;
-		dbAdapter.close();
 	}
 }

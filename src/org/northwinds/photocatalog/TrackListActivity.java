@@ -103,18 +103,18 @@ public class TrackListActivity extends ListActivity {
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info =
 		    (AdapterContextMenuInfo)item.getMenuInfo();
+
+		Uri.Builder uri = ContentUris
+		    .appendId(LifeLog.Tracks.CONTENT_URI.buildUpon(), info.id);
+
 		switch(item.getItemId()) {
 		case R.id.edit:
-			Intent intent =
-			    new Intent(this, EditTrackActivity.class);
-			intent.putExtra("track", info.id);
-			startActivity(intent);
+			startActivity(
+			    new Intent(Intent.ACTION_EDIT, uri.build(),
+				       this, EditTrackActivity.class));
 			return true;
 		case R.id.delete:
-			getContentResolver()
-			    .delete(ContentUris
-				.withAppendedId(LifeLog.Tracks.CONTENT_URI,
-						info.id), null, null);
+			getContentResolver().delete(uri.build(), null, null);
 			refreshTracks();
 			return true;
 		case R.id.save:
@@ -122,12 +122,10 @@ public class TrackListActivity extends ListActivity {
 			exportGPS.exportAsGPX(info.id);
 			return true;
 		case R.id.gps_list:
-			Uri uri = ContentUris
-			    .appendId(LifeLog.Tracks.CONTENT_URI.buildUpon(),
-				      info.id).appendPath("locations").build();
-			intent = new Intent(Intent.ACTION_VIEW, uri,
-					    this, GPSList.class);
-			startActivity(intent);
+			startActivity(
+			    new Intent(Intent.ACTION_VIEW,
+				       uri.appendPath("locations").build(),
+				       this, GPSList.class));
 			return true;
 		}
 		return super.onContextItemSelected(item);

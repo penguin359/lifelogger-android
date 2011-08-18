@@ -29,7 +29,6 @@
 package org.northwinds.photocatalog;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -37,24 +36,17 @@ import android.os.Bundle;
 import android.widget.EditText;
 
 public class EditTrackActivity extends Activity {
-	private long mTrack = 0;
-
-	EditText mName;
-	EditText mComment;
-	EditText mType;
-	EditText mDescription;
-
-	LogDbAdapter mDbAdapter;
+	private EditText mName;
+	private EditText mComment;
+	private EditText mType;
+	private EditText mDescription;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		setContentView(R.layout.edit_track);
-		Intent intent = getIntent();
-		mTrack = intent.getLongExtra("track", 0);
 
-		if(mTrack <= 0) {
+		if(getIntent().getData() == null) {
 			finish();
 			return;
 		}
@@ -64,16 +56,14 @@ public class EditTrackActivity extends Activity {
 		mType = (EditText)findViewById(R.id.type);
 		mDescription = (EditText)findViewById(R.id.description);
 
-		mDbAdapter = new LogDbAdapter(this);
-		mDbAdapter.open();
 		Cursor c = null;
 		try {
-			c = mDbAdapter.fetchTrack(mTrack);
+			c = getContentResolver().query(getIntent().getData(), null, null, null, null);
 
-			int nameCol = c.getColumnIndexOrThrow(LogDbAdapter.KEY_NAME);
-			int commentCol = c.getColumnIndexOrThrow(LogDbAdapter.KEY_CMT);
-			int typeCol = c.getColumnIndexOrThrow(LogDbAdapter.KEY_TYPE);
-			int descriptionCol = c.getColumnIndexOrThrow(LogDbAdapter.KEY_DESC);
+			int nameCol = c.getColumnIndexOrThrow(LifeLog.Tracks.NAME);
+			int commentCol = c.getColumnIndexOrThrow(LifeLog.Tracks.CMT);
+			int typeCol = c.getColumnIndexOrThrow(LifeLog.Tracks.TYPE);
+			int descriptionCol = c.getColumnIndexOrThrow(LifeLog.Tracks.DESC);
 			if(c.moveToFirst()) {
 				mName.setText(c.getString(nameCol));
 				mComment.setText(c.getString(commentCol));
@@ -90,17 +80,11 @@ public class EditTrackActivity extends Activity {
 	@Override
 	public void onPause() {
 		ContentValues args = new ContentValues();
-		args.put(LogDbAdapter.KEY_NAME, mName.getText().toString());
-		args.put(LogDbAdapter.KEY_CMT, mComment.getText().toString());
-		args.put(LogDbAdapter.KEY_TYPE, mType.getText().toString());
-		args.put(LogDbAdapter.KEY_DESC, mDescription.getText().toString());
-		mDbAdapter.updateTrack(mTrack, args);
+		args.put(LifeLog.Tracks.NAME, mName.getText().toString());
+		args.put(LifeLog.Tracks.CMT, mComment.getText().toString());
+		args.put(LifeLog.Tracks.TYPE, mType.getText().toString());
+		args.put(LifeLog.Tracks.DESC, mDescription.getText().toString());
+		getContentResolver().update(getIntent().getData(), args, null, null);
 		super.onPause();
-	}
-
-	@Override
-	public void onDestroy() {
-		mDbAdapter.close();
-		super.onDestroy();
 	}
 }

@@ -236,13 +236,16 @@ public class LifeProvider extends ContentProvider {
 	@Override
 	public Uri insert(Uri uri, ContentValues initialValues) {
 		String tableName;
+		String nullColumn;
 		switch(sUriMatcher.match(uri)) {
 		case LOCATIONS:
 			tableName = TABLE_LOCATIONS;
+			nullColumn = null;
 			break;
 
 		case TRACKS:
-			tableName = TABLE_LOCATIONS;
+			tableName = TABLE_TRACKS;
+			nullColumn = LifeLog.Tracks.NAME;
 			break;
 
 		default:
@@ -253,10 +256,10 @@ public class LifeProvider extends ContentProvider {
 		if(initialValues != null)
 			values = new ContentValues(initialValues);
 		else
-			values = new ContentValues();
+			values = new ContentValues(0);
 
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
-		long rowId = db.insert(tableName, null, values);
+		long rowId = db.insert(tableName, nullColumn, values);
 		if(rowId > 0) {
 			Uri rowUri = ContentUris.withAppendedId(LifeLog.Locations.CONTENT_URI, rowId);
 			getContext().getContentResolver().notifyChange(rowUri, null);
