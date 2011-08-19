@@ -270,10 +270,17 @@ public class LifeProvider extends ContentProvider {
 	public Uri insert(Uri uri, ContentValues initialValues) {
 		String tableName;
 		String nullColumn;
+		boolean hasTrack = false;
 		switch(sUriMatcher.match(uri)) {
 		case LOCATIONS:
 			tableName = TABLE_LOCATIONS;
 			nullColumn = null;
+			break;
+
+		case TRACKS_LOCATIONS:
+			tableName = TABLE_LOCATIONS;
+			nullColumn = null;
+			hasTrack = true;
 			break;
 
 		case TRACKS:
@@ -291,11 +298,29 @@ public class LifeProvider extends ContentProvider {
 		else
 			values = new ContentValues(0);
 
+		if(hasTrack && !values.containsKey(LifeLog.Locations.TRACK))
+			values.put(LifeLog.Locations.TRACK,
+				   Long.parseLong(uri.getPathSegments().get(1)));
+		if(TABLE_LOCATIONS.equals(tableName) &&
+		   !values.containsKey(LifeLog.Locations.TRACK))
+			values.put(LifeLog.Locations.TRACK, 0);
+
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
 		long rowId = db.insert(tableName, nullColumn, values);
 		if(rowId > 0) {
-			Uri rowUri = ContentUris.withAppendedId(LifeLog.Locations.CONTENT_URI, rowId);
-			addNotifyUri(rowUri);
+			Uri rowUri;
+			if(TABLE_LOCATIONS.equals(tableName)) {
+				rowUri = ContentUris.withAppendedId(LifeLog.Locations.CONTENT_URI, rowId);
+				addNotifyUri(rowUri);
+				long track = values.getAsLong(LifeLog.Locations.TRACK);
+				if(track != 0) {
+					Uri trackUri = ContentUris.appendId(ContentUris.appendId(LifeLog.Tracks.CONTENT_URI.buildUpon(), track).appendPath("locations"), rowId).build();
+					addNotifyUri(trackUri);
+				}
+			} else {
+				rowUri = ContentUris.withAppendedId(LifeLog.Tracks.CONTENT_URI, rowId);
+				addNotifyUri(rowUri);
+			}
 			return rowUri;
 		}
 
