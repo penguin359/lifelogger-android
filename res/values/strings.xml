@@ -29,4 +29,10 @@
     <string name="save">Save</string>
     <string name="gps_list">GPS List</string>
     <string name="manage_tracks">Select/Manage Tracks</string>
+    <string name="ok">OK</string>
+    <string name="dont_show_again">Don\'t show this again</string>
+    <string name="first_time_title">First Time</string>
+    <string name="first_time">This app is a fully functional GPS logger.  It can operate stand-alone and export logs as GPX, but it\'s specifically designed to work with PhotoCatalog.\n\n
+<b>Please</b> see http://code.google.com/p/photocatalog/.</string>
+    <string name="visit_website">Visit Website</string>
 </resources>

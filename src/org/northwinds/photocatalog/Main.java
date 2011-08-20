@@ -33,8 +33,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.ContentUris;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -49,11 +52,13 @@ import android.os.Messenger;
 import android.os.Process;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 public class Main extends Activity {
@@ -246,6 +251,8 @@ public class Main extends Activity {
 		   getLastNonConfigurationInstance() == null &&
 		   mPrefs.getBoolean("autoStart", false))
 			startService(new Intent(Logger.ACTION_START_LOG, null, this, Logger.class));
+		if(mPrefs.getBoolean("firstTime", true))
+			showDialog(DIALOG_FIRST_TIME);
 	}
 
 	@Override
@@ -428,5 +435,36 @@ public class Main extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		unbindService(mConnection);
+	}
+
+	private static final int DIALOG_FIRST_TIME = 1;
+
+	@Override
+	protected Dialog onCreateDialog(int which) {
+		switch(which) {
+		case DIALOG_FIRST_TIME:
+			AlertDialog.Builder builder =
+			    new AlertDialog.Builder(this);
+			builder.setTitle(R.string.first_time_title);
+			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog,
+						    int which) {
+					if(((CheckBox)((Dialog)dialog).findViewById(R.id.dont_show_again)).isChecked())
+						mPrefs.edit().putBoolean("firstTime", false).commit();
+					//dialog.dismiss();
+				}
+			});
+			builder.setNeutralButton(R.string.visit_website, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog,
+						    int which) {
+					startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.north-winds.org/unix/photocatalog/")));
+				}
+			});
+			LayoutInflater inflater = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
+			View view = inflater.inflate(R.layout.first_time, null);
+			builder.setView(view);
+			return builder.create();
+		}
+		return super.onCreateDialog(which);
 	}
 }

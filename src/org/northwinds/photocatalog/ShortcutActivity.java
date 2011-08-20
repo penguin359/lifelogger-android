@@ -19,33 +19,33 @@ public class ShortcutActivity extends Activity {
 	private static final String ACTION_STOP_LOG = "org.northwinds.android.intent.STOP_LOG";
 	private static final String ACTION_TOGGLE_LOG = "org.northwinds.android.intent.TOGGLE_LOG";
 
+	private static final String CATEGORY_SHORTCUT = "org.northwinds.android.intent.CATEGORY_SHORTCUT";
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		Intent intent = getIntent();
-		if(intent != null && ACTION_START_LOG.equals(intent.getAction())) {
-			startService(new Intent(Logger.ACTION_START_LOG, null, this, Logger.class));
-			Toast.makeText(this, "GPS Logger started", Toast.LENGTH_SHORT).show();
-			finish();
-		}
-		if(intent != null && ACTION_START_LOG_AND_PHOTOCATALOG.equals(intent.getAction())) {
-			startService(new Intent(Logger.ACTION_START_LOG, null, this, Logger.class));
-			startActivity(new Intent(this, Main.class));
-			finish();
-		}
-		if(intent != null && ACTION_START_PHOTOCATALOG.equals(intent.getAction())) {
-			startActivity(new Intent(this, Main.class));
-			finish();
-		}
-		if(intent != null && ACTION_TOGGLE_LOG.equals(intent.getAction())) {
-			startService(new Intent(Logger.ACTION_TOGGLE_LOG, null, this, Logger.class));
-			Toast.makeText(this, "GPS Logger toggled", Toast.LENGTH_SHORT).show();
-			finish();
-		}
-		if(intent != null && ACTION_STOP_LOG.equals(intent.getAction())) {
-			startService(new Intent(Logger.ACTION_STOP_LOG, null, this, Logger.class));
-			Toast.makeText(this, "GPS Logger stopped", Toast.LENGTH_SHORT).show();
+		if(intent.hasCategory(CATEGORY_SHORTCUT)) {
+			if(ACTION_START_LOG.equals(intent.getAction())) {
+				startService(new Intent(Logger.ACTION_START_LOG, null, this, Logger.class));
+				Toast.makeText(this, "GPS Logger started", Toast.LENGTH_SHORT).show();
+			}
+			if(ACTION_START_LOG_AND_PHOTOCATALOG.equals(intent.getAction())) {
+				startService(new Intent(Logger.ACTION_START_LOG, null, this, Logger.class));
+				startActivity(new Intent(this, Main.class));
+			}
+			if(ACTION_START_PHOTOCATALOG.equals(intent.getAction())) {
+				startActivity(new Intent(this, Main.class));
+			}
+			if(ACTION_TOGGLE_LOG.equals(intent.getAction())) {
+				startService(new Intent(Logger.ACTION_TOGGLE_LOG, null, this, Logger.class));
+				Toast.makeText(this, "GPS Logger toggled", Toast.LENGTH_SHORT).show();
+			}
+			if(ACTION_STOP_LOG.equals(intent.getAction())) {
+				startService(new Intent(Logger.ACTION_STOP_LOG, null, this, Logger.class));
+				Toast.makeText(this, "GPS Logger stopped", Toast.LENGTH_SHORT).show();
+			}
 			finish();
 		}
 
@@ -92,6 +92,7 @@ public class ShortcutActivity extends Activity {
 					shortcutIntent = new Intent(ACTION_START_LOG, null, ShortcutActivity.this, ShortcutActivity.class);
 					intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, "Start GPS");
 				}
+				shortcutIntent.addCategory(CATEGORY_SHORTCUT);
 				intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
 				Parcelable iconResource = Intent.ShortcutIconResource.fromContext(ShortcutActivity.this, R.drawable.icon);
 				intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, iconResource);
