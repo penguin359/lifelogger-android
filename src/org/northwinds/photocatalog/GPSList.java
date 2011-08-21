@@ -98,6 +98,8 @@ public class GPSList extends ListActivity {
 		uri = uri.buildUpon()
 		         .appendQueryParameter(LifeLog.PARAM_FORMAT,
 					       LifeLog.FORMAT_PRETTY)
+		         .appendQueryParameter(LifeLog.PARAM_LIMIT,
+					       "1000")
 			 .build();
 		intent.setData(uri);
 

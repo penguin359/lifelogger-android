@@ -38,9 +38,11 @@ public final class LifeLog {
 	public static final String AUTHORITY = "org.northwinds.photocatalog.lifelog";
 
 	public static final String PARAM_FORMAT = "format";
+	public static final String PARAM_LIMIT  = "limit";
+	public static final String PARAM_OFFSET = "offset";
 
 	public static final String FORMAT_DEFAULT = "default";
-	public static final String FORMAT_PRETTY = "pretty";
+	public static final String FORMAT_PRETTY  = "pretty";
 
 	public static final class Locations implements BaseColumns {
 		/* This class cannot be instantiated */

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu
   xmlns:android="http://schemas.android.com/apk/res/android">
-  <item android:id="@+id/new_track" android:title="@string/new_track"/>
-  <item android:id="@+id/edit_track" android:title="@string/edit_track"/>
-  <item android:id="@+id/continuous_record" android:title="@string/continuous_record"/>
-  <item android:id="@+id/manage_tracks" android:title="@string/manage_tracks"/>
-  <item android:id="@+id/settings" android:title="@string/settings"/>
-  <item android:id="@+id/quit"     android:title="@string/quit"/>
-  <item android:id="@+id/kill"     android:title="@string/kill"/>
-  <item android:id="@+id/save"     android:title="@string/save"/>
+  <item android:id="@+id/new_track" android:title="@string/new_track" android:icon="@android:drawable/ic_menu_add"/>
+  <item android:id="@+id/edit_track" android:title="@string/edit_track" android:icon="@android:drawable/ic_menu_edit"/>
+  <item android:id="@+id/continuous_record" android:title="@string/continuous_record" android:icon="@android:drawable/ic_menu_add"/>
+  <item android:id="@+id/manage_tracks" android:title="@string/manage_tracks" android:icon="@android:drawable/ic_menu_agenda"/>
+  <item android:id="@+id/settings" android:title="@string/settings" android:icon="@android:drawable/ic_menu_preferences"/>
+  <item android:id="@+id/quit"     android:title="@string/quit" android:icon="@android:drawable/ic_menu_add"/>
+  <item android:id="@+id/kill"     android:title="@string/kill" android:icon="@android:drawable/ic_menu_add"/>
+  <item android:id="@+id/save"     android:title="@string/save" android:icon="@android:drawable/ic_menu_save"/>
 </menu>

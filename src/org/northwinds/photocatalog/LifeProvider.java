@@ -189,6 +189,11 @@ public class LifeProvider extends ContentProvider {
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 
+		String limit = uri.getQueryParameter(LifeLog.PARAM_LIMIT);
+		String offset = uri.getQueryParameter(LifeLog.PARAM_OFFSET);
+		if(offset != null)
+			limit = limit + "," + offset;
+
 		switch(sUriMatcher.match(uri)) {
 		case LOCATIONS:
 			qb.setTables(TABLE_LOCATIONS);
@@ -241,7 +246,7 @@ public class LifeProvider extends ContentProvider {
 		}
 
 		SQLiteDatabase db = mDbHelper.getReadableDatabase();
-		Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+		Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder, limit);
 
 		/* Tell cursor what URI to watch for for data changes */
 		c.setNotificationUri(getContext().getContentResolver(), uri);
