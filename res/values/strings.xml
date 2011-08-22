@@ -2,6 +2,8 @@
 <resources>
   <string name="hello">Hello PhotoCatalogger!</string>
   <string name="app_name">PhotoCatalog</string>
+  <string name="debug">Debug</string>
+  <string name="logging_service">Logging Service</string>
   <string name="latitude">Latitude</string>
   <string name="time">Time</string>
   <string name="longitude">Longitude</string>
@@ -13,6 +15,7 @@
   <string name="new_track">New Track</string>
   <string name="edit_track">Edit Track</string>
   <string name="continuous_record">Continuous Record</string>
+  <string name="manage_tracks">Select/Manage Tracks</string>
   <string name="settings">Settings</string>
   <string name="quit">Quit</string>
   <string name="kill">Kill</string>
@@ -28,7 +31,6 @@
   <string name="select">Select</string>
   <string name="save">Save</string>
   <string name="gps_list">GPS List</string>
-  <string name="manage_tracks">Select/Manage Tracks</string>
 
   <!-- First time use dialog -->
   <string name="first_time_title">First Time</string>
@@ -52,8 +54,6 @@
   <string name="website_summary">URL for uploading data to.</string>
   <string name="gps_source">GPS Source</string>
   <string name="gps_source_summary">ID of GPS Source to report.</string>
-  <string name="units_for_display">Display Units</string>
-  <string name="units_for_display_summary">Units for screen display.</string>
   <string name="sms_activation">SMS Activation</string>
   <string name="sms_activation_on">PhotoCatalog will allow SMS activation.</string>
   <string name="sms_activation_off">PhotoCatalog will not allow SMS activation.</string>
@@ -62,6 +62,21 @@
   <string name="edit_details_at_start">Edit Details at Start</string>
   <string name="edit_details_at_start_on">Open the edit track details screen when starting new track.</string>
   <string name="edit_details_at_start_off">Start new track but edit details later.</string>
+
+  <!-- Display preferences -->
+  <string name="display_preferences">Display Preferences</string>
+  <string name="display_preferences_summary">Settings that affect display output only.</string>
+  <string name="units_for_display">Display Units</string>
+  <string name="units_for_display_summary">Units for screen display.</string>
+  <!-- This must match the values in res/values/units.xml -->
+  <string-array name="unit_names">
+    <item>Nautical</item>
+    <item>Metric</item>
+    <item>Statute</item>
+  </string-array>
+  <string name="display_first_fix">Show time to first fix</string>
+  <string name="display_first_fix_on">Show a notification of the time to first fix.</string>
+  <string name="display_first_fix_off">No notification of time to fitst fix will be shown.</string>
 
   <!-- GPS Parameter preferences -->
   <string name="gps_parameters">GPS Parameters</string>

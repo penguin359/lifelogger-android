@@ -2,69 +2,71 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	  package="org.northwinds.photocatalog"
 	  android:versionCode="2" android:versionName="0.2 ALPHA (unreleased)">
-	<application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="true">
-		<activity android:name=".EditTrackActivity"/>
-		<activity android:name=".GPSList"/>
-		<activity android:name=".Main"
-				  android:launchMode="singleTask">
+	<application android:icon="@drawable/icon"
+		     android:label="@string/app_name"
+		     android:debuggable="true">
+		<activity android:name=".DebugActivity"
+			  android:label="@string/debug">
 			<intent-filter>
-				<action android:name="android.intent.action.MAIN"/>
+				<action   android:name="android.intent.action.MAIN"/>
 				<category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
-			<!--
-			<intent-filter android:label="Debug">
-				<action android:name="android.intent.action.SEND"/>
+			<intent-filter    android:label="@string/debug">
+				<action   android:name="android.intent.action.SEND"/>
+				<action   android:name="android.intent.action.SEND_MULTIPLE"/>
 				<category android:name="android.intent.category.DEFAULT"/>
-				<data android:mimeType="image/*"/>
-				<data android:mimeType="text/*"/>
+				<data     android:mimeType="*/*"/>
 			</intent-filter>
-			-->
 		</activity>
-		<activity android:name=".DebugActivity" android:label="Debug">
+		<activity android:name=".EditTrackActivity"
+			  android:label="@string/edit_track"/>
+		<activity android:name=".GPSList"
+			  android:label="@string/gps_list"/>
+		<activity android:name=".Main"
+			  android:launchMode="singleTask">
 			<intent-filter>
-				<action android:name="android.intent.action.MAIN"/>
+				<action   android:name="android.intent.action.MAIN"/>
 				<category android:name="android.intent.category.LAUNCHER"/>
-			</intent-filter>
-			<intent-filter android:label="Debug">
-				<action android:name="android.intent.action.SEND"/>
-				<action android:name="android.intent.action.SEND_MULTIPLE"/>
-				<category android:name="android.intent.category.DEFAULT"/>
-				<data android:mimeType="*/*"/>
 			</intent-filter>
 		</activity>
 		<activity android:name=".PrefAct"/>
-		<activity android:name=".ShortcutActivity" android:label="PhotoCatalog"
+		<activity android:name=".ShortcutActivity"
+			  android:label="@string/app_name"
 			  android:theme="@android:style/Theme.Dialog"
 			  android:taskAffinity=""
 			  android:excludeFromRecents="true">
 			<intent-filter>
-				<action android:name="android.intent.action.CREATE_SHORTCUT"/>
+				<action   android:name="android.intent.action.CREATE_SHORTCUT"/>
 				<category android:name="android.intent.category.DEFAULT"/>
 			</intent-filter>
 		</activity>
-		<activity android:name=".TrackListActivity" android:label="@string/manage_tracks"/>
-		<activity android:name=".Upload" android:label="PhotoCatalog">
+		<activity android:name=".TrackListActivity"
+			  android:label="@string/manage_tracks"/>
+		<activity android:name=".Upload"
+			  android:label="@string/app_name">
 			<intent-filter>
-				<action android:name="android.intent.action.SEND"/>
+				<action   android:name="android.intent.action.SEND"/>
 				<category android:name="android.intent.category.DEFAULT"/>
-				<data android:mimeType="text/plain"/>
+				<data     android:mimeType="text/plain"/>
 			</intent-filter>
 			<intent-filter>
-				<action android:name="android.intent.action.SEND"/>
-				<action android:name="android.intent.action.SEND_MULTIPLE"/>
+				<action   android:name="android.intent.action.SEND"/>
+				<action   android:name="android.intent.action.SEND_MULTIPLE"/>
 				<category android:name="android.intent.category.DEFAULT"/>
-				<data android:mimeType="image/*"/>
+				<data     android:mimeType="image/*"/>
 			</intent-filter>
 		</activity>
-		<provider android:name=".LifeProvider" android:authorities="org.northwinds.photocatalog.lifelog"/>
+		<provider android:name=".LifeProvider"
+		          android:authorities="org.northwinds.photocatalog.lifelog"/>
 		<receiver android:name=".Receiver">
 			<intent-filter>
-				<action android:name="android.intent.action.BOOT_COMPLETED"/>
-				<action android:name="android.intent.action.BATTERY_LOW"/>
-				<action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+				<action   android:name="android.intent.action.BATTERY_LOW"/>
+				<action   android:name="android.intent.action.BOOT_COMPLETED"/>
+				<action   android:name="android.provider.Telephony.SMS_RECEIVED"/>
 			</intent-filter>
 		</receiver>
-		<service android:label="Logging Service" android:name=".Logger"/>
+		<service android:name=".Logger"
+			 android:label="@string/logging_service"/>
 	</application>
 	<uses-sdk android:targetSdkVersion="8" android:minSdkVersion="7"/>
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>

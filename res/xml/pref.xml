@@ -19,6 +19,18 @@
   <EditTextPreference android:title="@string/gps_source"
    android:summary="@string/gps_source_summary"
    android:key="source" android:defaultValue="1"/>
+  <PreferenceScreen android:title="@string/display_preferences"
+   android:summary="@string/display_preferences_summary">
+    <ListPreference android:title="@string/units_for_display"
+     android:summary="@string/units_for_display_summary"
+     android:key="units" android:defaultValue="1"
+     android:entryValues="@array/unit_values"
+     android:entries="@array/unit_names"/>
+    <CheckBoxPreference android:title="@string/display_first_fix"
+     android:summaryOn="@string/display_first_fix_on"
+     android:summaryOff="@string/display_first_fix_off"
+     android:key="displayFirstFix" android:defaultValue="false"/>
+  </PreferenceScreen>
   <PreferenceScreen android:title="@string/gps_parameters"
    android:summary="@string/gps_parameters_summary">
     <EditTextPreference android:title="@string/minimum_distance"
@@ -38,11 +50,6 @@
      android:summaryOff="@string/filter_distance_off"
      android:key="filterByDistance" android:defaultValue="true"/>
   </PreferenceScreen>
-  <ListPreference android:title="@string/units_for_display"
-   android:summary="@string/units_for_display_summary"
-   android:key="units" android:defaultValue="1"
-   android:entryValues="@array/unit_values"
-   android:entries="@array/unit_names"/>
   <CheckBoxPreference android:title="@string/sms_activation"
    android:summaryOn="@string/sms_activation_on"
    android:summaryOff="@string/sms_activation_off"
