@@ -50,16 +50,18 @@
      android:summaryOff="@string/filter_distance_off"
      android:key="filterByDistance" android:defaultValue="true"/>
   </PreferenceScreen>
-  <CheckBoxPreference android:title="@string/sms_activation"
-   android:summaryOn="@string/sms_activation_on"
-   android:summaryOff="@string/sms_activation_off"
-   android:key="sms" android:defaultValue="false"/>
-  <EditTextPreference android:title="@string/sms_activation_code"
-   android:summary="@string/sms_activation_code_summary"
-   android:key="smsKey" android:defaultValue=""
-   android:editable="false"/>
   <CheckBoxPreference android:title="@string/edit_details_at_start"
    android:summaryOn="@string/edit_details_at_start_on"
    android:summaryOff="@string/edit_details_at_start_off"
    android:key="editDetailsAtStart" android:defaultValue="true"/>
+  <PreferenceCategory android:title="@string/sms_activation">
+    <CheckBoxPreference android:title="@string/sms_activation"
+     android:summaryOn="@string/sms_activation_on"
+     android:summaryOff="@string/sms_activation_off"
+     android:key="sms" android:defaultValue="false"/>
+    <EditTextPreference android:title="@string/sms_activation_code"
+     android:summary="@string/sms_activation_code_summary"
+     android:key="smsKey" android:defaultValue=""
+     android:dependency="sms" android:editable="false"/>
+  </PreferenceCategory>
 </PreferenceScreen>

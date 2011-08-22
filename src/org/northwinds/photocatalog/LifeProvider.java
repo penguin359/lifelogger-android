@@ -192,7 +192,7 @@ public class LifeProvider extends ContentProvider {
 		String limit = uri.getQueryParameter(LifeLog.PARAM_LIMIT);
 		String offset = uri.getQueryParameter(LifeLog.PARAM_OFFSET);
 		if(offset != null)
-			limit = limit + "," + offset;
+			limit = offset + "," + limit;
 
 		switch(sUriMatcher.match(uri)) {
 		case LOCATIONS:

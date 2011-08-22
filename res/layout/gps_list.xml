@@ -11,8 +11,10 @@
 <LinearLayout android:id="@+id/footer"
   android:layout_height="wrap_content" android:layout_width="fill_parent"
   android:orientation="horizontal" android:layout_alignParentBottom="true">
-  <Button android:id="@+id/delete_but" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1" android:text="@string/delete_all"/>
-  <Button android:id="@+id/delete_uploaded_but" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_weight="1" android:text="@string/delete_uploaded"/>
+  <ImageButton android:id="@+id/back" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_weight="0" android:src="@drawable/ic_menu_back"/>
+  <Button android:id="@+id/delete_but" android:layout_height="fill_parent" android:layout_width="fill_parent" android:layout_weight="1" android:text="@string/delete_all"/>
+  <Button android:id="@+id/delete_uploaded_but" android:layout_height="fill_parent" android:layout_width="fill_parent" android:layout_weight="1" android:text="@string/delete_uploaded"/>
+  <ImageButton android:id="@+id/forward" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_weight="0" android:src="@drawable/ic_menu_forward"/>
 </LinearLayout>
 <ListView android:layout_width="fill_parent" android:layout_height="wrap_content" android:fastScrollEnabled="true" android:layout_below="@id/header" android:layout_above="@id/footer" android:id="@+id/android:list"/>
 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@id/header" android:layout_above="@id/footer" android:id="@+id/android:empty" android:text="@string/no_gps"/>

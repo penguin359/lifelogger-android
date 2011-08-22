@@ -35,9 +35,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.SimpleCursorAdapter;
 
 public class GPSList extends ListActivity {
+	private static final int PAGE_SIZE = 5000;
+
 	private static final String[] FROM = new String[] {
 		LifeLog.Locations._ID,
 		LifeLog.Locations.TIMESTAMP,
@@ -57,7 +60,20 @@ public class GPSList extends ListActivity {
 		R.id.row,
 	};
 
+	private Uri mBaseUri;
+	private int mOffset = 0;
+
 	private void refreshLocations() {
+		Uri uri = mBaseUri.buildUpon()
+		         .appendQueryParameter(LifeLog.PARAM_FORMAT,
+					       LifeLog.FORMAT_PRETTY)
+		         .appendQueryParameter(LifeLog.PARAM_LIMIT,
+					       new Integer(PAGE_SIZE).toString())
+		         .appendQueryParameter(LifeLog.PARAM_OFFSET,
+					       new Integer(mOffset).toString())
+			 .build();
+		getIntent().setData(uri);
+
 		Cursor c =
 		   managedQuery(getIntent().getData(), FROM, null, null, null);
 		SimpleCursorAdapter entries =
@@ -92,19 +108,28 @@ public class GPSList extends ListActivity {
 		setContentView(R.layout.gps_list);
 
 		Intent intent = getIntent();
-		Uri uri = intent.getData();
-		if(uri == null)
-			uri = LifeLog.Locations.CONTENT_URI;
-		uri = uri.buildUpon()
-		         .appendQueryParameter(LifeLog.PARAM_FORMAT,
-					       LifeLog.FORMAT_PRETTY)
-		         .appendQueryParameter(LifeLog.PARAM_LIMIT,
-					       "1000")
-			 .build();
-		intent.setData(uri);
+		mBaseUri = intent.getData();
+		if(mBaseUri == null)
+			mBaseUri = LifeLog.Locations.CONTENT_URI;
 
 		refreshLocations();
 
+		ImageButton ib = (ImageButton)findViewById(R.id.forward);
+		ib.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				mOffset += PAGE_SIZE;
+				refreshLocations();
+			}
+		});
+		ib = (ImageButton)findViewById(R.id.back);
+		ib.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				mOffset -= PAGE_SIZE;
+				if(mOffset < 0)
+					mOffset = 0;
+				refreshLocations();
+			}
+		});
 		Button b = (Button)findViewById(R.id.delete_uploaded_but);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
