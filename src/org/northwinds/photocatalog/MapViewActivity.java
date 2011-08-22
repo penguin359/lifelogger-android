@@ -31,9 +31,9 @@ package org.northwinds.photocatalog;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.AlertDialog;
+//import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.Context;
+//import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -42,23 +42,26 @@ import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
+//import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.google.android.maps.GeoPoint;
-import com.google.android.maps.ItemizedOverlay;
+//import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
-import com.google.android.maps.OverlayItem;
+//import com.google.android.maps.OverlayItem;
 import com.google.android.maps.Projection;
 
 public class MapViewActivity extends MapActivity {
 	private Projection mProjection;
 
+	/*
 	private static class MapItemizedOverlay extends ItemizedOverlay<OverlayItem> {
 		private ArrayList<OverlayItem> mOverlays = new ArrayList<OverlayItem>();
 		private Context mContext;
@@ -93,6 +96,7 @@ public class MapViewActivity extends MapActivity {
 			return true;
 		}
 	}
+	*/
 
 	private class PathOverlay extends Overlay {
 		Paint mPaint;
@@ -177,27 +181,7 @@ public class MapViewActivity extends MapActivity {
 		return pathList.toArray(new GeoPoint[pathList.size()]);
 	}
 
-	private boolean mIsRefreshing = false;
 	private MapView mMapView;
-
-	private class RefreshTask extends AsyncTask<Void, Void, GeoPoint[]> {
-		protected void onPreExecute() {
-			mIsRefreshing = true;
-		}
-
-		protected GeoPoint[] doInBackground(Void... obj) {
-			try {
-				Thread.sleep(2000);
-			} catch(InterruptedException ex) {}
-			return refreshPath();
-		}
-
-		protected void onPostExecute(GeoPoint[] pathList) {
-			mPathList = pathList;
-			mMapView.invalidate();
-			mIsRefreshing = false;
-		}
-	}
 
 	private ContentObserver mObserver = new ContentObserver(null) {
 		@Override
@@ -216,9 +200,6 @@ public class MapViewActivity extends MapActivity {
 		@Override
 		public void onChange(boolean selfChange) {
 			super.onChange(selfChange);
-			//if(!mIsRefreshing) {
-			//	new RefreshTask().execute();
-			//}
 			try {
 				Thread.sleep(2000);
 			} catch(InterruptedException ex) {}
@@ -241,18 +222,30 @@ public class MapViewActivity extends MapActivity {
 		mMapView.setBuiltInZoomControls(true);
 		List<Overlay> mapOverlays = mMapView.getOverlays();
 		mProjection = mMapView.getProjection();
-		Drawable drawable = getResources().getDrawable(R.drawable.androidmarker);
-		MapItemizedOverlay itemizedOverlay = new MapItemizedOverlay(drawable, this);
-		GeoPoint point = new GeoPoint(19240000,-99120000);
-		OverlayItem overlayItem = new OverlayItem(point, "Hola, Mundo!", "I'm in Mexico City!");
-		itemizedOverlay.addOverlay(overlayItem);
-		GeoPoint point2 = new GeoPoint(35410000, 139460000);
-		OverlayItem overlayItem2 = new OverlayItem(point2, "Sekai, konichiwa!", "I'm in Japan!");
-		itemizedOverlay.addOverlay(overlayItem2);
-		mapOverlays.add(itemizedOverlay);
 		mapOverlays.add(new PathOverlay());
 
 		getContentResolver().registerContentObserver(getIntent().getData(), true, mObserver);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.map_view, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()) {
+		case R.id.map_mode:
+			mMapView.setSatellite(!mMapView.isSatellite());
+			return true;
+		case R.id.center_map:
+			if(mPathList.length > 0)
+				mMapView.getController().setCenter(mPathList[mPathList.length-1]);
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
