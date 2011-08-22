@@ -153,7 +153,8 @@ public class Logger extends Service implements Runnable {
 			if(mAutoUpload != newAutoUpload) {
 				mAutoUpload = newAutoUpload;
 				if(mAutoUpload) {
-					startUpload();
+					if(mIsStarted)
+						startUpload();
 				} else {
 					if(!mUploadRunOnce)
 						stopUpload(false);
@@ -427,7 +428,8 @@ public class Logger extends Service implements Runnable {
 				smsManager.sendTextMessage(mSmsAddress, null, sb.toString(), null, null);
 				mSmsAddress = null;
 			}
-			if(mStartTime != 0) {
+			if(mStartTime != 0 &&
+			   mPrefs.getBoolean("displayFirstFix", false)) {
 				Long timeDiff = SystemClock.uptimeMillis() - mStartTime;
 				StringBuilder sb = new StringBuilder();
 				sb.append("Time to first GPS fix: ");

@@ -29,6 +29,8 @@
 package org.northwinds.photocatalog;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -144,17 +146,80 @@ public class LifeProvider extends ContentProvider {
 		}
 	}
 
+	private Set<Uri> notifyUris = new HashSet<Uri>();
+
+	private Thread notifyThread = new Thread(new Runnable() {
+		public void run() {
+			while(notifyThread != null) {
+				synchronized(notifyUris) {
+					for(Uri uri: notifyUris) {
+						getContext().getContentResolver().notifyChange(uri, null);
+					}
+					notifyUris.clear();
+				}
+				try {
+					Thread.sleep(5000);
+				} catch(InterruptedException ex) {}
+				synchronized(notifyUris) {
+					try {
+						notifyUris.wait();
+					} catch(InterruptedException ex) {}
+				}
+			}
+		}
+	});
+
+	private void addNotifyUri(Uri uri) {
+		synchronized(notifyUris) {
+			notifyUris.add(uri);
+			notifyUris.notify();
+		}
+	}
+
+	private void notifyUri(boolean isTrack, long rowId) {
+		Uri rowUri = LifeLog.Locations.CONTENT_URI;
+		if(isTrack)
+			rowUri = LifeLog.Tracks.CONTENT_URI;
+		rowUri = ContentUris.withAppendedId(rowUri, rowId);
+		addNotifyUri(rowUri);
+		if(!isTrack) {
+			Cursor c = null;
+			long track = 0;
+			try {
+				SQLiteDatabase db = mDbHelper.getReadableDatabase();
+				c = db.query(TABLE_LOCATIONS, new String[] { LifeLog.Locations.TRACK }, LifeLog.Locations._ID+"="+(new Long(rowId).toString()), null, null, null, null);
+				int col = c.getColumnIndexOrThrow(LifeLog.Locations.TRACK);
+				if(c.moveToFirst())
+					track = c.getInt(col);
+			} catch(SQLException ex) {
+			} finally {
+				if(c != null)
+					c.close();
+			}
+			if(track != 0) {
+				Uri trackUri = ContentUris.appendId(ContentUris.appendId(LifeLog.Tracks.CONTENT_URI.buildUpon(), track).appendPath("locations"), rowId).build();
+				addNotifyUri(trackUri);
+			}
+		}
+	}
+
 	private DatabaseHelper mDbHelper;
 
 	@Override
 	public boolean onCreate() {
 		mDbHelper = new DatabaseHelper(getContext());
+		notifyThread.start();
 		return true;
 	}
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+
+		String limit = uri.getQueryParameter(LifeLog.PARAM_LIMIT);
+		String offset = uri.getQueryParameter(LifeLog.PARAM_OFFSET);
+		if(offset != null)
+			limit = offset + "," + limit;
 
 		switch(sUriMatcher.match(uri)) {
 		case LOCATIONS:
@@ -208,7 +273,7 @@ public class LifeProvider extends ContentProvider {
 		}
 
 		SQLiteDatabase db = mDbHelper.getReadableDatabase();
-		Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+		Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder, limit);
 
 		/* Tell cursor what URI to watch for for data changes */
 		c.setNotificationUri(getContext().getContentResolver(), uri);
@@ -237,10 +302,17 @@ public class LifeProvider extends ContentProvider {
 	public Uri insert(Uri uri, ContentValues initialValues) {
 		String tableName;
 		String nullColumn;
+		boolean hasTrack = false;
 		switch(sUriMatcher.match(uri)) {
 		case LOCATIONS:
 			tableName = TABLE_LOCATIONS;
 			nullColumn = null;
+			break;
+
+		case TRACKS_LOCATIONS:
+			tableName = TABLE_LOCATIONS;
+			nullColumn = null;
+			hasTrack = true;
 			break;
 
 		case TRACKS:
@@ -258,11 +330,23 @@ public class LifeProvider extends ContentProvider {
 		else
 			values = new ContentValues(0);
 
+		if(hasTrack && !values.containsKey(LifeLog.Locations.TRACK))
+			values.put(LifeLog.Locations.TRACK,
+				   Long.parseLong(uri.getPathSegments().get(1)));
+		if(TABLE_LOCATIONS.equals(tableName) &&
+		   !values.containsKey(LifeLog.Locations.TRACK))
+			values.put(LifeLog.Locations.TRACK, 0);
+
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
 		long rowId = db.insert(tableName, nullColumn, values);
 		if(rowId > 0) {
-			Uri rowUri = ContentUris.withAppendedId(LifeLog.Locations.CONTENT_URI, rowId);
-			getContext().getContentResolver().notifyChange(rowUri, null);
+			notifyUri(TABLE_TRACKS.equals(tableName), rowId);
+			Uri rowUri;
+			if(TABLE_LOCATIONS.equals(tableName)) {
+				rowUri = ContentUris.withAppendedId(LifeLog.Locations.CONTENT_URI, rowId);
+			} else {
+				rowUri = ContentUris.withAppendedId(LifeLog.Tracks.CONTENT_URI, rowId);
+			}
 			return rowUri;
 		}
 
@@ -273,6 +357,8 @@ public class LifeProvider extends ContentProvider {
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
 		int count;
+		boolean isTrack = false;
+		long rowId = -1;
 		switch(sUriMatcher.match(uri)) {
 		case LOCATIONS:
 			count = db.update(TABLE_LOCATIONS, values, selection, selectionArgs);
@@ -280,6 +366,7 @@ public class LifeProvider extends ContentProvider {
 
 		case LOCATIONS_ID:
 			String locationId = uri.getPathSegments().get(1);
+			rowId = Long.parseLong(locationId);
 			count = db.update(TABLE_LOCATIONS, values, LifeLog.Locations._ID + "=" + locationId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
@@ -299,6 +386,7 @@ public class LifeProvider extends ContentProvider {
 
 		case TRACKS_LOCATIONS_ID:
 			locationId = uri.getPathSegments().get(3);
+			rowId = Long.parseLong(locationId);
 			count = db.update(TABLE_LOCATIONS, values, LifeLog.Locations._ID + "=" + locationId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
@@ -306,7 +394,10 @@ public class LifeProvider extends ContentProvider {
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
 
-		getContext().getContentResolver().notifyChange(uri, null);
+		if(rowId > 0)
+			notifyUri(isTrack, rowId);
+		else
+			addNotifyUri(uri);
 		return count;
 	}
 
@@ -349,7 +440,7 @@ public class LifeProvider extends ContentProvider {
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
 
-		getContext().getContentResolver().notifyChange(uri, null);
+		addNotifyUri(uri);
 		return count;
 	}
 

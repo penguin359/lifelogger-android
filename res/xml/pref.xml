@@ -1,20 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
- xmlns:android="http://schemas.android.com/apk/res/android">
-  <CheckBoxPreference android:summaryOff="PhotoCatalog will not run on boot" android:title="Start on Boot" android:summaryOn="PhotoCatalog will start logging on boot" android:key="onBoot"/>
-  <CheckBoxPreference android:summary="Start GPS logger when app is started from launcher." android:defaultValue="false" android:title="Auto Start" android:key="autoStart"/>
-  <CheckBoxPreference android:summaryOff="PhotoCatalog will not upload GPS log" android:title="Automatically Upload" android:summaryOn="PhotoCatalog will automaticaly upload GPS log" android:key="autoUpload"/>
-  <EditTextPreference android:defaultValue="http://www.example.org/photocatalog/" android:key="url" android:title="Website" android:summary="URL for uploading data to"/>
-  <EditTextPreference android:summary="ID of GPS Source to report" android:title="GPS Source" android:key="source" android:defaultValue="1"/>
-  <PreferenceScreen android:title="GPS Parameters">
-    <EditTextPreference android:summary="in Meters" android:defaultValue="50" android:key="distance" android:title="Minimum Distance"/>
-    <EditTextPreference android:summary="in Seconds" android:defaultValue="60" android:key="time" android:title="Minimum Time"/>
-    <EditTextPreference android:summary="Minimum accuracy (maximum distance in meters) for a GPS fix to be recorded." android:title="Minimum Accuracy" android:defaultValue="200" android:key="accuracy"/>
-    <EditTextPreference android:summary="Skip the first few GPS samples." android:title="Skip Samples" android:defaultValue="3" android:key="skip"/>
-    <CheckBoxPreference android:summaryOff="All points logged regardless of distance between them." android:title="Filter by distance" android:summaryOn="Distant points will be dropped." android:defaultValue="true" android:key="filterByDistance"/>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+  <CheckBoxPreference android:title="@string/start_on_boot"
+   android:summaryOn="@string/start_on_boot_on"
+   android:summaryOff="@string/start_on_boot_off"
+   android:key="onBoot" android:defaultValue="false"/>
+  <CheckBoxPreference android:title="@string/start_on_launch"
+   android:summaryOn="@string/start_on_launch_on"
+   android:summaryOff="@string/start_on_launch_off"
+   android:key="autoStart" android:defaultValue="false"/>
+  <CheckBoxPreference android:title="@string/automatically_upload"
+   android:summaryOn="@string/automatically_upload_on"
+   android:summaryOff="@string/automatically_upload_off"
+   android:key="autoUpload" android:defaultValue="false"/>
+  <EditTextPreference android:title="@string/website"
+   android:summary="@string/website_summary"
+   android:key="url"
+   android:defaultValue="http://www.example.org/photocatalog/"/>
+  <EditTextPreference android:title="@string/gps_source"
+   android:summary="@string/gps_source_summary"
+   android:key="source" android:defaultValue="1"/>
+  <PreferenceScreen android:title="@string/display_preferences"
+   android:summary="@string/display_preferences_summary">
+    <ListPreference android:title="@string/units_for_display"
+     android:summary="@string/units_for_display_summary"
+     android:key="units" android:defaultValue="1"
+     android:entryValues="@array/unit_values"
+     android:entries="@array/unit_names"/>
+    <CheckBoxPreference android:title="@string/display_first_fix"
+     android:summaryOn="@string/display_first_fix_on"
+     android:summaryOff="@string/display_first_fix_off"
+     android:key="displayFirstFix" android:defaultValue="false"/>
   </PreferenceScreen>
-  <ListPreference android:key="units" android:summary="Units for screen display." android:defaultValue="1" android:title="Display Units" android:entryValues="@array/unit_values" android:entries="@array/unit_names"/>
-  <CheckBoxPreference android:summaryOff="PhotoCatalog will allow SMS activation" android:title="SMS Activation" android:summaryOn="PhotoCatalog will allow SMS activation" android:key="sms"/>
-  <EditTextPreference android:defaultValue="1234567890" android:key="smsKey" android:title="SMS Activation Code" android:summary="Use this code in SMS messages to activate PhotoCatalog" android:editable="false"/>
-  <CheckBoxPreference android:summaryOff="Start new track and edit details later." android:title="Edit Details at Start" android:summaryOn="Open the edit track details screen on starting new track." android:key="editDetailsAtStart"/>
+  <PreferenceScreen android:title="@string/gps_parameters"
+   android:summary="@string/gps_parameters_summary">
+    <EditTextPreference android:title="@string/minimum_distance"
+     android:summary="@string/minimum_distance_summary"
+     android:key="distance" android:defaultValue="50"/>
+    <EditTextPreference android:title="@string/minimum_time"
+     android:summary="@string/minimum_time_summary"
+     android:key="time" android:defaultValue="60"/>
+    <EditTextPreference android:title="@string/minimum_accoracy"
+     android:summary="@string/minimum_accoracy_summary"
+     android:key="accuracy" android:defaultValue="200"/>
+    <EditTextPreference android:title="@string/skip_samples"
+     android:summary="@string/skip_samples_summary"
+     android:key="skip" android:defaultValue="0"/>
+    <CheckBoxPreference android:title="@string/filter_distance"
+     android:summaryOn="@string/filter_distance_on"
+     android:summaryOff="@string/filter_distance_off"
+     android:key="filterByDistance" android:defaultValue="true"/>
+  </PreferenceScreen>
+  <CheckBoxPreference android:title="@string/edit_details_at_start"
+   android:summaryOn="@string/edit_details_at_start_on"
+   android:summaryOff="@string/edit_details_at_start_off"
+   android:key="editDetailsAtStart" android:defaultValue="true"/>
+  <PreferenceCategory android:title="@string/sms_activation">
+    <CheckBoxPreference android:title="@string/sms_activation"
+     android:summaryOn="@string/sms_activation_on"
+     android:summaryOff="@string/sms_activation_off"
+     android:key="sms" android:defaultValue="false"/>
+    <EditTextPreference android:title="@string/sms_activation_code"
+     android:summary="@string/sms_activation_code_summary"
+     android:key="smsKey" android:defaultValue=""
+     android:dependency="sms" android:editable="false"/>
+  </PreferenceCategory>
 </PreferenceScreen>

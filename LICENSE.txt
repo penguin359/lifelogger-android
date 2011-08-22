@@ -1,5 +1,6 @@
 The majority of this work is under the following license.  Artwork under
-res/drawable-*/ is provided by the Android SDK.
+res/drawable*/ is provided by the Android SDK and is under the Apache
+License listed in NOTICE.txt.
 
 
 Copyright (c) 2011, Loren M. Lang
