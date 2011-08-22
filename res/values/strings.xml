@@ -1,38 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, Main!</string>
-    <string name="app_name">PhotoCatalog</string>
-    <string name="latitude">Latitude</string>
-    <string name="time">Time</string>
-    <string name="longitude">Longitude</string>
-    <string name="altitude">Altitude</string>
-    <string name="accuracy">Accuracy</string>
-    <string name="no_gps">No GPS Coordinates Logged</string>
-    <string name="delete_all">Delete All</string>
-    <string name="delete_uploaded">Delete Uploaded</string>
-    <string name="new_track">New Track</string>
-    <string name="edit_track">Edit Track</string>
-    <string name="continuous_record">Continuous Record</string>
-    <string name="settings">Settings</string>
-    <string name="quit">Quit</string>
-    <string name="kill">Kill</string>
-    <string name="title">Title</string>
-    <string name="description">Description</string>
-    <string name="caption">Caption</string>
-    <string name="comment">Comment</string>
-    <string name="track_name">Track Name</string>
-    <string name="track_type">Track Type</string>
-    <string name="walking_driving">walking, driving, hiking, etc.</string>
-    <string name="no_tracks_listed">No tracks created yet!</string>
-    <string name="delete">Delete</string>
-    <string name="select">Select</string>
-    <string name="save">Save</string>
-    <string name="gps_list">GPS List</string>
-    <string name="manage_tracks">Select/Manage Tracks</string>
-    <string name="ok">OK</string>
-    <string name="dont_show_again">Don\'t show this again</string>
-    <string name="first_time_title">First Time</string>
-    <string name="first_time">This app is a fully functional GPS logger.  It can operate stand-alone and export logs as GPX, but it\'s specifically designed to work with PhotoCatalog.\n\n
+  <string name="hello">Hello PhotoCatalogger!</string>
+  <string name="app_name">PhotoCatalog</string>
+  <string name="latitude">Latitude</string>
+  <string name="time">Time</string>
+  <string name="longitude">Longitude</string>
+  <string name="altitude">Altitude</string>
+  <string name="accuracy">Accuracy</string>
+  <string name="no_gps">No GPS Coordinates Logged</string>
+  <string name="delete_all">Delete All</string>
+  <string name="delete_uploaded">Delete Uploaded</string>
+  <string name="new_track">New Track</string>
+  <string name="edit_track">Edit Track</string>
+  <string name="continuous_record">Continuous Record</string>
+  <string name="settings">Settings</string>
+  <string name="quit">Quit</string>
+  <string name="kill">Kill</string>
+  <string name="title">Title</string>
+  <string name="description">Description</string>
+  <string name="caption">Caption</string>
+  <string name="comment">Comment</string>
+  <string name="track_name">Track Name</string>
+  <string name="track_type">Track Type</string>
+  <string name="walking_driving">walking, driving, hiking, etc.</string>
+  <string name="no_tracks_listed">No tracks created yet!</string>
+  <string name="delete">Delete</string>
+  <string name="select">Select</string>
+  <string name="save">Save</string>
+  <string name="gps_list">GPS List</string>
+  <string name="manage_tracks">Select/Manage Tracks</string>
+
+  <!-- First time use dialog -->
+  <string name="first_time_title">First Time</string>
+  <string name="first_time">This app is a fully functional GPS logger.  It can operate stand-alone and export logs as GPX, but it\'s specifically designed to work with PhotoCatalog.\n\n
 <b>Please</b> see http://code.google.com/p/photocatalog/.</string>
-    <string name="visit_website">Visit Website</string>
+  <string name="dont_show_again">Don\'t show this again</string>
+  <string name="ok">OK</string>
+  <string name="visit_website">Visit Website</string>
+
+  <!-- Preferences -->
+  <string name="start_on_boot">Start on Boot</string>
+  <string name="start_on_boot_on">PhotoCatalog will start logging GPS on boot.</string>
+  <string name="start_on_boot_off">PhotoCatalog will not run on boot.</string>
+  <string name="start_on_launch">Auto Start</string>
+  <string name="start_on_launch_on">Start GPS logger when app is started from launcher.</string>
+  <string name="start_on_launch_off">Just start app, but not logging service.</string>
+  <string name="automatically_upload">Automatically Upload</string>
+  <string name="automatically_upload_on">Automatically upload GPS log while logging data.</string>
+  <string name="automatically_upload_off">PhotoCatalog will not upload GPS log.</string>
+  <string name="website">Website</string>
+  <string name="website_summary">URL for uploading data to.</string>
+  <string name="gps_source">GPS Source</string>
+  <string name="gps_source_summary">ID of GPS Source to report.</string>
+  <string name="units_for_display">Display Units</string>
+  <string name="units_for_display_summary">Units for screen display.</string>
+  <string name="sms_activation">SMS Activation</string>
+  <string name="sms_activation_on">PhotoCatalog will allow SMS activation.</string>
+  <string name="sms_activation_off">PhotoCatalog will not allow SMS activation.</string>
+  <string name="sms_activation_code">SMS Activation Code</string>
+  <string name="sms_activation_code_summary">Use this code in SMS messages to activate PhotoCatalog.</string>
+  <string name="edit_details_at_start">Edit Details at Start</string>
+  <string name="edit_details_at_start_on">Open the edit track details screen when starting new track.</string>
+  <string name="edit_details_at_start_off">Start new track but edit details later.</string>
+
+  <!-- GPS Parameter preferences -->
+  <string name="gps_parameters">GPS Parameters</string>
+  <string name="gps_parameters_summary">Various parameters for controlling what are acceptable points for logging GPS data.</string>
+  <string name="minimum_distance">Minimum Distance</string>
+  <string name="minimum_distance_summary">Minimum distance traversed (in meters) before another point is recorded.</string>
+  <string name="minimum_time">Minimum Time</string>
+  <string name="minimum_time_summary">Minimum time (in seconds) before another point is recorded.</string>
+  <string name="minimum_accoracy">Minimum Accuracy</string>
+  <string name="minimum_accoracy_summary">Minimum accuracy (maximum distance in meters) for a GPS fix to be recorded.</string>
+  <string name="skip_samples">Skip Samples</string>
+  <string name="skip_samples_summary">Skip the first few GPS samples at the start of a log.</string>
+  <string name="filter_distance">Filter by distance</string>
+  <string name="filter_distance_on">Distant points will be dropped.</string>
+  <string name="filter_distance_off">All points logged regardless of distance between them.</string>
 </resources>
