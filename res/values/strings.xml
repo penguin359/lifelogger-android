@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="hello">Hello PhotoCatalogger!</string>
+  <string name="hello">Hello, PhotoCataloger!</string>
   <string name="app_name">PhotoCatalog</string>
   <string name="debug">Debug</string>
   <string name="logging_service">Logging Service</string>
@@ -29,7 +29,7 @@
   <string name="no_tracks_listed">No tracks created yet!</string>
   <string name="delete">Delete</string>
   <string name="select">Select</string>
-  <string name="save">Save</string>
+  <string name="save">Export</string>
   <string name="gps_list">GPS List</string>
 
   <!-- First time use dialog -->

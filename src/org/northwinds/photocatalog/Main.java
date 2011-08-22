@@ -234,7 +234,6 @@ public class Main extends Activity {
 		}
 	};
 
-	private TextView mTV;
 	private TextView mGpsStatus;
 	private TextView mUploadStatus;
 
@@ -261,8 +260,6 @@ public class Main extends Activity {
 		setContentView(R.layout.main);
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		mTV = (TextView)findViewById(R.id.status);
-		mTV.setText("Hello, PhotoCatalogger!");
 		mGpsStatus = (TextView)findViewById(R.id.location);
 		mUploadStatus = (TextView)findViewById(R.id.upload);
 

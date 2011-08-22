@@ -178,7 +178,28 @@ public class Upload extends Activity implements Runnable {
 		case ACTIVITY_SELECT_IMAGE:
 			if(resultCode == RESULT_OK) {
 				Uri imageUri = intent.getData();
-				Toast.makeText(this, "Image " + imageUri.toString() + " added.", Toast.LENGTH_SHORT).show();
+				//Toast.makeText(this, "Image " + imageUri.toString() + " added.", Toast.LENGTH_SHORT).show();
+				setContentView(R.layout.upload_image);
+				ImageView iv = (ImageView)findViewById(R.id.image);
+				try {
+					mUri = imageUri;
+					if(mUri != null) {
+						iv.setImageURI(mUri);
+						/*
+						if(mUri.getScheme().equals("content")) {
+							Cursor c = cr.query(mUri, new String[] {
+									MediaColumns.TITLE
+								}, null, null, null);
+							if(c.moveToFirst())
+								mTitle = c.getString(c.getColumnIndexOrThrow(MediaColumns.TITLE));
+							c.close();
+						} else {
+							mTitle = mUri.getLastPathSegment();
+						}
+						*/
+					}
+				} catch(Exception ex) {
+				}
 			}
 			break;
 		}
@@ -313,10 +334,15 @@ public class Upload extends Activity implements Runnable {
 			m.put("response", "text");
 			m.put("title", mTitle);
 			m.put("description", mDescription);
-			if(mUri != null)
+			if(mUri != null) {
+				m.put("type", "image");
 				m.put("file", mUri);
-			if(mUris != null)
-				m.put("files", mUris);
+			} else if(mUris != null) {
+				m.put("type", "image");
+				m.put("file", mUris);
+			} else {
+				m.put("type", "text");
+			}
 			m.put("finish", "1");
 			//if(is != null)
 			//	m.put("file", is);
