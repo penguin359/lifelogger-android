@@ -153,7 +153,8 @@ public class Logger extends Service implements Runnable {
 			if(mAutoUpload != newAutoUpload) {
 				mAutoUpload = newAutoUpload;
 				if(mAutoUpload) {
-					startUpload();
+					if(mIsStarted)
+						startUpload();
 				} else {
 					if(!mUploadRunOnce)
 						stopUpload(false);

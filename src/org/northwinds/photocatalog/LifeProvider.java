@@ -176,6 +176,33 @@ public class LifeProvider extends ContentProvider {
 		}
 	}
 
+	private void notifyUri(boolean isTrack, long rowId) {
+		Uri rowUri = LifeLog.Locations.CONTENT_URI;
+		if(isTrack)
+			rowUri = LifeLog.Tracks.CONTENT_URI;
+		rowUri = ContentUris.withAppendedId(rowUri, rowId);
+		addNotifyUri(rowUri);
+		if(!isTrack) {
+			Cursor c = null;
+			long track = 0;
+			try {
+				SQLiteDatabase db = mDbHelper.getReadableDatabase();
+				c = db.query(TABLE_LOCATIONS, new String[] { LifeLog.Locations.TRACK }, LifeLog.Locations._ID+"="+(new Long(rowId).toString()), null, null, null, null);
+				int col = c.getColumnIndexOrThrow(LifeLog.Locations.TRACK);
+				if(c.moveToFirst())
+					track = c.getInt(col);
+			} catch(SQLException ex) {
+			} finally {
+				if(c != null)
+					c.close();
+			}
+			if(track != 0) {
+				Uri trackUri = ContentUris.appendId(ContentUris.appendId(LifeLog.Tracks.CONTENT_URI.buildUpon(), track).appendPath("locations"), rowId).build();
+				addNotifyUri(trackUri);
+			}
+		}
+	}
+
 	private DatabaseHelper mDbHelper;
 
 	@Override
@@ -313,18 +340,12 @@ public class LifeProvider extends ContentProvider {
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
 		long rowId = db.insert(tableName, nullColumn, values);
 		if(rowId > 0) {
+			notifyUri(TABLE_TRACKS.equals(tableName), rowId);
 			Uri rowUri;
 			if(TABLE_LOCATIONS.equals(tableName)) {
 				rowUri = ContentUris.withAppendedId(LifeLog.Locations.CONTENT_URI, rowId);
-				addNotifyUri(rowUri);
-				long track = values.getAsLong(LifeLog.Locations.TRACK);
-				if(track != 0) {
-					Uri trackUri = ContentUris.appendId(ContentUris.appendId(LifeLog.Tracks.CONTENT_URI.buildUpon(), track).appendPath("locations"), rowId).build();
-					addNotifyUri(trackUri);
-				}
 			} else {
 				rowUri = ContentUris.withAppendedId(LifeLog.Tracks.CONTENT_URI, rowId);
-				addNotifyUri(rowUri);
 			}
 			return rowUri;
 		}
@@ -336,6 +357,8 @@ public class LifeProvider extends ContentProvider {
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
 		int count;
+		boolean isTrack = false;
+		long rowId = -1;
 		switch(sUriMatcher.match(uri)) {
 		case LOCATIONS:
 			count = db.update(TABLE_LOCATIONS, values, selection, selectionArgs);
@@ -343,6 +366,7 @@ public class LifeProvider extends ContentProvider {
 
 		case LOCATIONS_ID:
 			String locationId = uri.getPathSegments().get(1);
+			rowId = Long.parseLong(locationId);
 			count = db.update(TABLE_LOCATIONS, values, LifeLog.Locations._ID + "=" + locationId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
@@ -362,6 +386,7 @@ public class LifeProvider extends ContentProvider {
 
 		case TRACKS_LOCATIONS_ID:
 			locationId = uri.getPathSegments().get(3);
+			rowId = Long.parseLong(locationId);
 			count = db.update(TABLE_LOCATIONS, values, LifeLog.Locations._ID + "=" + locationId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
@@ -369,7 +394,10 @@ public class LifeProvider extends ContentProvider {
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
 
-		addNotifyUri(uri);
+		if(rowId > 0)
+			notifyUri(isTrack, rowId);
+		else
+			addNotifyUri(uri);
 		return count;
 	}
 
