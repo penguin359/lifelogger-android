@@ -37,12 +37,14 @@ import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.SQLException;
+//import android.graphics.Bitmap;
+//import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.Paint;
 import android.graphics.Point;
-//import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -51,11 +53,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.google.android.maps.GeoPoint;
-//import com.google.android.maps.ItemizedOverlay;
+import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
-//import com.google.android.maps.OverlayItem;
+import com.google.android.maps.OverlayItem;
 import com.google.android.maps.Projection;
 
 public class MapViewActivity extends MapActivity {
@@ -98,8 +100,32 @@ public class MapViewActivity extends MapActivity {
 	}
 	*/
 
+	/* Quick hack to get access to the boundCenter static method of
+	 * ItemizedOverlay. */
+	private static class DummyItemizedOverlay extends ItemizedOverlay<OverlayItem> {
+		public static Drawable myBoundCenter(Drawable d) {
+			return boundCenter(d);
+		}
+
+		public DummyItemizedOverlay(Drawable defaultMarker) {
+			super(boundCenterBottom(defaultMarker));
+		}
+
+		@Override
+		protected OverlayItem createItem(int i) {
+			return null;
+		}
+
+		@Override
+		public int size() {
+			return 0;
+		}
+	}
+
 	private class PathOverlay extends Overlay {
 		Paint mPaint;
+		Drawable mIndicator;
+		//Bitmap mIndicator;
 
 		public PathOverlay() {
 			mPaint = new Paint();
@@ -111,6 +137,9 @@ public class MapViewActivity extends MapActivity {
 			mPaint.setStrokeJoin(Paint.Join.ROUND);
 			mPaint.setStrokeCap(Paint.Cap.ROUND);
 			mPaint.setStrokeWidth(5);
+
+			mIndicator = DummyItemizedOverlay.myBoundCenter(getResources().getDrawable(R.drawable.ic_maps_indicator_current_position));
+			//mIndicator = BitmapFactory.decodeResource(getResources(), R.drawable.ic_maps_indicator_current_position);
 		}
 
 		public void draw(Canvas canvas, MapView mapView, boolean shadow) {
@@ -126,8 +155,9 @@ public class MapViewActivity extends MapActivity {
 				path.moveTo(p1.x, p1.y);
 			}
 
+			Point p1 = null;
 			for(GeoPoint point: mPathList) {
-				Point p1 = new Point();
+				p1 = new Point();
 				mProjection.toPixels(point, p1);
 				path.lineTo(p1.x, p1.y);
 			}
@@ -146,12 +176,15 @@ public class MapViewActivity extends MapActivity {
 			//path.lineTo(p1.x, p1.y);
 
 			canvas.drawPath(path, mPaint);
+			if(p1 != null)
+				drawAt(canvas, mIndicator, p1.x, p1.y, false);
+				//canvas.drawBitmap(mIndicator, p1.x, p1.y, null);
 		}
 	}
 
 	@Override
 	protected boolean isRouteDisplayed() {
-		return false;
+		return true;
 	}
 
 	private GeoPoint[] mPathList;
@@ -162,12 +195,6 @@ public class MapViewActivity extends MapActivity {
 			Cursor c = getContentResolver().query(getIntent().getData(), new String[] { LifeLog.Locations.LATITUDE, LifeLog.Locations.LONGITUDE, }, null, null, null);
 			int latCol = c.getColumnIndexOrThrow("latitude");
 			int lonCol = c.getColumnIndexOrThrow("longitude");
-			//if(c.moveToFirst()) {
-			//	int lat = (int)(c.getDouble(latCol)*1000000.);
-			//	int lon = (int)(c.getDouble(lonCol)*1000000.);
-			//	GeoPoint point = new GeoPoint(lat, lon);
-			//	pathList.add(point);
-			//}
 			while(c.moveToNext()) {
 				int lat = (int)(c.getDouble(latCol)*1000000.);
 				int lon = (int)(c.getDouble(lonCol)*1000000.);

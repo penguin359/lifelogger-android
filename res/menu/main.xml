@@ -9,5 +9,5 @@
   <item android:id="@+id/quit"     android:title="@string/quit" android:icon="@drawable/ic_menu_add"/>
   <item android:id="@+id/kill"     android:title="@string/kill" android:icon="@drawable/ic_menu_add"/>
   <item android:id="@+id/save"     android:title="@string/save" android:icon="@drawable/ic_menu_save"/>
-  <item android:id="@+id/maps"     android:title="@string/view_map" android:icon="@android:drawable/ic_menu_mapmode"/>
+  <item android:id="@+id/maps"     android:title="@string/view_map" android:icon="@drawable/ic_menu_mapmode"/>
 </menu>
