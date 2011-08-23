@@ -38,7 +38,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.SimpleCursorAdapter;
 
-public class GPSList extends ListActivity {
+public class GPSListActivity extends ListActivity {
 	private static final int PAGE_SIZE = 5000;
 
 	private static final String[] FROM = new String[] {

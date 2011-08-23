@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	  package="org.northwinds.photocatalog"
-	  android:versionCode="2" android:versionName="0.2 ALPHA (unreleased)">
+	  android:versionCode="4" android:versionName="0.4 ALPHA (unreleased)">
 	<application android:icon="@drawable/icon"
 		     android:label="@string/app_name"
 		     android:debuggable="true">
@@ -20,16 +20,16 @@
 		</activity>
 		<activity android:name=".EditTrackActivity"
 			  android:label="@string/edit_track"/>
-		<activity android:name=".GPSList"
+		<activity android:name=".GPSListActivity"
 			  android:label="@string/gps_list"/>
-		<activity android:name=".Main"
+		<activity android:name=".MainActivity"
 			  android:launchMode="singleTask">
 			<intent-filter>
 				<action   android:name="android.intent.action.MAIN"/>
 				<category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
 		</activity>
-		<activity android:name=".PrefAct"/>
+		<activity android:name=".PreferencesActivity"/>
 		<activity android:name=".ShortcutActivity"
 			  android:label="@string/app_name"
 			  android:theme="@android:style/Theme.Dialog"
@@ -42,7 +42,7 @@
 		</activity>
 		<activity android:name=".TrackListActivity"
 			  android:label="@string/manage_tracks"/>
-		<activity android:name=".Upload"
+		<activity android:name=".UploadActivity"
 			  android:label="@string/app_name">
 			<intent-filter>
 				<action   android:name="android.intent.action.SEND"/>
@@ -65,7 +65,7 @@
 				<action   android:name="android.provider.Telephony.SMS_RECEIVED"/>
 			</intent-filter>
 		</receiver>
-		<service android:name=".Logger"
+		<service android:name=".LoggingService"
 			 android:label="@string/logging_service"/>
 	</application>
 	<uses-sdk android:targetSdkVersion="8" android:minSdkVersion="7"/>

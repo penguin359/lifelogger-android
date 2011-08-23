@@ -39,7 +39,7 @@ import android.preference.PreferenceManager;
  * @author Loren M. Lang
  *
  */
-public class PrefAct extends PreferenceActivity {
+public class PreferencesActivity extends PreferenceActivity {
 	protected void onCreate(Bundle b) {
 		super.onCreate(b);
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -48,6 +48,6 @@ public class PrefAct extends PreferenceActivity {
 			editor.putString("smsKey", UUID.randomUUID().toString());
 			editor.commit();
 		}
-		addPreferencesFromResource(R.xml.pref);
+		addPreferencesFromResource(R.xml.preferences);
 	}
 }

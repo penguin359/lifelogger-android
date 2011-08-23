@@ -125,7 +125,7 @@ public class TrackListActivity extends ListActivity {
 			startActivity(
 			    new Intent(Intent.ACTION_VIEW,
 				       uri.appendPath("locations").build(),
-				       this, GPSList.class));
+				       this, GPSListActivity.class));
 			return true;
 		}
 		return super.onContextItemSelected(item);

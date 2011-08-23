@@ -70,8 +70,8 @@ import android.widget.Toast;
  * @author Loren M. Lang
  *
  */
-public class Upload extends Activity implements Runnable {
-	private static final String TAG = "PhotoCatalog-Upload";
+public class UploadActivity extends Activity implements Runnable {
+	private static final String TAG = "PhotoCatalog-UploadActivity";
 
 	private Thread mThread;
 	private Uri mUri = null;
