@@ -148,12 +148,10 @@ public class Main extends Activity {
 			case Logger.MSG_LOCATION:
 				Location loc = (Location)msg.obj;
 				if(loc != null) {
-					//mGpsStatus.setText(String.format("Location: [ %.6f, %.6f ]", loc.getLatitude(), loc.getLongitude()));
 					Bundle extras = loc.getExtras();
 					String satellites = "";
 					if(extras != null && extras.containsKey("satellites"))
 						satellites = String.format("%d", extras.getInt("satellites"));
-					//mGpsStatus.setText("Tracking...");
 					mTimestamp.setText(mDateFormat.format(new Date()));
 					mLatitude.setText(formatCoordinate(loc.getLatitude(), true, true));
 					mLongitude.setText(formatCoordinate(loc.getLongitude(), false, true));
@@ -167,27 +165,29 @@ public class Main extends Activity {
 			case Logger.MSG_GPS:
 				switch(msg.arg1) {
 				case LocationProvider.AVAILABLE:
-					mGpsStatus.setText("Tracking...");
+					mGpsStatus.setText(R.string.lp_available);
 					break;
 				case LocationProvider.OUT_OF_SERVICE:
-					mGpsStatus.setText("GPS Out of Service");
+					mGpsStatus.setText(R.string.lp_out_of_service);
 					break;
 				case LocationProvider.TEMPORARILY_UNAVAILABLE:
-					mGpsStatus.setText("GPS Unavailable");
+					mGpsStatus.setText(R.string.lp_temporarily_unavailable);
 					break;
 				}
 				break;
 			case Logger.MSG_STATUS:
 				if(msg.arg1 > 0) {
 					mStartButton.setOnClickListener(mStopGpsOnClick);
-					mStartButton.setText("Stop");
-					mStartButton.setTextColor(0xffff0000);
-					mGpsStatus.setText("GPS waiting for fix");
+					mStartButton.setText(R.string.stop);
+					mStartButton.setTextColor(
+					    getResources().getColor(R.color.stop);
+					mGpsStatus.setText(R.string.gps_waiting_for_fix);
 				} else {
 					mStartButton.setOnClickListener(mStartGpsOnClick);
-					mStartButton.setText("Start");
-					mStartButton.setTextColor(0xff00ff00);
-					mGpsStatus.setText("GPS Idle");
+					mStartButton.setText(R.string.start);
+					mStartButton.setTextColor(
+					    getResources().getColor(R.color.start);
+					mGpsStatus.setText(R.string.gps_idle);
 				}
 				break;
 			case Logger.MSG_UPLOAD:
