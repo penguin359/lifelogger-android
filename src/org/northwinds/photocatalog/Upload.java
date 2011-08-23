@@ -30,9 +30,9 @@ package org.northwinds.photocatalog;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 
@@ -178,7 +178,6 @@ public class Upload extends Activity implements Runnable {
 		case ACTIVITY_SELECT_IMAGE:
 			if(resultCode == RESULT_OK) {
 				Uri imageUri = intent.getData();
-				//Toast.makeText(this, "Image " + imageUri.toString() + " added.", Toast.LENGTH_SHORT).show();
 				setContentView(R.layout.upload_image);
 				ImageView iv = (ImageView)findViewById(R.id.image);
 				try {
@@ -229,6 +228,11 @@ public class Upload extends Activity implements Runnable {
 		mStatusView = (TextView)findViewById(R.id.status);
 		mTitleView = (EditText)findViewById(R.id.title);
 		mDescriptionView = (EditText)findViewById(R.id.description);
+
+		if(!mPrefs.getBoolean("photocatalog", false)) {
+			Toast.makeText(this, "PhotoCatalog integration is disabled.", Toast.LENGTH_LONG).show();
+			finish();
+		}
 
 		ContentResolver cr = getContentResolver();
 
@@ -310,8 +314,6 @@ public class Upload extends Activity implements Runnable {
 
 		mThread = new Thread(this);
 		mThread.start();
-
-		//Toast.makeText(this, "Upload started", Toast.LENGTH_SHORT).show();
 	}
 
 	//@Override

@@ -1,59 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-  <CheckBoxPreference android:title="@string/start_on_boot"
-   android:summaryOn="@string/start_on_boot_on"
-   android:summaryOff="@string/start_on_boot_off"
-   android:key="onBoot" android:defaultValue="false"/>
-  <CheckBoxPreference android:title="@string/start_on_launch"
-   android:summaryOn="@string/start_on_launch_on"
-   android:summaryOff="@string/start_on_launch_off"
-   android:key="autoStart" android:defaultValue="false"/>
-  <CheckBoxPreference android:title="@string/automatically_upload"
-   android:summaryOn="@string/automatically_upload_on"
-   android:summaryOff="@string/automatically_upload_off"
-   android:key="autoUpload" android:defaultValue="false"/>
-  <EditTextPreference android:title="@string/website"
-   android:summary="@string/website_summary"
-   android:key="url"
-   android:defaultValue="http://www.example.org/photocatalog/"/>
-  <EditTextPreference android:title="@string/gps_source"
-   android:summary="@string/gps_source_summary"
-   android:key="source" android:defaultValue="1"/>
-  <PreferenceScreen android:title="@string/display_preferences"
-   android:summary="@string/display_preferences_summary">
-    <ListPreference android:title="@string/units_for_display"
-     android:summary="@string/units_for_display_summary"
-     android:key="units" android:defaultValue="1"
-     android:entryValues="@array/unit_values"
-     android:entries="@array/unit_names"/>
-    <CheckBoxPreference android:title="@string/display_first_fix"
-     android:summaryOn="@string/display_first_fix_on"
-     android:summaryOff="@string/display_first_fix_off"
-     android:key="displayFirstFix" android:defaultValue="false"/>
-  </PreferenceScreen>
-  <PreferenceScreen android:title="@string/gps_parameters"
-   android:summary="@string/gps_parameters_summary">
-    <EditTextPreference android:title="@string/minimum_distance"
-     android:summary="@string/minimum_distance_summary"
-     android:key="distance" android:defaultValue="50"/>
-    <EditTextPreference android:title="@string/minimum_time"
-     android:summary="@string/minimum_time_summary"
-     android:key="time" android:defaultValue="60"/>
-    <EditTextPreference android:title="@string/minimum_accoracy"
-     android:summary="@string/minimum_accoracy_summary"
-     android:key="accuracy" android:defaultValue="200"/>
-    <EditTextPreference android:title="@string/skip_samples"
-     android:summary="@string/skip_samples_summary"
-     android:key="skip" android:defaultValue="0"/>
-    <CheckBoxPreference android:title="@string/filter_distance"
-     android:summaryOn="@string/filter_distance_on"
-     android:summaryOff="@string/filter_distance_off"
-     android:key="filterByDistance" android:defaultValue="true"/>
-  </PreferenceScreen>
-  <CheckBoxPreference android:title="@string/edit_details_at_start"
-   android:summaryOn="@string/edit_details_at_start_on"
-   android:summaryOff="@string/edit_details_at_start_off"
-   android:key="editDetailsAtStart" android:defaultValue="true"/>
+  <PreferenceCategory android:title="@string/general_preferences">
+    <CheckBoxPreference android:title="@string/start_on_boot"
+     android:summaryOn="@string/start_on_boot_on"
+     android:summaryOff="@string/start_on_boot_off"
+     android:key="onBoot" android:defaultValue="false"/>
+    <CheckBoxPreference android:title="@string/start_on_launch"
+     android:summaryOn="@string/start_on_launch_on"
+     android:summaryOff="@string/start_on_launch_off"
+     android:key="autoStart" android:defaultValue="false"/>
+    <CheckBoxPreference android:title="@string/edit_details_at_start"
+     android:summaryOn="@string/edit_details_at_start_on"
+     android:summaryOff="@string/edit_details_at_start_off"
+     android:key="editDetailsAtStart" android:defaultValue="true"/>
+  </PreferenceCategory>
+  <PreferenceCategory android:title="@string/photocatalog_integration">
+    <CheckBoxPreference android:title="@string/photocatalog_integration"
+     android:summaryOn="@string/photocatalog_integration_on"
+     android:summaryOff="@string/photocatalog_integration_off"
+     android:key="photocatalog" android:defaultValue="false"/>
+    <CheckBoxPreference android:title="@string/automatically_upload"
+     android:summaryOn="@string/automatically_upload_on"
+     android:summaryOff="@string/automatically_upload_off"
+     android:key="autoUpload" android:defaultValue="true"
+     android:dependency="photocatalog"/>
+    <EditTextPreference android:title="@string/website"
+     android:summary="@string/website_summary"
+     android:key="url"
+     android:defaultValue="http://www.example.org/photocatalog/"
+     android:dependency="photocatalog"/>
+    <EditTextPreference android:title="@string/gps_source"
+     android:summary="@string/gps_source_summary"
+     android:key="source" android:defaultValue="1"
+     android:dependency="photocatalog"/>
+  </PreferenceCategory>
+  <PreferenceCategory android:title="@string/other_preferences">
+    <PreferenceScreen android:title="@string/display_preferences"
+     android:summary="@string/display_preferences_summary">
+      <ListPreference android:title="@string/units_for_display"
+       android:summary="@string/units_for_display_summary"
+       android:key="units" android:defaultValue="1"
+       android:entryValues="@array/unit_values"
+       android:entries="@array/unit_names"/>
+      <CheckBoxPreference android:title="@string/display_first_fix"
+       android:summaryOn="@string/display_first_fix_on"
+       android:summaryOff="@string/display_first_fix_off"
+       android:key="displayFirstFix" android:defaultValue="false"/>
+    </PreferenceScreen>
+    <PreferenceScreen android:title="@string/gps_parameters"
+     android:summary="@string/gps_parameters_summary">
+      <EditTextPreference android:title="@string/minimum_distance"
+       android:summary="@string/minimum_distance_summary"
+       android:key="distance" android:defaultValue="50"/>
+      <EditTextPreference android:title="@string/minimum_time"
+       android:summary="@string/minimum_time_summary"
+       android:key="time" android:defaultValue="60"/>
+      <EditTextPreference android:title="@string/minimum_accoracy"
+       android:summary="@string/minimum_accoracy_summary"
+       android:key="accuracy" android:defaultValue="200"/>
+      <EditTextPreference android:title="@string/skip_samples"
+       android:summary="@string/skip_samples_summary"
+       android:key="skip" android:defaultValue="0"/>
+      <CheckBoxPreference android:title="@string/filter_distance"
+       android:summaryOn="@string/filter_distance_on"
+       android:summaryOff="@string/filter_distance_off"
+       android:key="filterByDistance" android:defaultValue="true"/>
+    </PreferenceScreen>
+  </PreferenceCategory>
   <PreferenceCategory android:title="@string/sms_activation">
     <CheckBoxPreference android:title="@string/sms_activation"
      android:summaryOn="@string/sms_activation_on"

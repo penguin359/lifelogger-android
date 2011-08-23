@@ -4,6 +4,6 @@
   <color name="stop">#ff0000</color>
   <color name="uploaded">#ff008000</color>
   <color name="not_uploaded">#ff800000</color>
-  <color name="table_backgrond">#202020</color>
+  <color name="table_background">#202020</color>
   <color name="table_foreground">#ffffff</color>
 </resources>

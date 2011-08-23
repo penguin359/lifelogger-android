@@ -69,12 +69,16 @@
   <string name="visit_website">Visit Website</string>
 
   <!-- Preferences -->
+  <string name="general_preferences">General Preferences</string>
   <string name="start_on_boot">Start on Boot</string>
   <string name="start_on_boot_on">PhotoCatalog will start logging GPS on boot.</string>
   <string name="start_on_boot_off">PhotoCatalog will not run on boot.</string>
   <string name="start_on_launch">Auto Start</string>
   <string name="start_on_launch_on">Start GPS logger when app is started from launcher.</string>
   <string name="start_on_launch_off">Just start app, but not logging service.</string>
+  <string name="photocatalog_integration">PhotoCatalog Integration</string>
+  <string name="photocatalog_integration_on">PhotoCatalog will integrate with online service.</string>
+  <string name="photocatalog_integration_off">PhotoCatalog will operate standalone only.</string>
   <string name="automatically_upload">Automatically Upload</string>
   <string name="automatically_upload_on">Automatically upload GPS log while logging data.</string>
   <string name="automatically_upload_off">PhotoCatalog will not upload GPS log.</string>
@@ -82,6 +86,7 @@
   <string name="website_summary">URL for uploading data to.</string>
   <string name="gps_source">GPS Source</string>
   <string name="gps_source_summary">ID of GPS Source to report.</string>
+  <string name="other_preferences">Other Preferences</string>
   <string name="sms_activation">SMS Activation</string>
   <string name="sms_activation_on">PhotoCatalog will allow SMS activation.</string>
   <string name="sms_activation_off">PhotoCatalog will not allow SMS activation.</string>
@@ -104,7 +109,7 @@
   </string-array>
   <string name="display_first_fix">Show time to first fix</string>
   <string name="display_first_fix_on">Show a notification of the time to first fix.</string>
-  <string name="display_first_fix_off">No notification of time to fitst fix will be shown.</string>
+  <string name="display_first_fix_off">No notification of time to first fix will be shown.</string>
 
   <!-- GPS Parameter preferences -->
   <string name="gps_parameters">GPS Parameters</string>

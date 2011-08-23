@@ -180,13 +180,13 @@ public class Main extends Activity {
 					mStartButton.setOnClickListener(mStopGpsOnClick);
 					mStartButton.setText(R.string.stop);
 					mStartButton.setTextColor(
-					    getResources().getColor(R.color.stop);
+					    getResources().getColor(R.color.stop));
 					mGpsStatus.setText(R.string.gps_waiting_for_fix);
 				} else {
 					mStartButton.setOnClickListener(mStartGpsOnClick);
 					mStartButton.setText(R.string.start);
 					mStartButton.setTextColor(
-					    getResources().getColor(R.color.start);
+					    getResources().getColor(R.color.start));
 					mGpsStatus.setText(R.string.gps_idle);
 				}
 				break;
@@ -238,6 +238,16 @@ public class Main extends Activity {
 	private TextView mUploadStatus;
 
 	private Button mStartButton;
+	private Button mStatusButton;
+
+	private final SharedPreferences.OnSharedPreferenceChangeListener mPrefsChange = new SharedPreferences.OnSharedPreferenceChangeListener() {
+		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+				String key) {
+			if(key.equals("photocatalog")) {
+				mStatusButton.setEnabled(mPrefs.getBoolean("photocatalog", false));
+			}
+		}
+	};
 
 	//private static class ActivityState {
 	//	private boolean isRestart = false;
@@ -272,14 +282,15 @@ public class Main extends Activity {
 		mSpeed = (TextView)findViewById(R.id.speed);
 		mSatellites = (TextView)findViewById(R.id.satellites);
 
-		Button b = (Button)findViewById(R.id.status_but);
-		b.setOnClickListener(new View.OnClickListener() {
+		mStatusButton = (Button)findViewById(R.id.status_but);
+		mStatusButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				startActivity(new Intent(Main.this, Upload.class));
 			}
 		});
+		mStatusButton.setEnabled(mPrefs.getBoolean("photocatalog", false));
 
-		b = (Button)findViewById(R.id.list_but);
+		Button b = (Button)findViewById(R.id.list_but);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				startActivity(new Intent(Main.this, GPSList.class));
@@ -317,6 +328,8 @@ public class Main extends Activity {
 		mStartButton.setOnClickListener(mStartGpsOnClick);
 
 		bindService(new Intent(this, Logger.class), mConnection, BIND_AUTO_CREATE);
+
+		mPrefs.registerOnSharedPreferenceChangeListener(mPrefsChange);
 
 		parseIntent(getIntent());
 	}

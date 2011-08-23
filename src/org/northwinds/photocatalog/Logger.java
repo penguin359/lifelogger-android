@@ -97,7 +97,8 @@ public class Logger extends Service implements Runnable {
 	private String mSmsAddress = null;
 
 	/* All state used by upload thread */
-	private boolean mAutoUpload = false;
+	private boolean mPhotocatalog = false;
+	private boolean mAutoUpload = true;
 	private Thread mUpload = null;
 	private volatile boolean mUploadRun = false;
 	private volatile boolean mUploadRunOnce = false;
@@ -109,7 +110,7 @@ public class Logger extends Service implements Runnable {
 
 	private ArrayList<Messenger> mClients = new ArrayList<Messenger>();
 
-	private String mLastUploadStatus = "Upload stopped.";
+	private String mLastUploadStatus = "";
 	private Location mLastLocation = null;
 	private int mGpsStatus = -1;
 
@@ -147,17 +148,20 @@ public class Logger extends Service implements Runnable {
 				mUploadBaseUrl = mPrefs.getString("url", "http://www.example.org/photocatalog/");
 			if(key.equals("source"))
 				mUploadSource = mPrefs.getString("source", "1");
-			if(!key.equals("autoUpload"))
-				return;
-			boolean newAutoUpload = mPrefs.getBoolean("autoUpload", true);
-			if(mAutoUpload != newAutoUpload) {
-				mAutoUpload = newAutoUpload;
-				if(mAutoUpload) {
-					if(mIsStarted)
-						startUpload();
+			if(key.equals("photocatalog") ||
+			   key.equals("autoUpload")) {
+				mPhotocatalog = mPrefs.getBoolean("photocatalog", false);
+				mAutoUpload = mPrefs.getBoolean("autoUpload", true);
+				if(!mPhotocatalog) {
+					stopUpload(false);
 				} else {
-					if(!mUploadRunOnce)
-						stopUpload(false);
+					if(mAutoUpload) {
+						if(mIsStarted)
+							startUpload();
+					} else {
+						if(!mUploadRunOnce)
+							stopUpload(false);
+					}
 				}
 			}
 		}
@@ -217,6 +221,7 @@ public class Logger extends Service implements Runnable {
 			mUploadCount = c.getInt(countCol);
 		}
 		c.close();
+		mPhotocatalog = mPrefs.getBoolean("photocatalog", false);
 		mAutoUpload = mPrefs.getBoolean("autoUpload", true);
 		mTrack = mPrefs.getLong("track", 0);
 		mUploadBaseUrl = mPrefs.getString("url", "http://www.example.org/photocatalog/");
@@ -276,7 +281,7 @@ public class Logger extends Service implements Runnable {
 		//}
 
 		/* Don't start unless automatic uploading was requested */
-		if(!mAutoUpload)
+		if(!mPhotocatalog || !mAutoUpload)
 			return;
 
 		mUploadRun = true;
@@ -300,6 +305,10 @@ public class Logger extends Service implements Runnable {
 				return;
 			}
 		//}
+
+		/* Don't start unless photocatalog integration is enabled */
+		if(!mPhotocatalog)
+			return;
 
 		/* Don't downgrade to running only once if thread
 		 * already running unless I'm forced to */
@@ -590,8 +599,6 @@ public class Logger extends Service implements Runnable {
 		try {
 			Thread.sleep(2000);
 		} catch(InterruptedException e) {
-			if(!mUploadRun)
-				return;
 		}
 
 		while(mUploadRun) {
@@ -748,7 +755,10 @@ public class Logger extends Service implements Runnable {
 			}
 		}
 
-		sendUploadStatus("Upload stopped.");
+		if(mPhotocatalog)
+			sendUploadStatus("Upload stopped.");
+		else
+			sendUploadStatus("");
 		if(mUploadRunOnce && mUploadRunOnceStartId > 0)
 			stopSelfResult(mUploadRunOnceStartId);
 		mUploadRun = false;
