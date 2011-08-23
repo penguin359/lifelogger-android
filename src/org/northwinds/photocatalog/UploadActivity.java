@@ -59,6 +59,7 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore.MediaColumns;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -146,12 +147,11 @@ public class UploadActivity extends Activity implements Runnable {
 		}
 	}
 
-	private static final int IMAGE_MENU = 0;
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		menu.add(Menu.NONE, IMAGE_MENU, Menu.NONE, "Add Image");
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.upload, menu);
 		return true;
 	}
 
@@ -160,7 +160,7 @@ public class UploadActivity extends Activity implements Runnable {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
-		case IMAGE_MENU:
+		case R.id.add_image:
 			Intent i = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 			startActivityForResult(i, ACTIVITY_SELECT_IMAGE);
 			break;

@@ -1,38 +1,38 @@
-Add Google Maps
+*Add Google Maps
 Add Google Analytics
 Add Admob
 Add Error reporting service
-Add multi-track
+*Add multi-track
 Dynamic API endpoints
-built-in image picker
+*built-in image picker
 multi-image picking
 GPS stats
-GPS list more details on rotation
-No restart on rotate
-Shortcuts
+*GPS list more details on rotation
+*No restart on rotate
+*Shortcuts
 widget
 support milliseconds
-menu icons
+*menu icons
 application icons
 theme out shortcut blip
-edit details at start
-preference screens
+*edit details at start
+*preference screens
 shortcuts to start gps on new track
 start gps logger on new track preference
 de-localize dates
 localize text
-note at start for getting PhotoCatalog
+*note at start for getting PhotoCatalog
 note at start for analytics
 Notification buttons
 Background file uploading (service)
 Recording uploads in database
-ContentProvider
-Preference for time to fix toast
+*ContentProvider
+*Preference for time to fix toast
 Backport to cupcake and beyond
-Buttons in GPS list broken
+*Buttons in GPS list broken
 Crash reports
 Deleting track should delete/fix GPS locations
-The great renaming
+*The great renaming
 develop test suite
 thourghly test content provider
   test upload count

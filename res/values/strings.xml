@@ -47,9 +47,6 @@
   <string name="delete_all">Delete All</string>
   <string name="delete_uploaded">Delete Uploaded</string>
 
-  <string name="title">Title</string>
-  <string name="description">Description</string>
-  <string name="caption">Caption</string>
   <string name="comment">Comment</string>
   <string name="track_name">Track Name</string>
   <string name="track_type">Track Type</string>
@@ -62,11 +59,18 @@
 
   <!-- First time use dialog -->
   <string name="first_time_title">First Time</string>
-  <string name="first_time">This app is a fully functional GPS logger.  It can operate stand-alone and export logs as GPX, but it\'s specifically designed to work with PhotoCatalog.\n\n
-<b>Please</b> see http://code.google.com/p/photocatalog/.</string>
+  <string name="first_time">This app is a fully functional GPS logger.  It can operate stand-alone and export logs as GPX, but it\'s specifically designed to work with PhotoCatalog.\n\n<b>Please</b> see http://code.google.com/p/photocatalog/.</string>
   <string name="dont_show_again">Don\'t show this again</string>
   <string name="ok">OK</string>
   <string name="visit_website">Visit Website</string>
+
+  <!-- Upload Activity -->
+  <string name="add_image">Add Image</string>
+  <string name="title">Title</string>
+  <string name="description">Description</string>
+  <string name="caption">Caption</string>
+  <string name="upload">Upload</string>
+  <string name="preview_not_supported_for_multi">Preview not supported for multiple images.\n</string>
 
   <!-- Preferences -->
   <string name="general_preferences">General Preferences</string>
