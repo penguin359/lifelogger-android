@@ -28,23 +28,23 @@ public class ShortcutActivity extends Activity {
 		Intent intent = getIntent();
 		if(intent.hasCategory(CATEGORY_SHORTCUT)) {
 			if(ACTION_START_LOG.equals(intent.getAction())) {
-				startService(new Intent(Logger.ACTION_START_LOG, null, this, Logger.class));
-				Toast.makeText(this, "GPS Logger started", Toast.LENGTH_SHORT).show();
+				startService(new Intent(LoggingService.ACTION_START_LOG, null, this, LoggingService.class));
+				Toast.makeText(this, "GPS logging service started", Toast.LENGTH_SHORT).show();
 			}
 			if(ACTION_START_LOG_AND_PHOTOCATALOG.equals(intent.getAction())) {
-				startService(new Intent(Logger.ACTION_START_LOG, null, this, Logger.class));
-				startActivity(new Intent(this, Main.class));
+				startService(new Intent(LoggingService.ACTION_START_LOG, null, this, LoggingService.class));
+				startActivity(new Intent(this, MainActivity.class));
 			}
 			if(ACTION_START_PHOTOCATALOG.equals(intent.getAction())) {
-				startActivity(new Intent(this, Main.class));
+				startActivity(new Intent(this, MainActivity.class));
 			}
 			if(ACTION_TOGGLE_LOG.equals(intent.getAction())) {
-				startService(new Intent(Logger.ACTION_TOGGLE_LOG, null, this, Logger.class));
-				Toast.makeText(this, "GPS Logger toggled", Toast.LENGTH_SHORT).show();
+				startService(new Intent(LoggingService.ACTION_TOGGLE_LOG, null, this, LoggingService.class));
+				Toast.makeText(this, "GPS logging service toggled", Toast.LENGTH_SHORT).show();
 			}
 			if(ACTION_STOP_LOG.equals(intent.getAction())) {
-				startService(new Intent(Logger.ACTION_STOP_LOG, null, this, Logger.class));
-				Toast.makeText(this, "GPS Logger stopped", Toast.LENGTH_SHORT).show();
+				startService(new Intent(LoggingService.ACTION_STOP_LOG, null, this, LoggingService.class));
+				Toast.makeText(this, "GPS logging service stopped", Toast.LENGTH_SHORT).show();
 			}
 			finish();
 		}

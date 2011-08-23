@@ -73,8 +73,8 @@ import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
 
-public class Logger extends Service implements Runnable {
-	private static final String TAG = "PhotoCatalog-Logger";
+public class LoggingService extends Service implements Runnable {
+	private static final String TAG = "PhotoCatalog-LoggingService";
 
 	private static final int PHOTOCATALOG_ID = 1;
 
@@ -97,7 +97,8 @@ public class Logger extends Service implements Runnable {
 	private String mSmsAddress = null;
 
 	/* All state used by upload thread */
-	private boolean mAutoUpload = false;
+	private boolean mPhotocatalog = false;
+	private boolean mAutoUpload = true;
 	private Thread mUpload = null;
 	private volatile boolean mUploadRun = false;
 	private volatile boolean mUploadRunOnce = false;
@@ -109,7 +110,7 @@ public class Logger extends Service implements Runnable {
 
 	private ArrayList<Messenger> mClients = new ArrayList<Messenger>();
 
-	private String mLastUploadStatus = "Upload stopped.";
+	private String mLastUploadStatus = "";
 	private Location mLastLocation = null;
 	private int mGpsStatus = -1;
 
@@ -147,17 +148,20 @@ public class Logger extends Service implements Runnable {
 				mUploadBaseUrl = mPrefs.getString("url", "http://www.example.org/photocatalog/");
 			if(key.equals("source"))
 				mUploadSource = mPrefs.getString("source", "1");
-			if(!key.equals("autoUpload"))
-				return;
-			boolean newAutoUpload = mPrefs.getBoolean("autoUpload", true);
-			if(mAutoUpload != newAutoUpload) {
-				mAutoUpload = newAutoUpload;
-				if(mAutoUpload) {
-					if(mIsStarted)
-						startUpload();
+			if(key.equals("photocatalog") ||
+			   key.equals("autoUpload")) {
+				mPhotocatalog = mPrefs.getBoolean("photocatalog", false);
+				mAutoUpload = mPrefs.getBoolean("autoUpload", true);
+				if(!mPhotocatalog) {
+					stopUpload(false);
 				} else {
-					if(!mUploadRunOnce)
-						stopUpload(false);
+					if(mAutoUpload) {
+						if(mIsStarted)
+							startUpload();
+					} else {
+						if(!mUploadRunOnce)
+							stopUpload(false);
+					}
 				}
 			}
 		}
@@ -217,12 +221,13 @@ public class Logger extends Service implements Runnable {
 			mUploadCount = c.getInt(countCol);
 		}
 		c.close();
+		mPhotocatalog = mPrefs.getBoolean("photocatalog", false);
 		mAutoUpload = mPrefs.getBoolean("autoUpload", true);
 		mTrack = mPrefs.getLong("track", 0);
 		mUploadBaseUrl = mPrefs.getString("url", "http://www.example.org/photocatalog/");
 		mUploadSource = mPrefs.getString("source", "1");
 		mPrefs.registerOnSharedPreferenceChangeListener(mPrefsChange);
-		//Toast.makeText(this, "Logger created", Toast.LENGTH_LONG).show();
+		//Toast.makeText(this, "LoggingService created", Toast.LENGTH_LONG).show();
 	}
 
 	private void startGps() {
@@ -231,7 +236,7 @@ public class Logger extends Service implements Runnable {
 		mLM.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.parseLong(mPrefs.getString("time", "5"))*1000, Float.parseFloat(mPrefs.getString("distance", "5")), mLocationListener);
 		mLM.addGpsStatusListener(mGpsListener);
 		mNotification = new Notification(R.drawable.icon, "PhotoCatalog GPS Logging", System.currentTimeMillis());
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Main.class), 0);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
 		mNotification.setLatestEventInfo(getApplicationContext(), "PhotoCatalog", "Starting GPS...", contentIntent);
 		startForeground(PHOTOCATALOG_ID, mNotification);
 		mSkipSamples = Integer.parseInt(mPrefs.getString("skip", "0"));
@@ -276,7 +281,7 @@ public class Logger extends Service implements Runnable {
 		//}
 
 		/* Don't start unless automatic uploading was requested */
-		if(!mAutoUpload)
+		if(!mPhotocatalog || !mAutoUpload)
 			return;
 
 		mUploadRun = true;
@@ -301,6 +306,10 @@ public class Logger extends Service implements Runnable {
 			}
 		//}
 
+		/* Don't start unless photocatalog integration is enabled */
+		if(!mPhotocatalog)
+			return;
+
 		/* Don't downgrade to running only once if thread
 		 * already running unless I'm forced to */
 		if(!mUploadRun || force) {
@@ -309,7 +318,7 @@ public class Logger extends Service implements Runnable {
 			mUploadRunOnceStartId = startId;
 		}
 		if(mUpload == null || mUpload.getState() == Thread.State.TERMINATED) {
-			mUpload = new Thread(Logger.this);
+			mUpload = new Thread(LoggingService.this);
 			mUpload.start();
 		} else {
 			mUpload.interrupt();
@@ -338,7 +347,7 @@ public class Logger extends Service implements Runnable {
 		mPrefs.unregisterOnSharedPreferenceChangeListener(mPrefsChange);
 		stopGps();
 		stopUpload(true);
-		//Toast.makeText(this, "Logger destroyed", Toast.LENGTH_LONG).show();
+		//Toast.makeText(this, "LoggingService destroyed", Toast.LENGTH_LONG).show();
 		super.onDestroy();
 	}
 
@@ -417,9 +426,9 @@ public class Logger extends Service implements Runnable {
 			if(mSmsAddress != null) {
 				StringBuilder sb = new StringBuilder();
 				sb.append("[ ");
-				sb.append(Main.formatCoordinate(loc.getLatitude(), true, false));
+				sb.append(MainActivity.formatCoordinate(loc.getLatitude(), true, false));
 				sb.append(", ");
-				sb.append(Main.formatCoordinate(loc.getLongitude(), false, false));
+				sb.append(MainActivity.formatCoordinate(loc.getLongitude(), false, false));
 				sb.append(" ] http://maps.google.com/?q=");
 				sb.append(loc.getLatitude());
 				sb.append(",");
@@ -435,7 +444,7 @@ public class Logger extends Service implements Runnable {
 				sb.append("Time to first GPS fix: ");
 				sb.append(timeDiff/1000);
 				sb.append(" seconds");
-				Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_LONG).show();
+				Toast.makeText(LoggingService.this, sb.toString(), Toast.LENGTH_LONG).show();
 				mStartTime = 0L;
 			}
 			if(mStopOnFirstFix)
@@ -445,11 +454,11 @@ public class Logger extends Service implements Runnable {
 		}
 
 		public void onProviderDisabled(String provider) {
-			//Toast.makeText(Logger.this, provider + " provider disabled", Toast.LENGTH_SHORT).show();
+			//Toast.makeText(LoggingService.this, provider + " provider disabled", Toast.LENGTH_SHORT).show();
 		}
 
 		public void onProviderEnabled(String provider) {
-			//Toast.makeText(Logger.this, provider + " provider enabled", Toast.LENGTH_SHORT).show();
+			//Toast.makeText(LoggingService.this, provider + " provider enabled", Toast.LENGTH_SHORT).show();
 		}
 
 		public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -480,7 +489,7 @@ public class Logger extends Service implements Runnable {
 			//		sb.append(name);
 			//	}
 			//}
-			//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
+			//Toast.makeText(LoggingService.this, sb.toString(), Toast.LENGTH_SHORT).show();
 			/*
 			StringBuilder sb = new StringBuilder();
 			if(extras != null)
@@ -498,7 +507,7 @@ public class Logger extends Service implements Runnable {
 			}
 			Log.v(TAG, sb.toString());
 			*/
-			//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
+			//Toast.makeText(LoggingService.this, sb.toString(), Toast.LENGTH_SHORT).show();
 			for(int i = mClients.size()-1; i >= 0; i--) {
 				try {
 					mClients.get(i).send(Message.obtain(null, MSG_GPS, mGpsStatus, 0));
@@ -524,7 +533,7 @@ public class Logger extends Service implements Runnable {
 					nUsed++;
 			}
 			mNotification = new Notification(R.drawable.icon, "PhotoCatalog GPS Logging", System.currentTimeMillis());
-			PendingIntent contentIntent = PendingIntent.getActivity(Logger.this, 0, new Intent(Logger.this, Main.class), 0);
+			PendingIntent contentIntent = PendingIntent.getActivity(LoggingService.this, 0, new Intent(LoggingService.this, MainActivity.class), 0);
 			mNotification.setLatestEventInfo(getApplicationContext(), "PhotoCatalog", "GPS: " + nUsed + " / " + nSat, contentIntent);
 			mNM.notify(PHOTOCATALOG_ID, mNotification);
 		}
@@ -543,7 +552,7 @@ public class Logger extends Service implements Runnable {
 	@Override
 	public void onStart(Intent intent, int startId) {
 		if(intent == null) {
-			//Toast.makeText(this, "Logger restarted", Toast.LENGTH_LONG).show();
+			//Toast.makeText(this, "LoggingService restarted", Toast.LENGTH_LONG).show();
 			if(!mIsStarted)
 				stopSelfResult(startId);
 			return;
@@ -590,8 +599,6 @@ public class Logger extends Service implements Runnable {
 		try {
 			Thread.sleep(2000);
 		} catch(InterruptedException e) {
-			if(!mUploadRun)
-				return;
 		}
 
 		while(mUploadRun) {
@@ -748,7 +755,10 @@ public class Logger extends Service implements Runnable {
 			}
 		}
 
-		sendUploadStatus("Upload stopped.");
+		if(mPhotocatalog)
+			sendUploadStatus("Upload stopped.");
+		else
+			sendUploadStatus("");
 		if(mUploadRunOnce && mUploadRunOnceStartId > 0)
 			stopSelfResult(mUploadRunOnceStartId);
 		mUploadRun = false;

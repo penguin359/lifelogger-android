@@ -28,16 +28,16 @@ public class Receiver extends BroadcastReceiver {
 		else if(action.equals(Intent.ACTION_BOOT_COMPLETED) &&
 			prefs.getBoolean("onBoot", false))
 			context.startService(
-			    new Intent(Logger.ACTION_START_LOG,
+			    new Intent(LoggingService.ACTION_START_LOG,
 				       null,
 				       context,
-				       Logger.class));
+				       LoggingService.class));
 		else if(action.equals(Intent.ACTION_BATTERY_LOW))
 			context.startService(
-			    new Intent(Logger.ACTION_STOP_LOG,
+			    new Intent(LoggingService.ACTION_STOP_LOG,
 				       null,
 				       context,
-				       Logger.class));
+				       LoggingService.class));
 		else if(action.equals(SMS_RECEIVED) &&
 			prefs.getBoolean("sms", false)) {
 			String smsKey = prefs.getString("smsKey", "1234567890");
@@ -57,28 +57,28 @@ public class Receiver extends BroadcastReceiver {
 				String msg = sms.getMessageBody();
 				if(smsStartLog.equals(msg))
 					context.startService(
-					    new Intent(Logger.ACTION_START_LOG,
+					    new Intent(LoggingService.ACTION_START_LOG,
 						       null,
 						       context,
-						       Logger.class));
+						       LoggingService.class));
 				else if(smsStopLog.equals(msg))
 					context.startService(
-					    new Intent(Logger.ACTION_STOP_LOG,
+					    new Intent(LoggingService.ACTION_STOP_LOG,
 						       null,
 						       context,
-						       Logger.class));
+						       LoggingService.class));
 				else if(smsUploadOnce.equals(msg))
 					context.startService(
-					    new Intent(Logger.ACTION_UPLOAD_ONCE,
+					    new Intent(LoggingService.ACTION_UPLOAD_ONCE,
 						       null,
 						       context,
-						       Logger.class));
+						       LoggingService.class));
 				else if(smsRetrieveLocation.equals(msg)) {
-					Intent i = new Intent(Logger.ACTION_RETRIEVE_LOCATION,
+					Intent i = new Intent(LoggingService.ACTION_RETRIEVE_LOCATION,
 						       null,
 						       context,
-						       Logger.class);
-					i.putExtra(Logger.EXTRA_SMS_ADDRESS, sms.getOriginatingAddress());
+						       LoggingService.class);
+					i.putExtra(LoggingService.EXTRA_SMS_ADDRESS, sms.getOriginatingAddress());
 					context.startService(i);
 				}
 			}

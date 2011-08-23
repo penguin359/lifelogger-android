@@ -61,7 +61,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-public class Main extends Activity {
+public class MainActivity extends Activity {
 	private TextView mTimestamp;
 	private TextView mLatitude;
 	private TextView mLongitude;
@@ -145,15 +145,13 @@ public class Main extends Activity {
 		@Override
 		public void handleMessage(Message msg) {
 			switch(msg.what) {
-			case Logger.MSG_LOCATION:
+			case LoggingService.MSG_LOCATION:
 				Location loc = (Location)msg.obj;
 				if(loc != null) {
-					//mGpsStatus.setText(String.format("Location: [ %.6f, %.6f ]", loc.getLatitude(), loc.getLongitude()));
 					Bundle extras = loc.getExtras();
 					String satellites = "";
 					if(extras != null && extras.containsKey("satellites"))
 						satellites = String.format("%d", extras.getInt("satellites"));
-					//mGpsStatus.setText("Tracking...");
 					mTimestamp.setText(mDateFormat.format(new Date()));
 					mLatitude.setText(formatCoordinate(loc.getLatitude(), true, true));
 					mLongitude.setText(formatCoordinate(loc.getLongitude(), false, true));
@@ -164,33 +162,35 @@ public class Main extends Activity {
 					mSatellites.setText(satellites);
 				}
 				break;
-			case Logger.MSG_GPS:
+			case LoggingService.MSG_GPS:
 				switch(msg.arg1) {
 				case LocationProvider.AVAILABLE:
-					mGpsStatus.setText("Tracking...");
+					mGpsStatus.setText(R.string.lp_available);
 					break;
 				case LocationProvider.OUT_OF_SERVICE:
-					mGpsStatus.setText("GPS Out of Service");
+					mGpsStatus.setText(R.string.lp_out_of_service);
 					break;
 				case LocationProvider.TEMPORARILY_UNAVAILABLE:
-					mGpsStatus.setText("GPS Unavailable");
+					mGpsStatus.setText(R.string.lp_temporarily_unavailable);
 					break;
 				}
 				break;
-			case Logger.MSG_STATUS:
+			case LoggingService.MSG_STATUS:
 				if(msg.arg1 > 0) {
 					mStartButton.setOnClickListener(mStopGpsOnClick);
-					mStartButton.setText("Stop");
-					mStartButton.setTextColor(0xffff0000);
-					mGpsStatus.setText("GPS waiting for fix");
+					mStartButton.setText(R.string.stop);
+					mStartButton.setTextColor(
+					    getResources().getColor(R.color.stop));
+					mGpsStatus.setText(R.string.gps_waiting_for_fix);
 				} else {
 					mStartButton.setOnClickListener(mStartGpsOnClick);
-					mStartButton.setText("Start");
-					mStartButton.setTextColor(0xff00ff00);
-					mGpsStatus.setText("GPS Idle");
+					mStartButton.setText(R.string.start);
+					mStartButton.setTextColor(
+					    getResources().getColor(R.color.start));
+					mGpsStatus.setText(R.string.gps_idle);
 				}
 				break;
-			case Logger.MSG_UPLOAD:
+			case LoggingService.MSG_UPLOAD:
 				mUploadStatus.setText((String)msg.obj);
 				break;
 			default:
@@ -206,7 +206,7 @@ public class Main extends Activity {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			mService = new Messenger(service);
 			try {
-				Message msg = Message.obtain(null, Logger.MSG_REGISTER_CLIENT);
+				Message msg = Message.obtain(null, LoggingService.MSG_REGISTER_CLIENT);
 				msg.replyTo = mMessenger;
 				mService.send(msg);
 			} catch(RemoteException ex) {
@@ -222,15 +222,15 @@ public class Main extends Activity {
 
 	private final View.OnClickListener mStartGpsOnClick = new View.OnClickListener() {
 		public void onClick(View v) {
-			startService(new Intent(Logger.ACTION_START_LOG, null,
-						Main.this, Logger.class));
+			startService(new Intent(LoggingService.ACTION_START_LOG, null,
+						MainActivity.this, LoggingService.class));
 		}
 	};
 
 	private final View.OnClickListener mStopGpsOnClick = new View.OnClickListener() {
 		public void onClick(View v) {
-			startService(new Intent(Logger.ACTION_STOP_LOG, null,
-						Main.this, Logger.class));
+			startService(new Intent(LoggingService.ACTION_STOP_LOG, null,
+						MainActivity.this, LoggingService.class));
 		}
 	};
 
@@ -238,6 +238,16 @@ public class Main extends Activity {
 	private TextView mUploadStatus;
 
 	private Button mStartButton;
+	private Button mStatusButton;
+
+	private final SharedPreferences.OnSharedPreferenceChangeListener mPrefsChange = new SharedPreferences.OnSharedPreferenceChangeListener() {
+		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+				String key) {
+			if(key.equals("photocatalog")) {
+				mStatusButton.setEnabled(mPrefs.getBoolean("photocatalog", false));
+			}
+		}
+	};
 
 	//private static class ActivityState {
 	//	private boolean isRestart = false;
@@ -249,7 +259,7 @@ public class Main extends Activity {
 		   intent.hasCategory(Intent.CATEGORY_LAUNCHER) &&
 		   getLastNonConfigurationInstance() == null &&
 		   mPrefs.getBoolean("autoStart", false))
-			startService(new Intent(Logger.ACTION_START_LOG, null, this, Logger.class));
+			startService(new Intent(LoggingService.ACTION_START_LOG, null, this, LoggingService.class));
 		if(mPrefs.getBoolean("firstTime", true))
 			showDialog(DIALOG_FIRST_TIME);
 	}
@@ -272,17 +282,18 @@ public class Main extends Activity {
 		mSpeed = (TextView)findViewById(R.id.speed);
 		mSatellites = (TextView)findViewById(R.id.satellites);
 
-		Button b = (Button)findViewById(R.id.status_but);
-		b.setOnClickListener(new View.OnClickListener() {
+		mStatusButton = (Button)findViewById(R.id.status_but);
+		mStatusButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				startActivity(new Intent(Main.this, Upload.class));
+				startActivity(new Intent(MainActivity.this, UploadActivity.class));
 			}
 		});
+		mStatusButton.setEnabled(mPrefs.getBoolean("photocatalog", false));
 
-		b = (Button)findViewById(R.id.list_but);
+		Button b = (Button)findViewById(R.id.list_but);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				startActivity(new Intent(Main.this, GPSList.class));
+				startActivity(new Intent(MainActivity.this, GPSListActivity.class));
 			}
 		});
 
@@ -309,14 +320,16 @@ public class Main extends Activity {
 		b = (Button)findViewById(R.id.upload_once_but);
 		b.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				startService(new Intent(Logger.ACTION_UPLOAD_ONCE, null, Main.this, Logger.class));
+				startService(new Intent(LoggingService.ACTION_UPLOAD_ONCE, null, MainActivity.this, LoggingService.class));
 			}
 		});
 
 		mStartButton = (Button)findViewById(R.id.start_but);
 		mStartButton.setOnClickListener(mStartGpsOnClick);
 
-		bindService(new Intent(this, Logger.class), mConnection, BIND_AUTO_CREATE);
+		bindService(new Intent(this, LoggingService.class), mConnection, BIND_AUTO_CREATE);
+
+		mPrefs.registerOnSharedPreferenceChangeListener(mPrefsChange);
 
 		parseIntent(getIntent());
 	}
@@ -334,8 +347,9 @@ public class Main extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.menu, menu);
+		inflater.inflate(R.menu.main, menu);
 		return true;
 	}
 
@@ -382,11 +396,11 @@ public class Main extends Activity {
 			    new Intent(this, TrackListActivity.class));
 			return true;
 		case R.id.settings:
-			startActivity(new Intent(this, PrefAct.class));
+			startActivity(new Intent(this, PreferencesActivity.class));
 			return true;
 		case R.id.quit:
-			startService(new Intent(Logger.ACTION_STOP_LOG, null,
-						this, Logger.class));
+			startService(new Intent(LoggingService.ACTION_STOP_LOG, null,
+						this, LoggingService.class));
 			finish();
 			return true;
 		case R.id.kill:
@@ -408,7 +422,7 @@ public class Main extends Activity {
 		super.onStart();
 		if(mService != null) {
 			try {
-				Message msg = Message.obtain(null, Logger.MSG_REGISTER_CLIENT);
+				Message msg = Message.obtain(null, LoggingService.MSG_REGISTER_CLIENT);
 				msg.replyTo = mMessenger;
 				mService.send(msg);
 			} catch(RemoteException ex) {
@@ -422,7 +436,7 @@ public class Main extends Activity {
 		super.onStop();
 		if(mService != null) {
 			try {
-				Message msg = Message.obtain(null, Logger.MSG_UNREGISTER_CLIENT);
+				Message msg = Message.obtain(null, LoggingService.MSG_UNREGISTER_CLIENT);
 				msg.replyTo = mMessenger;
 				mService.send(msg);
 			} catch(RemoteException ex) {

@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="hello">Hello, PhotoCataloger!</string>
+  <!-- Manifest strings -->
   <string name="app_name">PhotoCatalog</string>
   <string name="debug">Debug</string>
   <string name="logging_service">Logging Service</string>
-  <string name="latitude">Latitude</string>
-  <string name="time">Time</string>
-  <string name="longitude">Longitude</string>
-  <string name="altitude">Altitude</string>
-  <string name="accuracy">Accuracy</string>
-  <string name="no_gps">No GPS Coordinates Logged</string>
-  <string name="delete_all">Delete All</string>
-  <string name="delete_uploaded">Delete Uploaded</string>
+  <string name="gps_list">GPS List</string>
+
+  <!-- Main Activity -->
+  <string name="hello">Hello, PhotoCataloger!</string>
+  <string name="status_update">Status Update</string>
+  <string name="gps_location">GPS Location</string>
+  <string name="delete_uploaded_gps">Delete Uploaded GPS</string>
+  <string name="upload_once">Upload Once</string>
+  <string name="delete_all_my_gps">Delete All My GPS</string>
+  <string name="start">Start</string>
+  <string name="stop">Stop</string>
+  <string name="gps_idle">GPS Idle</string>
+  <string name="gps_waiting_for_fix">GPS waiting for fix</string>
+
+  <!-- Main Menu -->
   <string name="new_track">New Track</string>
   <string name="edit_track">Edit Track</string>
   <string name="continuous_record">Continuous Record</string>
@@ -19,18 +26,36 @@
   <string name="settings">Settings</string>
   <string name="quit">Quit</string>
   <string name="kill">Kill</string>
-  <string name="title">Title</string>
-  <string name="description">Description</string>
-  <string name="caption">Caption</string>
+
+  <!-- Location Provider -->
+  <string name="lp_available">Tracking...</string>
+  <string name="lp_out_of_service">GPS Out of Service</string>
+  <string name="lp_temporarily_unavailable">GPS Unavailable</string>
+
+  <!-- Location fields -->
+  <string name="date_time">Date/Time</string>
+  <string name="latitude">Latitude</string>
+  <string name="longitude">Longitude</string>
+  <string name="altitude">Altitude</string>
+  <string name="accuracy">Accuracy</string>
+  <string name="bearing">Bearing</string>
+  <string name="speed">Speed</string>
+  <string name="satellites">Satellites</string>
+
+  <!-- GPS List Activity -->
+  <string name="no_gps">No GPS Coordinates Logged</string>
+  <string name="delete_all">Delete All</string>
+  <string name="delete_uploaded">Delete Uploaded</string>
+
   <string name="comment">Comment</string>
   <string name="track_name">Track Name</string>
   <string name="track_type">Track Type</string>
   <string name="walking_driving">walking, driving, hiking, etc.</string>
+
   <string name="no_tracks_listed">No tracks created yet!</string>
   <string name="delete">Delete</string>
   <string name="select">Select</string>
   <string name="save">Export</string>
-  <string name="gps_list">GPS List</string>
   <string name="map_view">Map View</string>
   <string name="view_map">View Map</string>
   <string name="map_mode">Map Mode</string>
@@ -38,19 +63,30 @@
 
   <!-- First time use dialog -->
   <string name="first_time_title">First Time</string>
-  <string name="first_time">This app is a fully functional GPS logger.  It can operate stand-alone and export logs as GPX, but it\'s specifically designed to work with PhotoCatalog.\n\n
-<b>Please</b> see http://code.google.com/p/photocatalog/.</string>
+  <string name="first_time">This app is a fully functional GPS logger.  It can operate stand-alone and export logs as GPX, but it\'s specifically designed to work with PhotoCatalog.\n\n<b>Please</b> see http://code.google.com/p/photocatalog/.</string>
   <string name="dont_show_again">Don\'t show this again</string>
   <string name="ok">OK</string>
   <string name="visit_website">Visit Website</string>
 
+  <!-- Upload Activity -->
+  <string name="add_image">Add Image</string>
+  <string name="title">Title</string>
+  <string name="description">Description</string>
+  <string name="caption">Caption</string>
+  <string name="upload">Upload</string>
+  <string name="preview_not_supported_for_multi">Preview not supported for multiple images.\n</string>
+
   <!-- Preferences -->
+  <string name="general_preferences">General Preferences</string>
   <string name="start_on_boot">Start on Boot</string>
   <string name="start_on_boot_on">PhotoCatalog will start logging GPS on boot.</string>
   <string name="start_on_boot_off">PhotoCatalog will not run on boot.</string>
   <string name="start_on_launch">Auto Start</string>
   <string name="start_on_launch_on">Start GPS logger when app is started from launcher.</string>
   <string name="start_on_launch_off">Just start app, but not logging service.</string>
+  <string name="photocatalog_integration">PhotoCatalog Integration</string>
+  <string name="photocatalog_integration_on">PhotoCatalog will integrate with online service.</string>
+  <string name="photocatalog_integration_off">PhotoCatalog will operate standalone only.</string>
   <string name="automatically_upload">Automatically Upload</string>
   <string name="automatically_upload_on">Automatically upload GPS log while logging data.</string>
   <string name="automatically_upload_off">PhotoCatalog will not upload GPS log.</string>
@@ -58,6 +94,7 @@
   <string name="website_summary">URL for uploading data to.</string>
   <string name="gps_source">GPS Source</string>
   <string name="gps_source_summary">ID of GPS Source to report.</string>
+  <string name="other_preferences">Other Preferences</string>
   <string name="sms_activation">SMS Activation</string>
   <string name="sms_activation_on">PhotoCatalog will allow SMS activation.</string>
   <string name="sms_activation_off">PhotoCatalog will not allow SMS activation.</string>
@@ -80,7 +117,7 @@
   </string-array>
   <string name="display_first_fix">Show time to first fix</string>
   <string name="display_first_fix_on">Show a notification of the time to first fix.</string>
-  <string name="display_first_fix_off">No notification of time to fitst fix will be shown.</string>
+  <string name="display_first_fix_off">No notification of time to first fix will be shown.</string>
 
   <!-- GPS Parameter preferences -->
   <string name="gps_parameters">GPS Parameters</string>
