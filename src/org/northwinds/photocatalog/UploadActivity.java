@@ -183,7 +183,11 @@ public class UploadActivity extends Activity implements Runnable {
 				try {
 					mUri = imageUri;
 					if(mUri != null) {
-						iv.setImageURI(mUri);
+						try {
+							iv.setImageURI(mUri);
+						} catch(OutOfMemoryError ex) {
+							iv.setImageResource(R.drawable.icon);
+						}
 						/*
 						if(mUri.getScheme().equals("content")) {
 							Cursor c = cr.query(mUri, new String[] {
@@ -265,7 +269,11 @@ public class UploadActivity extends Activity implements Runnable {
 				try {
 					mUri = extras.getParcelable(Intent.EXTRA_STREAM);
 					if(mUri != null) {
-						iv.setImageURI(mUri);
+						try {
+							iv.setImageURI(mUri);
+						} catch(OutOfMemoryError ex) {
+							iv.setImageResource(R.drawable.icon);
+						}
 						if(mUri.getScheme().equals("content")) {
 							Cursor c = cr.query(mUri, new String[] {
 									MediaColumns.TITLE

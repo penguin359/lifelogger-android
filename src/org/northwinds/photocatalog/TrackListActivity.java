@@ -49,15 +49,25 @@ public class TrackListActivity extends ListActivity {
 	private static final String[] FROM = new String[] {
 		LifeLog.Tracks._ID,
 		LifeLog.Tracks.NAME,
+		LifeLog.Tracks.CMT,
+		LifeLog.Tracks.TYPE,
+		LifeLog.Tracks.NUM_POINTS,
 	};
 	private static final int[] TO = new int[] {
 		0,
 		R.id.name,
+		R.id.comment,
+		R.id.type,
+		R.id.count,
 	};
 
 	private void refreshTracks() {
-		Cursor c = managedQuery(LifeLog.Tracks.CONTENT_URI, FROM,
-					null, null, null);
+		Uri uri = LifeLog.Tracks.CONTENT_URI
+				 .buildUpon()
+				 .appendQueryParameter(LifeLog.PARAM_FORMAT,
+						       LifeLog.FORMAT_DETAILED)
+				 .build();
+		Cursor c = managedQuery(uri, FROM, null, null, null);
 		SimpleCursorAdapter entries =
 		    new SimpleCursorAdapter(this, R.layout.track_row,
 				    	    c, FROM, TO);
