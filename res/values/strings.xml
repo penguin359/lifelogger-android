@@ -8,6 +8,7 @@
 
   <!-- Main Activity -->
   <string name="hello">Hello, PhotoCataloger!</string>
+  <string name="track_format">Track: %1$s</string>
   <string name="status_update">Status Update</string>
   <string name="gps_location">GPS Location</string>
   <string name="delete_uploaded_gps">Delete Uploaded GPS</string>

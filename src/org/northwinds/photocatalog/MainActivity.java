@@ -41,6 +41,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationProvider;
 import android.net.Uri;
@@ -234,6 +235,7 @@ public class MainActivity extends Activity {
 		}
 	};
 
+	private TextView mTrackName;
 	private TextView mGpsStatus;
 	private TextView mUploadStatus;
 
@@ -245,6 +247,20 @@ public class MainActivity extends Activity {
 				String key) {
 			if(key.equals("photocatalog")) {
 				mStatusButton.setEnabled(mPrefs.getBoolean("photocatalog", false));
+			} else if(key.equals("track")) {
+				long track = mPrefs.getLong("track", 0);
+				if(track <= 0) {
+					mTrackName.setText(
+					    R.string.continuous_record);
+					return;
+				}
+				Cursor c = getContentResolver().query(ContentUris.withAppendedId(LifeLog.Tracks.CONTENT_URI, track), new String[] { LifeLog.Tracks.NAME }, null, null, null);
+				if(c == null)
+					return;
+				int nameCol = c.getColumnIndex(LifeLog.Tracks.NAME);
+				if(nameCol >= 0 && c.moveToFirst())
+					mTrackName.setText(getString(R.string.track_format, c.getString(nameCol)));
+				c.close();
 			}
 		}
 	};
@@ -270,6 +286,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.main);
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+		mTrackName = (TextView)findViewById(R.id.track);
 		mGpsStatus = (TextView)findViewById(R.id.location);
 		mUploadStatus = (TextView)findViewById(R.id.upload);
 
@@ -332,6 +349,25 @@ public class MainActivity extends Activity {
 		mPrefs.registerOnSharedPreferenceChangeListener(mPrefsChange);
 
 		parseIntent(getIntent());
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		long track = mPrefs.getLong("track", 0);
+		if(track <= 0) {
+			mTrackName.setText(
+			    R.string.continuous_record);
+			return;
+		}
+		Cursor c = getContentResolver().query(ContentUris.withAppendedId(LifeLog.Tracks.CONTENT_URI, track), new String[] { LifeLog.Tracks.NAME }, null, null, null);
+		if(c == null)
+			return;
+		int nameCol = c.getColumnIndex(LifeLog.Tracks.NAME);
+		if(nameCol >= 0 && c.moveToFirst())
+			mTrackName.setText(getString(R.string.track_format, c.getString(nameCol)));
+		c.close();
 	}
 
 	@Override
