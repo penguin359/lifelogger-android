@@ -57,6 +57,7 @@ public class LifeProvider extends ContentProvider {
 	private static HashMap<String, String> sLocationsProjectionMap;
 	private static HashMap<String, String> sLocationsPrettyProjectionMap;
 	private static HashMap<String, String> sTracksProjectionMap;
+	private static HashMap<String, String> sTracksDetailedProjectionMap;
 
 	private static final int LOCATIONS = 1;
 	private static final int LOCATIONS_ID = 2;
@@ -101,6 +102,18 @@ public class LifeProvider extends ContentProvider {
 		sTracksProjectionMap.put(LifeLog.Tracks.DESC, LifeLog.Tracks.DESC);
 		sTracksProjectionMap.put(LifeLog.Tracks.TYPE, LifeLog.Tracks.TYPE);
 		sTracksProjectionMap.put(LifeLog.Tracks.UPLOADED, LifeLog.Tracks.UPLOADED);
+
+		//sTracksDetailedProjectionMap = new HashMap<String, String>(sTracksProjectionMap);
+		//sTracksDetailedProjectionMap.put(LifeLog.Locations.TIMESTAMP, "datetime(round(timestamp), 'unixepoch') AS " + LifeLog.Locations.TIMESTAMP);
+
+		sTracksDetailedProjectionMap = new HashMap<String, String>(7);
+		sTracksDetailedProjectionMap.put(LifeLog.Tracks._ID, TABLE_TRACKS+"."+LifeLog.Tracks._ID+" AS "+LifeLog.Tracks._ID);
+		sTracksDetailedProjectionMap.put(LifeLog.Tracks.NAME, TABLE_TRACKS+"."+LifeLog.Tracks.NAME+" AS "+LifeLog.Tracks.NAME);
+		sTracksDetailedProjectionMap.put(LifeLog.Tracks.CMT, TABLE_TRACKS+"."+LifeLog.Tracks.CMT+" AS "+LifeLog.Tracks.CMT);
+		sTracksDetailedProjectionMap.put(LifeLog.Tracks.DESC, TABLE_TRACKS+"."+LifeLog.Tracks.DESC+" AS "+LifeLog.Tracks.DESC);
+		sTracksDetailedProjectionMap.put(LifeLog.Tracks.TYPE, TABLE_TRACKS+"."+LifeLog.Tracks.TYPE+" AS "+LifeLog.Tracks.TYPE);
+		sTracksDetailedProjectionMap.put(LifeLog.Tracks.UPLOADED, TABLE_TRACKS+"."+LifeLog.Tracks.UPLOADED+" AS "+LifeLog.Tracks.UPLOADED);
+		sTracksDetailedProjectionMap.put(LifeLog.Tracks.NUM_POINTS, "count(locations.track) || ' points' AS "+LifeLog.Tracks.NUM_POINTS);
 	}
 
 	private static final String TABLE_LOCATION_CREATE = "CREATE TABLE " + TABLE_LOCATIONS + " (" +
@@ -216,6 +229,7 @@ public class LifeProvider extends ContentProvider {
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 
+		String groupBy = null;
 		String limit = uri.getQueryParameter(LifeLog.PARAM_LIMIT);
 		String offset = uri.getQueryParameter(LifeLog.PARAM_OFFSET);
 		if(offset != null)
@@ -240,8 +254,15 @@ public class LifeProvider extends ContentProvider {
 			break;
 
 		case TRACKS:
-			qb.setTables(TABLE_TRACKS);
-			qb.setProjectionMap(sTracksProjectionMap);
+			if(LifeLog.FORMAT_DETAILED.equals(uri.getQueryParameter(LifeLog.PARAM_FORMAT))) {
+				qb.setTables(TABLE_TRACKS + " LEFT OUTER JOIN " + TABLE_LOCATIONS + " ON tracks._id = locations.track");
+				qb.setProjectionMap(sTracksDetailedProjectionMap);
+				//groupBy = TABLES_LOCATIONS+"."+LifeLog.Locations.TRACK;
+				groupBy = "tracks._id,tracks.name,tracks.cmt,tracks.type";
+			} else {
+				qb.setTables(TABLE_TRACKS);
+				qb.setProjectionMap(sTracksProjectionMap);
+			}
 			break;
 
 		case TRACKS_ID:
@@ -273,7 +294,7 @@ public class LifeProvider extends ContentProvider {
 		}
 
 		SQLiteDatabase db = mDbHelper.getReadableDatabase();
-		Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder, limit);
+		Cursor c = qb.query(db, projection, selection, selectionArgs, groupBy, null, sortOrder, limit);
 
 		/* Tell cursor what URI to watch for for data changes */
 		c.setNotificationUri(getContext().getContentResolver(), uri);

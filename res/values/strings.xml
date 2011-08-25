@@ -4,10 +4,11 @@
   <string name="app_name">PhotoCatalog</string>
   <string name="debug">Debug</string>
   <string name="logging_service">Logging Service</string>
-  <string name="gps_list">GPS List</string>
+  <string name="gps_list">GPS Log</string>
 
   <!-- Main Activity -->
   <string name="hello">Hello, PhotoCataloger!</string>
+  <string name="track_format">Track: %1$s</string>
   <string name="status_update">Status Update</string>
   <string name="gps_location">GPS Location</string>
   <string name="delete_uploaded_gps">Delete Uploaded GPS</string>

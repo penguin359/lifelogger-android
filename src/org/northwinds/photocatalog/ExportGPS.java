@@ -83,7 +83,37 @@ class ExportGPS {
 			OutputStream os = new BufferedOutputStream(new FileOutputStream(file));
 			os.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".getBytes());
 			os.write("<gpx creator=\"PhotoCatalog\" version=\"1.1\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\" xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n".getBytes());
-			os.write("  <trk>\n    <trkseg>\n".getBytes());
+			os.write("  <trk>\n".getBytes());
+			if("tracks".equals(track.getPathSegments().get(0))) {
+				Cursor c = null;
+				try {
+				String trackId = track.getPathSegments().get(1);
+				c = mCtx.getContentResolver().query(Uri.withAppendedPath(LifeLog.Tracks.CONTENT_URI, trackId), null, null, null, null);
+				int nameCol = c.getColumnIndexOrThrow("name");
+				int cmtCol = c.getColumnIndexOrThrow("cmt");
+				int descCol = c.getColumnIndexOrThrow("desc");
+				int typeCol = c.getColumnIndexOrThrow("type");
+				if(c.moveToFirst()) {
+					if(!c.isNull(nameCol) &&
+					   !"".equals(c.getString(nameCol)))
+						os.write(("    <name>"+c.getString(nameCol)+"</name>\n").getBytes());
+					if(!c.isNull(cmtCol) &&
+					   !"".equals(c.getString(cmtCol)))
+						os.write(("    <cmt>"+c.getString(cmtCol)+"</cmt>\n").getBytes());
+					if(!c.isNull(descCol) &&
+					   !"".equals(c.getString(descCol)))
+						os.write(("    <desc>"+c.getString(descCol)+"</desc>\n").getBytes());
+					if(!c.isNull(typeCol) &&
+					   !"".equals(c.getString(typeCol)))
+						os.write(("    <type>"+c.getString(typeCol)+"</type>\n").getBytes());
+				}
+				} catch(Exception ex) {
+				} finally {
+					if(c != null)
+						c.close();
+				}
+			}
+			os.write("    <trkseg>\n".getBytes());
 			Cursor c = mCtx.getContentResolver().query(track, null, null, null, null);
 			int latCol = c.getColumnIndexOrThrow("latitude");
 			int lonCol = c.getColumnIndexOrThrow("longitude");

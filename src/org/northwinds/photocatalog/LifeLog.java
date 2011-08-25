@@ -43,6 +43,7 @@ public final class LifeLog {
 
 	public static final String FORMAT_DEFAULT = "default";
 	public static final String FORMAT_PRETTY  = "pretty";
+	public static final String FORMAT_DETAILED= "detailed";
 
 	public static final class Locations implements BaseColumns {
 		/* This class cannot be instantiated */
@@ -79,5 +80,6 @@ public final class LifeLog {
 		public static final String DESC      = "desc";
 		public static final String TYPE      = "type";
 		public static final String UPLOADED  = "uploaded";
+		public static final String NUM_POINTS= "numPoints";
 	}
 }

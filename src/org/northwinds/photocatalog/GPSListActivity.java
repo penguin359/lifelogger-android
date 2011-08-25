@@ -48,6 +48,7 @@ public class GPSListActivity extends ListActivity {
 		LifeLog.Locations.LONGITUDE,
 		LifeLog.Locations.ALTITUDE,
 		LifeLog.Locations.ACCURACY,
+		LifeLog.Locations.SPEED,
 		LifeLog.Locations.UPLOADED,
 	};
 	private static final int[] TO = new int[] {
@@ -57,6 +58,7 @@ public class GPSListActivity extends ListActivity {
 		R.id.longitude,
 		R.id.altitude,
 		R.id.accuracy,
+		R.id.speed,
 		R.id.row,
 	};
 
