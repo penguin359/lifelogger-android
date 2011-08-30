@@ -48,12 +48,12 @@
   <string name="delete_all">Delete All</string>
   <string name="delete_uploaded">Delete Uploaded</string>
 
+  <!-- Track Edit and List Activities -->
   <string name="comment">Comment</string>
   <string name="track_name">Track Name</string>
   <string name="track_type">Track Type</string>
   <string name="walking_driving">walking, driving, hiking, etc.</string>
   <string name="num_points">%1$d points</string>
-
   <string name="no_tracks_listed">No tracks created yet!</string>
   <string name="delete">Delete</string>
   <string name="select">Select</string>
