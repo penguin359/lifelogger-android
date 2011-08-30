@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <!-- Colors for the GPS Toggle button on the Main Activity. -->
   <color name="start">#00ff00</color>
   <color name="stop">#ff0000</color>
-  <color name="uploaded">#ff008000</color>
-  <color name="not_uploaded">#ff800000</color>
+
+  <!-- Colors for the GPS fix data in the table on the Main Activity. -->
   <color name="table_background">#202020</color>
   <color name="table_foreground">#ffffff</color>
+
+  <!-- Colors for the uploaded state of entries shown on the
+       GPS List Activity and for the table header background. -->
+  <color name="uploaded">#008000</color>
+  <color name="not_uploaded">#800000</color>
+  <color name="gpslist_header">#202020</color>
 </resources>

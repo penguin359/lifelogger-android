@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Default style for the GPS Toggle button on the Main Activity.
+       Note that the actualy text and textColor toggle between this, and
+       @string/stop and @color/stop, respectively. -->
+  <style name="StartButton">
+    <item name="android:text">@string/start</item>
+    <item name="android:textColor">@color/start</item>
+    <item name="android:textStyle">bold</item>
+ </style>
+
+  <!-- These are the styles used by table on the Main Activity for
+       displaying the latest GPS fix data. -->
+  <style name="LocationTable">
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:background">@color/table_background</item>
+  </style>
+  <style name="LocationTable.Name">
+    <item name="android:paddingLeft">4px</item>
+    <item name="android:paddingRight">6px</item>
+    <item name="android:textStyle">bold</item>
+  </style>
+  <style name="LocationTable.Value">
+    <item name="android:paddingLeft">6px</item>
+    <item name="android:paddingRight">4px</item>
+    <item name="android:text"> \?</item>
+    <item name="android:textColor">@color/table_foreground</item>
+  </style>
+
+
+
+  <!-- Styles for GPS List Activity. -->
+
+  <!-- This is the default style for each line entry in the GPS List.
+       Note that the background color will change to @color/uploaded for
+       each entry that is marked as uploaded in the database. -->
+  <style name="GPSListRow">
+    <item name="android:layout_width">fill_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:background">@color/not_uploaded</item>
+  </style>
+
+  <!-- Style for each field on a row. -->
+  <style name="GPSListField">
+    <item name="android:layout_weight">3</item>
+    <item name="android:layout_width">fill_parent</item>
+    <item name="android:layout_height">fill_parent</item>
+    <item name="android:width">0px</item>
+  </style>
+
+  <!-- Date field is a little longer and needs a lower weight. -->
+  <style name="GPSListField.Date">
+    <item name="android:layout_weight">2</item>
+  </style>
+
+  <!-- This is the default style for the table header in the GPS List. -->
+  <style name="GPSListRow.Header">
+    <item name="android:background">@color/gpslist_header</item>
+  </style>
+</resources>

@@ -52,6 +52,7 @@
   <string name="track_name">Track Name</string>
   <string name="track_type">Track Type</string>
   <string name="walking_driving">walking, driving, hiking, etc.</string>
+  <string name="num_points">%1$d points</string>
 
   <string name="no_tracks_listed">No tracks created yet!</string>
   <string name="delete">Delete</string>

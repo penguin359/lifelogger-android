@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
- android:layout_width="fill_parent" android:layout_height="fill_parent"
- android:orientation="vertical">
+ android:layout_width="fill_parent" android:layout_height="fill_parent">
   <TextView
    android:layout_width="fill_parent" android:layout_height="wrap_content"
    android:id="@+id/hello" android:text="@string/hello"/>
@@ -24,8 +23,7 @@
   <Button
    android:layout_width="wrap_content" android:layout_height="wrap_content"
    android:layout_below="@id/upload"
-   android:text="@string/start" android:id="@+id/start_but"
-   android:textColor="@color/start" android:textStyle="bold"/>
+   android:id="@+id/start_but" style="@style/StartButton"/>
   <Button
    android:layout_width="wrap_content" android:layout_height="wrap_content"
    android:layout_below="@id/upload" android:layout_toRightOf="@id/start_but"
@@ -33,15 +31,16 @@
   <Button
    android:layout_width="wrap_content" android:layout_height="wrap_content"
    android:layout_below="@id/upload" android:layout_toRightOf="@id/list_but"
-   android:id="@+id/delete_uploaded_but" android:text="@string/delete_uploaded_gps"/>
+   android:id="@+id/delete_uploaded_but"
+   android:text="@string/delete_uploaded_gps"/>
   <Button
    android:layout_width="wrap_content" android:layout_height="wrap_content"
    android:layout_below="@id/start_but"
    android:id="@+id/upload_once_but" android:text="@string/upload_once"/>
   <Button
    android:layout_width="wrap_content" android:layout_height="wrap_content"
+   android:layout_below="@id/start_but"
    android:layout_toRightOf="@id/upload_once_but"
-   android:layout_alignBottom="@id/upload_once_but"
    android:id="@+id/delete_but" android:text="@string/delete_all_my_gps"/>
   <TableLayout
    android:layout_width="fill_parent" android:layout_height="wrap_content"
@@ -51,130 +50,66 @@
     <TableRow
      android:layout_width="wrap_content" android:layout_height="wrap_content"
      android:layout_alignParentLeft="true">
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:text="@string/date_time"
-       android:paddingLeft="4px" android:paddingRight="6px"
-       android:background="@color/table_background"
-       android:textStyle="bold"/>
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:id="@+id/timestamp" android:text=" ?"
-       android:paddingLeft="6px" android:paddingRight="4px"
-       android:background="@color/table_background"
-       android:textColor="@color/table_foreground"/>
+      <TextView style="@style/LocationTable.Name"
+       android:text="@string/date_time"/>
+      <TextView style="@style/LocationTable.Value"
+       android:id="@+id/timestamp"/>
     </TableRow>
     <TableRow
      android:layout_width="wrap_content" android:layout_height="wrap_content"
      android:layout_alignParentLeft="true">
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:text="@string/latitude"
-       android:paddingLeft="4px" android:paddingRight="6px"
-       android:background="@color/table_background"
-       android:textStyle="bold"/>
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:id="@+id/latitude" android:text=" ?"
-       android:paddingLeft="6px" android:paddingRight="4px"
-       android:background="@color/table_background"
-       android:textColor="@color/table_foreground"/>
+      <TextView style="@style/LocationTable.Name"
+       android:text="@string/latitude"/>
+      <TextView style="@style/LocationTable.Value"
+       android:id="@+id/latitude"/>
     </TableRow>
     <TableRow
      android:layout_width="wrap_content" android:layout_height="wrap_content"
      android:layout_alignParentLeft="true">
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:text="@string/longitude"
-       android:paddingLeft="4px" android:paddingRight="6px"
-       android:background="@color/table_background"
-       android:textStyle="bold"/>
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:id="@+id/longitude" android:text=" ?"
-       android:paddingLeft="6px" android:paddingRight="4px"
-       android:background="@color/table_background"
-       android:textColor="@color/table_foreground"/>
+      <TextView style="@style/LocationTable.Name"
+       android:text="@string/longitude"/>
+      <TextView style="@style/LocationTable.Value"
+       android:id="@+id/longitude"/>
     </TableRow>
     <TableRow
      android:layout_width="wrap_content" android:layout_height="wrap_content"
      android:layout_alignParentLeft="true">
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:text="@string/altitude"
-       android:paddingLeft="4px" android:paddingRight="6px"
-       android:background="@color/table_background"
-       android:textStyle="bold"/>
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:id="@+id/altitude" android:text=" ?"
-       android:paddingLeft="6px" android:paddingRight="4px"
-       android:background="@color/table_background"
-       android:textColor="@color/table_foreground"/>
+      <TextView style="@style/LocationTable.Name"
+       android:text="@string/altitude"/>
+      <TextView style="@style/LocationTable.Value"
+       android:id="@+id/altitude"/>
     </TableRow>
     <TableRow
      android:layout_width="wrap_content" android:layout_height="wrap_content"
      android:layout_alignParentLeft="true">
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:text="@string/accuracy"
-       android:paddingLeft="4px" android:paddingRight="6px"
-       android:background="@color/table_background"
-       android:textStyle="bold"/>
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:id="@+id/accuracy" android:text=" ?"
-       android:paddingLeft="6px" android:paddingRight="4px"
-       android:background="@color/table_background"
-       android:textColor="@color/table_foreground"/>
+      <TextView style="@style/LocationTable.Name"
+       android:text="@string/accuracy"/>
+      <TextView style="@style/LocationTable.Value"
+       android:id="@+id/accuracy"/>
     </TableRow>
     <TableRow
      android:layout_width="wrap_content" android:layout_height="wrap_content"
      android:layout_alignParentLeft="true">
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:text="@string/bearing"
-       android:paddingLeft="4px" android:paddingRight="6px"
-       android:background="@color/table_background"
-       android:textStyle="bold"/>
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:id="@+id/bearing" android:text=" ?"
-       android:paddingLeft="6px" android:paddingRight="4px"
-       android:background="@color/table_background"
-       android:textColor="@color/table_foreground"/>
+      <TextView style="@style/LocationTable.Name"
+       android:text="@string/bearing"/>
+      <TextView style="@style/LocationTable.Value"
+       android:id="@+id/bearing"/>
     </TableRow>
     <TableRow
        android:layout_width="wrap_content" android:layout_height="wrap_content"
        android:layout_alignParentLeft="true">
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:text="@string/speed"
-       android:paddingLeft="4px" android:paddingRight="6px"
-       android:background="@color/table_background"
-       android:textStyle="bold"/>
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:id="@+id/speed" android:text=" ?"
-       android:paddingLeft="6px" android:paddingRight="4px"
-       android:background="@color/table_background"
-       android:textColor="@color/table_foreground"/>
+      <TextView style="@style/LocationTable.Name"
+       android:text="@string/speed"/>
+      <TextView style="@style/LocationTable.Value"
+       android:id="@+id/speed"/>
     </TableRow>
     <TableRow
        android:layout_width="wrap_content" android:layout_height="wrap_content"
        android:layout_alignParentLeft="true">
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:text="@string/satellites"
-       android:paddingLeft="4px" android:paddingRight="6px"
-       android:background="@color/table_background"
-       android:textStyle="bold"/>
-      <TextView
-       android:layout_width="wrap_content" android:layout_height="wrap_content"
-       android:id="@+id/satellites" android:text=" ?"
-       android:paddingLeft="6px" android:paddingRight="4px"
-       android:background="@color/table_background"
-       android:textColor="@color/table_foreground"/>
+      <TextView style="@style/LocationTable.Name"
+       android:text="@string/satellites"/>
+      <TextView style="@style/LocationTable.Value"
+       android:id="@+id/satellites"/>
     </TableRow>
   </TableLayout>
 </RelativeLayout>
