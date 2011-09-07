@@ -20,6 +20,9 @@
 		</activity>
 		<activity android:name=".EditTrackActivity"
 			  android:label="@string/edit_track"/>
+		<activity android:name=".ExportActivity"
+			  android:label="@string/save"
+			  android:theme="@android:style/Theme.Dialog"/>
 		<activity android:name=".GPSListActivity"
 			  android:label="@string/gps_list"/>
 		<activity android:name=".MainActivity"

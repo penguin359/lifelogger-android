@@ -48,11 +48,12 @@
   <string name="delete_all">Delete All</string>
   <string name="delete_uploaded">Delete Uploaded</string>
 
+  <!-- Track Edit and List Activities -->
   <string name="comment">Comment</string>
   <string name="track_name">Track Name</string>
   <string name="track_type">Track Type</string>
   <string name="walking_driving">walking, driving, hiking, etc.</string>
-
+  <string name="num_points">%1$d points</string>
   <string name="no_tracks_listed">No tracks created yet!</string>
   <string name="delete">Delete</string>
   <string name="select">Select</string>
@@ -76,6 +77,12 @@
   <string name="caption">Caption</string>
   <string name="upload">Upload</string>
   <string name="preview_not_supported_for_multi">Preview not supported for multiple images.\n</string>
+
+  <!-- Export Activity -->
+  <string name="filename">Filename:</string>
+  <string name="save_as_gpx">Save as GPX</string>
+  <string name="save_as_kml">Save as KML</string>
+  <string name="save_as_csv">Save as CSV</string>
 
   <!-- Preferences -->
   <string name="general_preferences">General Preferences</string>

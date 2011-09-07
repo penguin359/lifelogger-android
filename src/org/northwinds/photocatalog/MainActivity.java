@@ -443,8 +443,10 @@ public class MainActivity extends Activity {
 			Process.killProcess(Process.myPid());
 			return true;
 		case R.id.save:
-			ExportGPS exportGPS = new ExportGPS(this);
-			exportGPS.exportAsGPX(LifeLog.Locations.CONTENT_URI);
+			startActivity(
+			    new Intent(Intent.ACTION_VIEW,
+				       LifeLog.Locations.CONTENT_URI,
+				       this, ExportActivity.class));
 			return true;
 		case R.id.maps:
 			startActivity(new Intent(this, MapViewActivity.class));

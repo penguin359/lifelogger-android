@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
- android:layout_height="wrap_content" android:layout_width="wrap_content"
+ android:layout_width="wrap_content" android:layout_height="wrap_content"
  android:orientation="vertical">
   <TextView android:text="@string/first_time" android:autoLink="web"
-   android:layout_height="wrap_content" android:layout_width="wrap_content"
-   style="?android:attr/textAppearanceMedium" android:padding="5dip"/>
-  <CheckBox android:text="@string/dont_show_again" android:id="@+id/dont_show_again"
-   android:layout_height="wrap_content" android:layout_width="wrap_content"/>
+   android:layout_width="wrap_content" android:layout_height="wrap_content"
+   style="?android:attr/textAppearanceMedium" android:padding="5dp"/>
+  <CheckBox android:text="@string/dont_show_again"
+   android:layout_width="wrap_content" android:layout_height="wrap_content"
+   android:id="@+id/dont_show_again"/>
 </LinearLayout>

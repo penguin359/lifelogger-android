@@ -1,24 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_height="fill_parent" android:layout_width="fill_parent">
-<LinearLayout android:id="@+id/header"
-  android:layout_height="wrap_content" android:layout_width="fill_parent">
-  <TextView android:layout_weight="2" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="@string/date_time" android:background="@color/uploaded"/>
-  <TextView android:layout_weight="3" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="@string/latitude" android:background="@color/uploaded"/>
-  <TextView android:layout_weight="3" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="@string/longitude" android:background="@color/uploaded"/>
-  <TextView android:layout_weight="3" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="@string/altitude" android:background="@color/uploaded"/>
-  <TextView android:layout_weight="3" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="@string/accuracy" android:background="@color/uploaded"/>
-  <TextView android:layout_weight="3" android:layout_height="fill_parent" android:layout_width="fill_parent" android:width="0px" android:text="@string/speed" android:background="@color/uploaded"/>
-</LinearLayout>
-<LinearLayout android:id="@+id/footer"
-  android:layout_height="wrap_content" android:layout_width="fill_parent"
-  android:orientation="horizontal" android:layout_alignParentBottom="true">
-  <ImageButton android:id="@+id/back" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_weight="0" android:src="@drawable/ic_menu_back"/>
-  <Button android:id="@+id/delete_but" android:layout_height="fill_parent" android:layout_width="fill_parent" android:layout_weight="1" android:text="@string/delete_all"/>
-  <Button android:id="@+id/delete_uploaded_but" android:layout_height="fill_parent" android:layout_width="fill_parent" android:layout_weight="1" android:text="@string/delete_uploaded"/>
-  <ImageButton android:id="@+id/forward" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_weight="0" android:src="@drawable/ic_menu_forward"/>
-</LinearLayout>
-<ListView android:layout_width="fill_parent" android:layout_height="wrap_content" android:fastScrollEnabled="true" android:layout_below="@id/header" android:layout_above="@id/footer" android:id="@+id/android:list"/>
-<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@id/header" android:layout_above="@id/footer" android:id="@+id/android:empty" android:text="@string/no_gps"/>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ android:layout_width="fill_parent" android:layout_height="fill_parent">
+  <LinearLayout style="@style/GPSListRow.Header" android:id="@+id/header">
+   <TextView style="@style/GPSListField.Date" android:text="@string/date_time"/>
+   <TextView style="@style/GPSListField" android:text="@string/latitude"/>
+   <TextView style="@style/GPSListField" android:text="@string/longitude"/>
+   <TextView style="@style/GPSListField" android:text="@string/altitude"/>
+   <TextView style="@style/GPSListField" android:text="@string/accuracy"/>
+   <TextView style="@style/GPSListField" android:text="@string/speed"/>
+  </LinearLayout>
+  <LinearLayout android:id="@+id/footer"
+   android:layout_width="fill_parent" android:layout_height="wrap_content"
+   android:orientation="horizontal" android:layout_alignParentBottom="true">
+    <ImageButton android:layout_weight="0"
+     android:layout_width="wrap_content" android:layout_height="wrap_content"
+     android:id="@+id/back" android:src="@drawable/ic_menu_back"/>
+    <Button android:layout_weight="1"
+     android:layout_width="fill_parent" android:layout_height="fill_parent"
+     android:id="@+id/delete_but" android:text="@string/delete_all"/>
+    <Button android:layout_weight="1"
+     android:layout_width="fill_parent" android:layout_height="fill_parent"
+     android:id="@+id/delete_uploaded_but"
+     android:text="@string/delete_uploaded"/>
+    <ImageButton android:layout_weight="0"
+     android:layout_width="wrap_content" android:layout_height="wrap_content"
+     android:id="@+id/forward" android:src="@drawable/ic_menu_forward"/>
+  </LinearLayout>
+  <ListView
+   android:layout_width="fill_parent" android:layout_height="wrap_content"
+   android:layout_below="@id/header" android:layout_above="@id/footer"
+   android:id="@id/android:list" android:fastScrollEnabled="true"/>
+  <TextView
+   android:layout_width="wrap_content" android:layout_height="wrap_content"
+   android:layout_below="@id/header" android:layout_above="@id/footer"
+   android:id="@id/android:empty" android:text="@string/no_gps"/>
 </RelativeLayout>

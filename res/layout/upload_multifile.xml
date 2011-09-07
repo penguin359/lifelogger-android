@@ -12,7 +12,7 @@
      android:text="@string/title"/>
     <EditText
      android:layout_width="fill_parent" android:layout_height="wrap_content"
-     android:id="@+id/title" android:contentDescription="@string/caption"/>
+     android:id="@+id/title" android:hint="@string/caption"/>
     <TextView
      android:layout_width="fill_parent" android:layout_height="wrap_content"
      android:text="@string/description"/>
