@@ -34,13 +34,14 @@ import java.util.List;
 //import android.app.AlertDialog;
 import android.content.Intent;
 //import android.content.Context;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.SQLException;
 //import android.graphics.Bitmap;
 //import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
+//import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.Paint;
 import android.graphics.Point;
@@ -128,15 +129,16 @@ public class MapViewActivity extends MapActivity {
 		//Bitmap mIndicator;
 
 		public PathOverlay() {
+			Resources r = getResources();
 			mPaint = new Paint();
 			mPaint.setDither(true);
 			//mPaint.setColor(Color.RED);
 			//mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-			mPaint.setColor(Color.CYAN);
+			mPaint.setColor(r.getColor(R.color.map_color));
 			mPaint.setStyle(Paint.Style.STROKE);
 			mPaint.setStrokeJoin(Paint.Join.ROUND);
 			mPaint.setStrokeCap(Paint.Cap.ROUND);
-			mPaint.setStrokeWidth(5);
+			mPaint.setStrokeWidth(r.getColor(R.integer.map_width));
 
 			mIndicator = DummyItemizedOverlay.myBoundCenter(getResources().getDrawable(R.drawable.ic_maps_indicator_current_position));
 			//mIndicator = BitmapFactory.decodeResource(getResources(), R.drawable.ic_maps_indicator_current_position);

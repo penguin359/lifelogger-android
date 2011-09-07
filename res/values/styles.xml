@@ -58,4 +58,8 @@
   <style name="GPSListRow.Header">
     <item name="android:background">@color/gpslist_header</item>
   </style>
+
+  <!-- Map View Path Overlay Style -->
+  <color name="map_color">#4000ffff</color>
+  <integer name="map_width">5</integer>
 </resources>
