@@ -128,8 +128,10 @@ public class TrackListActivity extends ListActivity {
 			refreshTracks();
 			return true;
 		case R.id.save:
-			ExportGPS exportGPS = new ExportGPS(this);
-			exportGPS.exportAsGPX(uri.appendPath("locations").build());
+			startActivity(
+			    new Intent(Intent.ACTION_VIEW,
+				       uri.appendPath("locations").build(),
+				       this, ExportActivity.class));
 			return true;
 		case R.id.gps_list:
 			startActivity(

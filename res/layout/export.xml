@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ android:layout_width="fill_parent" android:layout_height="wrap_content"
+ android:orientation="vertical">
+  <TextView
+   android:layout_width="wrap_content" android:layout_height="wrap_content"
+   android:text="@string/filename" android:minEms="20"/>
+  <EditText
+   android:layout_width="fill_parent" android:layout_height="wrap_content"
+   android:id="@+id/name"/>
+  <RadioGroup
+   android:layout_width="wrap_content" android:layout_height="wrap_content">
+    <RadioButton
+     android:layout_width="fill_parent" android:layout_height="wrap_content"
+     android:id="@+id/gpx" android:text="@string/save_as_gpx"/>
+    <RadioButton
+     android:layout_width="fill_parent" android:layout_height="wrap_content"
+     android:id="@+id/kml" android:text="@string/save_as_kml"/>
+    <RadioButton
+     android:layout_width="fill_parent" android:layout_height="wrap_content"
+     android:id="@+id/csv" android:text="@string/save_as_csv"/>
+  </RadioGroup>
+  <Button
+   android:layout_width="wrap_content" android:layout_height="wrap_content"
+   android:id="@+id/save" android:text="@string/save"/>
+</LinearLayout>

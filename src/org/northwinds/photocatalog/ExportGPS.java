@@ -62,12 +62,19 @@ class ExportGPS {
 	}
 
 	public void exportAsGPX(Uri track) {
-		exportAsGPX(track, TYPE_GPX);
-		exportAsGPX(track, TYPE_KML);
-		exportAsGPX(track, TYPE_CSV);
+		// /Android/data/<package_name>/files/
+		String date = mFilenameFormat.format(new Date());
+		String filename = "photocatalog-" + date;
+		exportAsGPX(track, filename);
 	}
 
-	public void exportAsGPX(Uri track, int type) {
+	public void exportAsGPX(Uri track, String filename) {
+		exportAsGPX(track, filename, TYPE_GPX);
+		exportAsGPX(track, filename, TYPE_KML);
+		exportAsGPX(track, filename, TYPE_CSV);
+	}
+
+	public void exportAsGPX(Uri track, String filename, int type) {
 		String ext = "";
 		switch(type) {
 		case TYPE_GPX:
@@ -89,10 +96,7 @@ class ExportGPS {
 			return;
 		}
 		File root = Environment.getExternalStorageDirectory();
-		// /Android/data/<package_name>/files/
-		String date = mFilenameFormat.format(new Date());
-		String filename = "photocatalog-" + date + ext;
-		File file = new File(root, filename);
+		File file = new File(root, filename + ext);
 		try {
 			file.createNewFile();
 		} catch(IOException ex) {

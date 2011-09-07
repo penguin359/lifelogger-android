@@ -74,6 +74,12 @@
   <string name="upload">Upload</string>
   <string name="preview_not_supported_for_multi">Preview not supported for multiple images.\n</string>
 
+  <!-- Export Activity -->
+  <string name="filename">Filename:</string>
+  <string name="save_as_gpx">Save as GPX</string>
+  <string name="save_as_kml">Save as KML</string>
+  <string name="save_as_csv">Save as CSV</string>
+
   <!-- Preferences -->
   <string name="general_preferences">General Preferences</string>
   <string name="start_on_boot">Start on Boot</string>
