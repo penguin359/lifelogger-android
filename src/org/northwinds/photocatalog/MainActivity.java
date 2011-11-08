@@ -65,7 +65,9 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-	private GoogleAnalyticsTracker tracker;
+	private LifeApplication mApplication;
+
+	private GoogleAnalyticsTracker mTracker;
 
 	private TextView mTimestamp;
 	private TextView mLatitude;
@@ -227,7 +229,7 @@ public class MainActivity extends Activity {
 
 	private final View.OnClickListener mStartGpsOnClick = new View.OnClickListener() {
 		public void onClick(View v) {
-			tracker.trackEvent("Clicks", "Button", "Start", 0);
+			mTracker.trackEvent("Clicks", "Button", "Start", 0);
 			startService(new Intent(LoggingService.ACTION_START_LOG, null,
 						MainActivity.this, LoggingService.class));
 		}
@@ -235,8 +237,8 @@ public class MainActivity extends Activity {
 
 	private final View.OnClickListener mStopGpsOnClick = new View.OnClickListener() {
 		public void onClick(View v) {
-			tracker.trackEvent("Clicks", "Button", "Stop", 0);
-			tracker.dispatch();
+			mTracker.trackEvent("Clicks", "Button", "Stop", 0);
+			mTracker.dispatch();
 			startService(new Intent(LoggingService.ACTION_STOP_LOG, null,
 						MainActivity.this, LoggingService.class));
 		}
@@ -293,8 +295,8 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.main);
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		tracker = GoogleAnalyticsTracker.getInstance();
-		tracker.startNewSession("", 20, this);
+		mApplication = (LifeApplication)getApplicationContext();
+		mTracker = mApplication.getTrackerInstance();
 
 		mTrackName = (TextView)findViewById(R.id.track);
 		mGpsStatus = (TextView)findViewById(R.id.location);
@@ -416,7 +418,7 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
 		case R.id.new_track:
-			tracker.trackPageView("/new_track");
+			mTracker.trackPageView("/new_track");
 			Uri trackUri = getContentResolver().insert(LifeLog.Tracks.CONTENT_URI, null);
 			long track = ContentUris.parseId(trackUri);
 			SharedPreferences.Editor editor = mPrefs.edit();
@@ -425,7 +427,7 @@ public class MainActivity extends Activity {
 			if(!mPrefs.getBoolean("editDetailsAtStart", false))
 				return true;
 		case R.id.edit_track:
-			tracker.trackPageView("/edit_track");
+			mTracker.trackPageView("/edit_track");
 			track = mPrefs.getLong("track", 0);
 			if(track <= 0)
 				return true;
@@ -440,7 +442,7 @@ public class MainActivity extends Activity {
 			editor.commit();
 			return true;
 		case R.id.manage_tracks:
-			tracker.trackPageView("/manage_tracks");
+			mTracker.trackPageView("/manage_tracks");
 			startActivity(
 			    new Intent(this, TrackListActivity.class));
 			return true;
@@ -456,14 +458,14 @@ public class MainActivity extends Activity {
 			Process.killProcess(Process.myPid());
 			return true;
 		case R.id.save:
-			tracker.trackPageView("/save");
+			mTracker.trackPageView("/save");
 			startActivity(
 			    new Intent(Intent.ACTION_VIEW,
 				       LifeLog.Locations.CONTENT_URI,
 				       this, ExportActivity.class));
 			return true;
 		case R.id.maps:
-			tracker.trackPageView("/maps");
+			mTracker.trackPageView("/maps");
 			startActivity(new Intent(this, MapViewActivity.class));
 			return true;
 		}
@@ -502,7 +504,8 @@ public class MainActivity extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		unbindService(mConnection);
-		tracker.stopSession();
+		mApplication.putTrackerInstance();
+		mTracker = null;
 	}
 
 	private static final int DIALOG_FIRST_TIME = 1;
