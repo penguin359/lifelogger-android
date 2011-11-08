@@ -1,5 +1,5 @@
-This notice only applies to files under res/drawable*/.  For all other
-files, see license notice in LICENSE.txt.
+This notice only applies to files under res/drawable*/ and lib/*.  For
+all other files, see license notice in LICENSE.txt.
 ------------------------------------------------------------
 
 

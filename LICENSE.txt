@@ -1,6 +1,7 @@
 The majority of this work is under the following license.  Artwork under
 res/drawable*/ is provided by the Android SDK and is under the Apache
-License listed in NOTICE.txt.
+License, Version 2.0 and can be found in NOTICE.txt.  The ACRA Library
+under lib/* is also under the Apache License, Version 2.0.
 
 
 Copyright (c) 2011, Loren M. Lang

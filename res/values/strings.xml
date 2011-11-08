@@ -141,4 +141,7 @@
   <string name="filter_distance">Filter by distance</string>
   <string name="filter_distance_on">Distant points will be dropped.</string>
   <string name="filter_distance_off">All points logged regardless of distance between them.</string>
+
+  <!-- Application strings -->
+  <string name="crash_toast_text">Sorry, but PhotoCatalog has unexpectedly crashed!  A crash report has been sent to the developer to help him fix the issue.</string>
 </resources>
