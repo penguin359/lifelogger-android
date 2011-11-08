@@ -24,7 +24,8 @@ public class LifeApplication extends Application {
 
 		if(mTracker == null) {
 			mTracker = GoogleAnalyticsTracker.getInstance();
-			mTracker.startNewSession("", 20, this);
+			mTracker.startNewSession(
+			    getString(R.string.analytics_id), 20, this);
 		}
 
 		return mTracker;
