@@ -8,7 +8,7 @@ import org.acra.annotation.ReportsCrashes;
 
 @ReportsCrashes(formKey = "dGExM01WVDVDSG5Ja1c0aXY1Wm9qTUE6MQ",
 		mode = ReportingInteractionMode.TOAST,
-		forceCloseDialogAfterToast = false,
+		forceCloseDialogAfterToast = true,
 		resToastText = R.string.crash_toast_text)
 public class LifeApplication extends Application {
 	@Override
