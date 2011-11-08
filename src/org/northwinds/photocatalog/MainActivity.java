@@ -50,7 +50,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-//import android.os.Process;
+import android.os.Process;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -439,9 +439,9 @@ public class MainActivity extends Activity {
 						this, LoggingService.class));
 			finish();
 			return true;
-		//case R.id.kill:
-		//	Process.killProcess(Process.myPid());
-		//	return true;
+		case R.id.kill:
+			Process.killProcess(Process.myPid());
+			return true;
 		case R.id.save:
 			startActivity(
 			    new Intent(Intent.ACTION_VIEW,
