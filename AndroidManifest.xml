@@ -60,6 +60,11 @@
 				<data     android:mimeType="image/*"/>
 			</intent-filter>
 		</activity>
+		<activity android:name="org.acra.CrashReportDialog"
+			  android:theme="@android:style/Theme.Dialog"
+			  android:launchMode="singleInstance"
+			  android:excludeFromRecents="true"
+			  android:finishOnTaskLaunch="true"/>
 		<provider android:name=".LifeProvider"
 		          android:authorities="org.northwinds.photocatalog.lifelog"/>
 		<receiver android:name=".Receiver">

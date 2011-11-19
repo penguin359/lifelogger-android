@@ -138,6 +138,16 @@
   <string name="filter_distance_on">Distant points will be dropped.</string>
   <string name="filter_distance_off">All points logged regardless of distance between them.</string>
 
-  <!-- Application strings -->
-  <string name="crash_toast_text">Sorry, but PhotoCatalog has unexpectedly crashed!  A crash report has been sent to the developer to help him fix the issue.</string>
+  <!-- ACRA strings -->
+  <string name="crash_toast_text">Sorry, but PhotoCatalog has unexpectedly crashed!  A crash report is being generated...</string>
+  <string name="crash_notif_ticker_text">Unexpected error, please send a report...</string>
+  <string name="crash_notif_title">PhotoCatalog has crashed...</string>
+  <string name="crash_notif_text">Please click here to help fix the issue.</string>
+
+  <string name="crash_dialog_title">PhotoCatalog has crashed</string>
+  <string name="crash_dialog_text">An unexpected error occurred forcing the
+    application to stop. Please help us fix this by sending us error data,
+    all you have to do is click \'OK\'.</string>
+  <string name="crash_dialog_comment_prompt">You might add your comments about the problem below:</string>
+  <string name="crash_dialog_ok_toast">Thank you!</string>
 </resources>
