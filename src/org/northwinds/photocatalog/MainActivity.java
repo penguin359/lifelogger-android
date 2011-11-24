@@ -32,8 +32,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -67,7 +65,7 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 	private LifeApplication mApplication;
 
-	private GoogleAnalyticsTracker mTracker;
+	private LifeAnalyticsTracker mTracker;
 
 	private TextView mTimestamp;
 	private TextView mLatitude;
