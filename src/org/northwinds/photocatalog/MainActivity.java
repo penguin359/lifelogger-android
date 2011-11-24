@@ -297,6 +297,8 @@ public class MainActivity extends Activity {
 
 		mApplication = (LifeApplication)getApplicationContext();
 		mTracker = mApplication.getTrackerInstance();
+		if(getLastNonConfigurationInstance() != null)
+			mApplication.putTrackerInstance();
 
 		mTrackName = (TextView)findViewById(R.id.track);
 		mGpsStatus = (TextView)findViewById(R.id.location);
@@ -390,6 +392,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
+		mApplication.getTrackerInstance();
 		return new Object();
 	}
 
