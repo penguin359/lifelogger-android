@@ -147,6 +147,9 @@
   <string name="enable_acra">Enable Crash Reporting</string>
   <string name="enable_acra_on">You will be given an option to send a crash report.</string>
   <string name="enable_acra_off">Crash reports will never be sent.</string>
+  <string name="enable_analytics">Enable Analytics Tracking</string>
+  <string name="enable_analytics_on">Anonymous usage statistics may be uploaded.</string>
+  <string name="enable_analytics_off">No usage statistics will be uploaded.</string>
 
   <!-- Crash Report Preferences -->
   <string name="acra_preferences">Crash Report Preferences</string>

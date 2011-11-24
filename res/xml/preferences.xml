@@ -102,5 +102,9 @@
        android:summaryOff="@string/acra_alwaysaccept_off"
        android:key="acra.alwaysaccept" android:defaultValue="false"/>
     </PreferenceScreen>
+    <CheckBoxPreference android:title="@string/enable_analytics"
+     android:summaryOn="@string/enable_analytics_on"
+     android:summaryOff="@string/enable_analytics_off"
+     android:key="analytics" android:defaultValue="false"/>
   </PreferenceCategory>
 </PreferenceScreen>
