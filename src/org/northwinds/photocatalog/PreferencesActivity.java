@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2010, Loren M. Lang
+﻿/*
+ * Copyright (c) 2010-2011, Loren M. Lang
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,11 +35,8 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
-/**
- * @author Loren M. Lang
- *
- */
 public class PreferencesActivity extends PreferenceActivity {
+	@Override
 	protected void onCreate(Bundle b) {
 		super.onCreate(b);
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);

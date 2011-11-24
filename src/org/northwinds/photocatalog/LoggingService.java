@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2011, Loren M. Lang
+﻿/*
+ * Copyright (c) 2010-2011, Loren M. Lang
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@ import java.io.StringReader;
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
-//import java.util.Set;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;

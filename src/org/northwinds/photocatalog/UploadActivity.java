@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2010, Loren M. Lang
+﻿/*
+ * Copyright (c) 2010-2011, Loren M. Lang
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,10 +67,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/**
- * @author Loren M. Lang
- *
- */
 public class UploadActivity extends Activity implements Runnable {
 	private static final String TAG = "PhotoCatalog-UploadActivity";
 
@@ -94,7 +90,7 @@ public class UploadActivity extends Activity implements Runnable {
 	private TextView mStatusView;
 	private ProgressDialog mProgressbar;
 
-	Handler updateUI = new Handler() {
+	private final Handler updateUI = new Handler() {
 		@Override
 		public void handleMessage(Message m) {
 			switch(m.what) {
@@ -208,7 +204,7 @@ public class UploadActivity extends Activity implements Runnable {
 		}
 	}
 
-	SharedPreferences mPrefs = null;
+	private SharedPreferences mPrefs = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -303,7 +299,6 @@ public class UploadActivity extends Activity implements Runnable {
 
 	@Override
 	public void onDestroy() {
-		super.onDestroy();
 		if(mThread != null && mThread.getState() != Thread.State.TERMINATED) {
 			mThread.interrupt();
 			try {
@@ -311,6 +306,7 @@ public class UploadActivity extends Activity implements Runnable {
 			} catch(InterruptedException ex) {
 			}
 		}
+		super.onDestroy();
 	}
 
 	public void startUpload(View view) {
@@ -324,7 +320,6 @@ public class UploadActivity extends Activity implements Runnable {
 		mThread.start();
 	}
 
-	//@Override
 	public void run() {
 		StringBuilder sb = new StringBuilder();
 		//try {

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (c) 2011, Loren M. Lang
+ * Copyright (c) 2010-2011, Loren M. Lang
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -264,10 +264,6 @@ public class MainActivity extends Activity {
 			}
 		}
 	};
-
-	//private static class ActivityState {
-	//	private boolean isRestart = false;
-	//}
 
 	private void parseIntent(Intent intent) {
 		String action = intent.getAction();
