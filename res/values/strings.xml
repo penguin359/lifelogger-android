@@ -112,7 +112,7 @@
   <string name="edit_details_at_start_on">Open the edit track details screen when starting new track.</string>
   <string name="edit_details_at_start_off">Start new track but edit details later.</string>
 
-  <!-- Display preferences -->
+  <!-- Display Preferences -->
   <string name="display_preferences">Display Preferences</string>
   <string name="display_preferences_summary">Settings that affect display output only.</string>
   <string name="units_for_display">Display Units</string>
@@ -127,7 +127,7 @@
   <string name="display_first_fix_on">Show a notification of the time to first fix.</string>
   <string name="display_first_fix_off">No notification of time to first fix will be shown.</string>
 
-  <!-- GPS Parameter preferences -->
+  <!-- GPS Parameter Preferences -->
   <string name="gps_parameters">GPS Parameters</string>
   <string name="gps_parameters_summary">Various parameters for controlling what are acceptable points for logging GPS data.</string>
   <string name="minimum_distance">Minimum Distance</string>
@@ -142,6 +142,37 @@
   <string name="filter_distance_on">Distant points will be dropped.</string>
   <string name="filter_distance_off">All points logged regardless of distance between them.</string>
 
-  <!-- Application strings -->
-  <string name="crash_toast_text">Sorry, but PhotoCatalog has unexpectedly crashed!  A crash report has been sent to the developer to help him fix the issue.</string>
+  <!-- Personal Information Preferences -->
+  <string name="personal_information">Personal Information</string>
+  <string name="enable_acra">Enable Crash Reporting</string>
+  <string name="enable_acra_on">You will be given an option to send a crash report.</string>
+  <string name="enable_acra_off">Crash reports will never be sent.</string>
+
+  <!-- Crash Report Preferences -->
+  <string name="acra_preferences">Crash Report Preferences</string>
+  <string name="acra_preferences_summary">Details to include in crash reports.</string>
+  <string name="acra_syslog">System Log</string>
+  <string name="acra_syslog_on">Send a copy of system log on crash.</string>
+  <string name="acra_syslog_off">System log will not be read.</string>
+  <string name="acra_deviceid">Send Device ID</string>
+  <string name="acra_deviceid_on">A unique identifier will be sent with the crash report.</string>
+  <string name="acra_deviceid_off">No unique device identified will be sent.</string>
+  <string name="acra_user_email">User Email</string>
+  <string name="acra_user_email_summary">If you would like feedback on a crash, enter your Email Address.</string>
+  <string name="acra_alwaysaccept">Auto-Submit Report</string>
+  <string name="acra_alwaysaccept_on">Crash reports will automatically be submitted.</string>
+  <string name="acra_alwaysaccept_off">User must manually submit crash reports.</string>
+
+  <!-- ACRA strings -->
+  <string name="crash_toast_text">Sorry, but PhotoCatalog has unexpectedly crashed!  A crash report is being generated...</string>
+  <string name="crash_notif_ticker_text">Unexpected error, please send a report...</string>
+  <string name="crash_notif_title">PhotoCatalog has crashed...</string>
+  <string name="crash_notif_text">Please click here to help fix the issue.</string>
+
+  <string name="crash_dialog_title">PhotoCatalog has crashed</string>
+  <string name="crash_dialog_text">An unexpected error occurred forcing the
+    application to stop. Please help us fix this by sending us error data,
+    all you have to do is click \'OK\'.</string>
+  <string name="crash_dialog_comment_prompt">You might add your comments about the problem below:</string>
+  <string name="crash_dialog_ok_toast">Thank you!</string>
 </resources>

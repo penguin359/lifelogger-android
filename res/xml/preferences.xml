@@ -77,4 +77,30 @@
      android:key="smsKey" android:defaultValue=""
      android:dependency="sms" android:editable="false"/>
   </PreferenceCategory>
+  <PreferenceCategory android:title="@string/personal_information">
+    <CheckBoxPreference android:title="@string/enable_acra"
+     android:summaryOn="@string/enable_acra_on"
+     android:summaryOff="@string/enable_acra_off"
+     android:key="acra.enable" android:defaultValue="true"/>
+    <PreferenceScreen android:title="@string/acra_preferences"
+     android:summary="@string/acra_preferences_summary"
+     android:dependency="acra.enable">
+      <CheckBoxPreference android:title="@string/acra_syslog"
+       android:summaryOn="@string/acra_syslog_on"
+       android:summaryOff="@string/acra_syslog_off"
+       android:key="acra.syslog.enable" android:defaultValue="true"/>
+      <CheckBoxPreference android:title="@string/acra_deviceid"
+       android:summaryOn="@string/acra_deviceid_on"
+       android:summaryOff="@string/acra_deviceid_off"
+       android:key="acra.deviceid.enable" android:defaultValue="true"/>
+      <EditTextPreference android:title="@string/acra_user_email"
+       android:summary="@string/acra_user_email_summary"
+       android:key="acra.user.email"/>
+      <CheckBoxPreference
+       android:title="@string/acra_alwaysaccept"
+       android:summaryOn="@string/acra_alwaysaccept_on"
+       android:summaryOff="@string/acra_alwaysaccept_off"
+       android:key="acra.alwaysaccept" android:defaultValue="false"/>
+    </PreferenceScreen>
+  </PreferenceCategory>
 </PreferenceScreen>
