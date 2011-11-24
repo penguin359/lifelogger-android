@@ -41,10 +41,14 @@ public class EditTrackActivity extends Activity {
 	private EditText mType;
 	private EditText mDescription;
 
+	private LifeAnalyticsTracker mTracker = null;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.edit_track);
+		mTracker = LifeApplication.getTrackerInstance(this);
+		mTracker.trackPageView("/edit_track");
 
 		if(getIntent().getData() == null) {
 			finish();
@@ -86,5 +90,11 @@ public class EditTrackActivity extends Activity {
 		args.put(LifeLog.Tracks.DESC, mDescription.getText().toString());
 		getContentResolver().update(getIntent().getData(), args, null, null);
 		super.onPause();
+	}
+
+	@Override
+	protected void onDestroy() {
+		mTracker.release();
+		super.onDestroy();
 	}
 }

@@ -40,8 +40,12 @@ import android.preference.PreferenceManager;
  *
  */
 public class PreferencesActivity extends PreferenceActivity {
+	private LifeAnalyticsTracker mTracker = null;
+
 	protected void onCreate(Bundle b) {
 		super.onCreate(b);
+		mTracker = LifeApplication.getTrackerInstance(this);
+		mTracker.trackPageView("/preferences");
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		if(!prefs.contains("smsKey")) {
 			SharedPreferences.Editor editor = prefs.edit();
@@ -49,5 +53,11 @@ public class PreferencesActivity extends PreferenceActivity {
 			editor.commit();
 		}
 		addPreferencesFromResource(R.xml.preferences);
+	}
+
+	@Override
+	protected void onDestroy() {
+		mTracker.release();
+		super.onDestroy();
 	}
 }

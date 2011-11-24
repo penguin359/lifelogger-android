@@ -236,10 +236,14 @@ public class MapViewActivity extends MapActivity {
 		}
 	};
 
+	private LifeAnalyticsTracker mTracker = null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map_view);
+		mTracker = LifeApplication.getTrackerInstance(this);
+		mTracker.trackPageView("/maps");
 
 		Intent intent = getIntent();
 		if(intent.getData() == null)
@@ -280,6 +284,7 @@ public class MapViewActivity extends MapActivity {
 	@Override
 	protected void onDestroy() {
 		getContentResolver().unregisterContentObserver(mObserver);
+		mTracker.release();
 		super.onDestroy();
 	}
 }

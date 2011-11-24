@@ -208,11 +208,15 @@ public class UploadActivity extends Activity implements Runnable {
 		}
 	}
 
-	SharedPreferences mPrefs = null;
+	private SharedPreferences mPrefs = null;
+
+	private LifeAnalyticsTracker mTracker = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		mTracker = LifeApplication.getTrackerInstance(this);
+		mTracker.trackPageView("/upload");
 
 		boolean multifile = false;
 		Intent intent = getIntent();
@@ -303,7 +307,6 @@ public class UploadActivity extends Activity implements Runnable {
 
 	@Override
 	public void onDestroy() {
-		super.onDestroy();
 		if(mThread != null && mThread.getState() != Thread.State.TERMINATED) {
 			mThread.interrupt();
 			try {
@@ -311,6 +314,8 @@ public class UploadActivity extends Activity implements Runnable {
 			} catch(InterruptedException ex) {
 			}
 		}
+		mTracker.release();
+		super.onDestroy();
 	}
 
 	public void startUpload(View view) {

@@ -104,10 +104,14 @@ public class GPSListActivity extends ListActivity {
 		setListAdapter(entries);
 	}
 
+	private LifeAnalyticsTracker mTracker = null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gps_list);
+		mTracker = LifeApplication.getTrackerInstance(this);
+		mTracker.trackPageView("/log");
 
 		Intent intent = getIntent();
 		mBaseUri = intent.getData();
@@ -159,5 +163,11 @@ public class GPSListActivity extends ListActivity {
 	protected void onResume() {
 		super.onResume();
 		//refreshLocations();
+	}
+
+	@Override
+	protected void onDestroy() {
+		mTracker.release();
+		super.onDestroy();
 	}
 }

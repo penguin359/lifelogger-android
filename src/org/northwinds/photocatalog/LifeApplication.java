@@ -29,6 +29,7 @@
 package org.northwinds.photocatalog;
 
 import android.app.Application;
+import android.content.Context;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
@@ -53,12 +54,9 @@ import org.acra.sender.HttpPostSender;
 public class LifeApplication extends Application {
 	private LifeAnalyticsTracker mTracker = null;
 
-	LifeAnalyticsTracker getTrackerInstance() {
-		return mTracker.alloc();
-	}
-
-	boolean putTrackerInstance() {
-		return mTracker.release();
+	static LifeAnalyticsTracker getTrackerInstance(Context context) {
+		return ((LifeApplication)context.getApplicationContext())
+		       .mTracker.alloc();
 	}
 
 	@Override

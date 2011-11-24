@@ -63,8 +63,6 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-	private LifeApplication mApplication;
-
 	private LifeAnalyticsTracker mTracker;
 
 	private TextView mTimestamp;
@@ -293,10 +291,10 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.main);
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		mApplication = (LifeApplication)getApplicationContext();
-		mTracker = mApplication.getTrackerInstance();
+		mTracker = LifeApplication.getTrackerInstance(this);
 		if(getLastNonConfigurationInstance() != null)
-			mApplication.putTrackerInstance();
+			mTracker.release(); /* release alloc() caused by
+					       onRetainNonConfig... */
 
 		mTrackName = (TextView)findViewById(R.id.track);
 		mGpsStatus = (TextView)findViewById(R.id.location);
@@ -390,7 +388,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-		mApplication.getTrackerInstance();
+		mTracker.alloc();
 		return new Object();
 	}
 
@@ -419,7 +417,7 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
 		case R.id.new_track:
-			mTracker.trackPageView("/new_track");
+			mTracker.trackPageView("/edit_track/new");
 			Uri trackUri = getContentResolver().insert(LifeLog.Tracks.CONTENT_URI, null);
 			long track = ContentUris.parseId(trackUri);
 			SharedPreferences.Editor editor = mPrefs.edit();
@@ -428,7 +426,6 @@ public class MainActivity extends Activity {
 			if(!mPrefs.getBoolean("editDetailsAtStart", false))
 				return true;
 		case R.id.edit_track:
-			mTracker.trackPageView("/edit_track");
 			track = mPrefs.getLong("track", 0);
 			if(track <= 0)
 				return true;
@@ -443,7 +440,6 @@ public class MainActivity extends Activity {
 			editor.commit();
 			return true;
 		case R.id.manage_tracks:
-			mTracker.trackPageView("/manage_tracks");
 			startActivity(
 			    new Intent(this, TrackListActivity.class));
 			return true;
@@ -459,14 +455,12 @@ public class MainActivity extends Activity {
 			Process.killProcess(Process.myPid());
 			return true;
 		case R.id.save:
-			mTracker.trackPageView("/save");
 			startActivity(
 			    new Intent(Intent.ACTION_VIEW,
 				       LifeLog.Locations.CONTENT_URI,
 				       this, ExportActivity.class));
 			return true;
 		case R.id.maps:
-			mTracker.trackPageView("/maps");
 			startActivity(new Intent(this, MapViewActivity.class));
 			return true;
 		}
@@ -505,7 +499,7 @@ public class MainActivity extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		unbindService(mConnection);
-		mApplication.putTrackerInstance();
+		mTracker.release();
 		mTracker = null;
 	}
 

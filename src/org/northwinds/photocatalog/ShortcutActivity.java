@@ -21,9 +21,13 @@ public class ShortcutActivity extends Activity {
 
 	private static final String CATEGORY_SHORTCUT = "org.northwinds.android.intent.CATEGORY_SHORTCUT";
 
+	private LifeAnalyticsTracker mTracker = null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		mTracker = LifeApplication.getTrackerInstance(this);
+		mTracker.trackPageView("/shortcut");
 
 		Intent intent = getIntent();
 		if(intent.hasCategory(CATEGORY_SHORTCUT)) {
@@ -107,5 +111,11 @@ public class ShortcutActivity extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
+	}
+
+	@Override
+	protected void onDestroy() {
+		mTracker.release();
+		super.onDestroy();
 	}
 }

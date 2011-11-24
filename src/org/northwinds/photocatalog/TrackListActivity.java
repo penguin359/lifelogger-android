@@ -74,10 +74,14 @@ public class TrackListActivity extends ListActivity {
 		setListAdapter(entries);
 	}
 
+	private LifeAnalyticsTracker mTracker = null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.track_list);
+		mTracker = LifeApplication.getTrackerInstance(this);
+		mTracker.trackPageView("/manage_tracks");
 
 		registerForContextMenu(getListView());
 	}
@@ -147,5 +151,11 @@ public class TrackListActivity extends ListActivity {
 			return true;
 		}
 		return super.onContextItemSelected(item);
+	}
+
+	@Override
+	protected void onDestroy() {
+		mTracker.release();
+		super.onDestroy();
 	}
 }

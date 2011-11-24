@@ -47,10 +47,14 @@ public class ExportActivity extends Activity {
 	private RadioButton mKml;
 	private RadioButton mCsv;
 
+	private LifeAnalyticsTracker mTracker = null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.export);
+		mTracker = LifeApplication.getTrackerInstance(this);
+		mTracker.trackPageView("/save");
 
 		String date = mFilenameFormat.format(new Date());
 		String filename = "photocatalog-" + date;
@@ -76,5 +80,11 @@ public class ExportActivity extends Activity {
 				finish();
 			}
 		});
+	}
+
+	@Override
+	protected void onDestroy() {
+		mTracker.release();
+		super.onDestroy();
 	}
 }
