@@ -1,7 +1,7 @@
 *Add Google Maps
-Add Google Analytics
+*Add Google Analytics
 Add Admob
-Add Error reporting service
+*Add Error reporting service
 *Add multi-track
 Dynamic API endpoints
 *built-in image picker
@@ -30,7 +30,6 @@ Recording uploads in database
 *Preference for time to fix toast
 Backport to cupcake and beyond
 *Buttons in GPS list broken
-Crash reports
 Deleting track should delete/fix GPS locations
 *The great renaming
 develop test suite
@@ -42,5 +41,5 @@ thourghly test content provider
   prettify GPSList
   change calling activities to using getData() instead of getExtraLong()
 send (via email) exported GPS log
-Add current track info
-Add track details to list
+*Add current track info
+*Add track details to list
