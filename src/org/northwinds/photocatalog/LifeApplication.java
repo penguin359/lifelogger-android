@@ -3,27 +3,37 @@ package org.northwinds.photocatalog;
 import android.app.Application;
 
 import org.acra.ACRA;
+import org.acra.ErrorReporter;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
+import org.acra.sender.GoogleFormSender;
+import org.acra.sender.HttpPostSender;
 
-@ReportsCrashes(formKey = "dGExM01WVDVDSG5Ja1c0aXY1Wm9qTUE6MQ",
+@ReportsCrashes(formKey = "",
 		mode = ReportingInteractionMode.NOTIFICATION,
-		forceCloseDialogAfterToast = true,
 		resToastText = R.string.crash_toast_text,
 		resNotifTickerText = R.string.crash_notif_ticker_text,
 		resNotifTitle = R.string.crash_notif_title,
 		resNotifText = R.string.crash_notif_text,
-		resNotifIcon = android.R.drawable.stat_notify_error, // optional. default is a warning sign
+		resNotifIcon = android.R.drawable.stat_notify_error,
 		resDialogText = R.string.crash_dialog_text,
-		resDialogIcon = android.R.drawable.ic_dialog_info, //optional. default is a warning sign
-		resDialogTitle = R.string.crash_dialog_title, // optional. default is your application name
-		resDialogCommentPrompt = R.string.crash_dialog_comment_prompt, // optional. when defined, adds a user text field input with this text resource as a label
-		resDialogOkToast = R.string.crash_dialog_ok_toast) // optional. displays a Toast message when the user accepts to send a report.
+		resDialogIcon = android.R.drawable.ic_dialog_info,
+		resDialogTitle = R.string.crash_dialog_title,
+		resDialogCommentPrompt = R.string.crash_dialog_comment_prompt,
+		resDialogOkToast = R.string.crash_dialog_ok_toast)
 
 public class LifeApplication extends Application {
 	@Override
 	public void onCreate() {
 		ACRA.init(this);
+		ErrorReporter reporter = ErrorReporter.getInstance();
+		if(!"".equals(getString(R.string.acra_post_url)))
+		  reporter.addReportSender(
+		   new HttpPostSender(getString(R.string.acra_post_url), null));
+		if(!"".equals(getString(R.string.acra_form_key)))
+		  reporter.addReportSender(
+		   new GoogleFormSender(getString(R.string.acra_form_key)));
+		reporter.checkReportsOnApplicationStart();
 		super.onCreate();
 	}
 }
