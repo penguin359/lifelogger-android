@@ -438,13 +438,13 @@ public class LifeProvider extends ContentProvider {
 
 		case TRACKS:
 			count = db.delete(TABLE_TRACKS, selection, selectionArgs);
-			count = db.delete(TABLE_LOCATIONS, LifeLog.Locations.TRACK + "!=0" + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
+			db.delete(TABLE_LOCATIONS, LifeLog.Locations.TRACK + "!=0" + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
 		case TRACKS_ID:
 			String trackId = uri.getPathSegments().get(1);
 			count = db.delete(TABLE_TRACKS, LifeLog.Tracks._ID + "=" + trackId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
-			count = db.delete(TABLE_LOCATIONS, LifeLog.Locations.TRACK + "=" + trackId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
+			db.delete(TABLE_LOCATIONS, LifeLog.Locations.TRACK + "=" + trackId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
 		case TRACKS_LOCATIONS:
