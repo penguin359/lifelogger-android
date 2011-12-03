@@ -1,0 +1,7 @@
+[patterns]
+**.java = native
+**.txt = native
+**.xml = native
+**.jar = BIN
+**.jpg = BIN
+**.png = BIN

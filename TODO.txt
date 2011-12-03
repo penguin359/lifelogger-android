@@ -44,3 +44,4 @@ thourghly test content provider
 send (via email) exported GPS log
 Add current track info
 Add track details to list
+Add license text to all source files

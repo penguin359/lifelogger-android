@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
   <!-- This much match the order of the unit_names string-array in
        strings.xml as well the *_UNITS in Main.java -->
