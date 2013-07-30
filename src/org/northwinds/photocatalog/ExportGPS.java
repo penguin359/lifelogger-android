@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2010-2011, Loren M. Lang
  * All rights reserved.
  *
