@@ -231,6 +231,7 @@ class Multipart {
 						if(mLength >= 0 && mUpdate != null)
 							mUpdate.onUpdate((int)(progress*100/mLength), 100);
 					}
+					is.close();
 					//Log.i(TAG, "Finish file");
 				} else if(obj instanceof ContentProducer) {
 					//Log.i(TAG, "Start content");
