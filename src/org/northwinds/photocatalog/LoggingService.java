@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Loren M. Lang
+ * Copyright (c) 2010-2011, Loren M. Lang
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@ import java.io.StringReader;
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.List;
-//import java.util.Set;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -132,18 +131,18 @@ public class LoggingService extends Service implements Runnable {
 				if(mIsStarted) {
 					mLM.removeUpdates(mLocationListener);
 					mLM.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-					    Long.parseLong(mPrefs.getString("time", "5"))*1000,
-					    Float.parseFloat(mPrefs.getString("distance", "5")),
+					    mPrefs.getLong("time", 5l)*1000l,
+					    mPrefs.getFloat("distance", 5.f),
 					    mLocationListener);
 				}
 				return;
 			}
 			if(key.equals("accuracy"))
-				mMinAccuracy = Float.parseFloat(mPrefs.getString("accuracy", "200"));
+				mMinAccuracy = mPrefs.getFloat("accuracy", 200.f);
 			if(key.equals("filterByDistance"))
 				mFilterByDistance = mPrefs.getBoolean("filterByDistance", false);
 			if(key.equals("track"))
-				mTrack = mPrefs.getLong("track", 0);
+				mTrack = mPrefs.getLong("track", 0l);
 			if(key.equals("url"))
 				mUploadBaseUrl = mPrefs.getString("url", "http://www.example.org/photocatalog/");
 			if(key.equals("source"))
@@ -211,7 +210,7 @@ public class LoggingService extends Service implements Runnable {
 		mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		mMinAccuracy = Float.parseFloat(mPrefs.getString("accuracy", "200"));
+		mMinAccuracy = mPrefs.getFloat("accuracy", 200.f);
 		mFilterByDistance = mPrefs.getBoolean("filterByDistance", false);
 
 		/* upload thread hasn't been started yet */
@@ -223,7 +222,7 @@ public class LoggingService extends Service implements Runnable {
 		c.close();
 		mPhotocatalog = mPrefs.getBoolean("photocatalog", false);
 		mAutoUpload = mPrefs.getBoolean("autoUpload", true);
-		mTrack = mPrefs.getLong("track", 0);
+		mTrack = mPrefs.getLong("track", 0l);
 		mUploadBaseUrl = mPrefs.getString("url", "http://www.example.org/photocatalog/");
 		mUploadSource = mPrefs.getString("source", "1");
 		mPrefs.registerOnSharedPreferenceChangeListener(mPrefsChange);
@@ -233,13 +232,13 @@ public class LoggingService extends Service implements Runnable {
 	private void startGps() {
 		if(mIsStarted)
 			return;
-		mLM.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.parseLong(mPrefs.getString("time", "5"))*1000, Float.parseFloat(mPrefs.getString("distance", "5")), mLocationListener);
+		mLM.requestLocationUpdates(LocationManager.GPS_PROVIDER, mPrefs.getLong("time", 5l)*1000l, mPrefs.getFloat("distance", 5.f), mLocationListener);
 		mLM.addGpsStatusListener(mGpsListener);
 		mNotification = new Notification(R.drawable.icon, "PhotoCatalog GPS Logging", System.currentTimeMillis());
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
 		mNotification.setLatestEventInfo(getApplicationContext(), "PhotoCatalog", "Starting GPS...", contentIntent);
 		startForeground(PHOTOCATALOG_ID, mNotification);
-		mSkipSamples = Integer.parseInt(mPrefs.getString("skip", "0"));
+		mSkipSamples = mPrefs.getInt("skip", 0);
 		mDroppedSamples = 0;
 		mStartTime = SystemClock.uptimeMillis();
 		mIsStarted = true;
@@ -396,7 +395,7 @@ public class LoggingService extends Service implements Runnable {
 			synchronized(mUploadLock) {
 				ContentValues values = new ContentValues(9);
 				values.put(LifeLog.Locations.TRACK,     mTrack);
-				values.put(LifeLog.Locations.TIMESTAMP, loc.getTime()/1000);
+				values.put(LifeLog.Locations.TIMESTAMP, loc.getTime()/1000l);
 				values.put(LifeLog.Locations.LATITUDE,  loc.getLatitude());
 				values.put(LifeLog.Locations.LONGITUDE, loc.getLongitude());
 				if(loc.hasAltitude())

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Loren M. Lang
+ * Copyright (c) 2010-2011, Loren M. Lang
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

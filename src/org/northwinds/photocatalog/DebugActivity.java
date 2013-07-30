@@ -1,6 +1,31 @@
-/**
- * 
+/*
+ * Copyright (c) 2010-2011, Loren M. Lang
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above
+ *       copyright notice, this list of conditions and the following
+ *       disclaimer in the documentation and/or other materials provided
+ *       with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT
+ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.northwinds.photocatalog;
 
 import java.io.InputStream;
@@ -18,55 +43,26 @@ import android.provider.MediaStore.MediaColumns;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/**
- * @author Loren M. Lang
- *
- */
 public class DebugActivity extends Activity implements LocationListener {
 
-	/* (non-Javadoc)
-	 * @see android.location.LocationListener#onLocationChanged(android.location.Location)
-	 */
-	//@Override
 	public void onLocationChanged(Location location) {
-		// TODO Auto-generated method stub
-
 	}
 
-	/* (non-Javadoc)
-	 * @see android.location.LocationListener#onProviderDisabled(java.lang.String)
-	 */
-	//@Override
 	public void onProviderDisabled(String provider) {
 		Toast.makeText(this, provider + " disabled", Toast.LENGTH_SHORT).show();
 	}
 
-	/* (non-Javadoc)
-	 * @see android.location.LocationListener#onProviderEnabled(java.lang.String)
-	 */
-	//@Override
 	public void onProviderEnabled(String provider) {
 		Toast.makeText(this, provider + " disabled", Toast.LENGTH_SHORT).show();
-
 	}
 
-	/* (non-Javadoc)
-	 * @see android.location.LocationListener#onStatusChanged(java.lang.String, int, android.os.Bundle)
-	 */
-	//@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
-		// TODO Auto-generated method stub
-
 	}
 
-	/* (non-Javadoc)
-	 * @see android.app.Activity#onCreate(android.os.Bundle)
-	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		//TextView tv = (TextView)findViewById(R.id.status);
 		TextView tv = new TextView(this);
 		setContentView(tv);
 		Intent intent = getIntent();
@@ -139,30 +135,21 @@ public class DebugActivity extends Activity implements LocationListener {
 		tv.setText(sb.toString());
 	}
 
-	/* (non-Javadoc)
-	 * @see android.app.Activity#onDestroy()
-	 */
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		Toast.makeText(this, "Destroy", Toast.LENGTH_SHORT).show();
-	}
-
-	/* (non-Javadoc)
-	 * @see android.app.Activity#onStart()
-	 */
 	@Override
 	protected void onStart() {
 		super.onStart();
 		Toast.makeText(this, "Start", Toast.LENGTH_SHORT).show();
 	}
 
-	/* (non-Javadoc)
-	 * @see android.app.Activity#onStop()
-	 */
 	@Override
 	protected void onStop() {
-		super.onStop();
 		Toast.makeText(this, "Stop", Toast.LENGTH_SHORT).show();
+		super.onStop();
+	}
+
+	@Override
+	protected void onDestroy() {
+		Toast.makeText(this, "Destroy", Toast.LENGTH_SHORT).show();
+		super.onDestroy();
 	}
 }

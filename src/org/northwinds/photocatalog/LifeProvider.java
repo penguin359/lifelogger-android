@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Loren M. Lang
+ * Copyright (c) 2010-2011, Loren M. Lang
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -438,13 +438,13 @@ public class LifeProvider extends ContentProvider {
 
 		case TRACKS:
 			count = db.delete(TABLE_TRACKS, selection, selectionArgs);
-			count = db.delete(TABLE_LOCATIONS, LifeLog.Locations.TRACK + "!=0" + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
+			db.delete(TABLE_LOCATIONS, LifeLog.Locations.TRACK + "!=0" + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
 		case TRACKS_ID:
 			String trackId = uri.getPathSegments().get(1);
 			count = db.delete(TABLE_TRACKS, LifeLog.Tracks._ID + "=" + trackId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
-			count = db.delete(TABLE_LOCATIONS, LifeLog.Locations.TRACK + "=" + trackId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
+			db.delete(TABLE_LOCATIONS, LifeLog.Locations.TRACK + "=" + trackId + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ")" : "" ), selectionArgs);
 			break;
 
 		case TRACKS_LOCATIONS:
@@ -464,41 +464,4 @@ public class LifeProvider extends ContentProvider {
 		addNotifyUri(uri);
 		return count;
 	}
-
-	/*
-	public long insertLocation(long track, Location location) {
-		ContentValues values = new ContentValues();
-		values.put(KEY_TRACK,     track);
-		values.put(KEY_TIMESTAMP, location.getTime()/1000);
-		values.put(KEY_LATITUDE,  location.getLatitude());
-		values.put(KEY_LONGITUDE, location.getLongitude());
-		if(location.hasAltitude())
-			values.put(KEY_ALTITUDE, location.getAltitude());
-		if(location.hasAccuracy())
-			values.put(KEY_ACCURACY, location.getAccuracy());
-		if(location.hasBearing())
-			values.put(KEY_BEARING,  location.getBearing());
-		if(location.hasSpeed())
-			values.put(KEY_SPEED,    location.getSpeed());
-		Bundle extras = location.getExtras();
-		if(extras != null && extras.containsKey("satellites"))
-			values.put(KEY_SATELLITES, extras.getInt("satellites"));
-		//StringBuilder sb = new StringBuilder();
-		//if(extras != null)
-		//	sb.append("Location extras(").append(extras.size()).append("): ");
-		//if(extras != null && extras.size() > 0) {
-		//	Set<String> set = extras.keySet();
-		//	for(String name: set) {
-		//		sb.append(name);
-		//		sb.append(" ISA ");
-		//		sb.append(extras.get(name).getClass().getName());
-		//		sb.append(", ");
-		//	}
-		//}
-		//Log.v(TAG, sb.toString());
-		//Toast.makeText(Logger.this, sb.toString(), Toast.LENGTH_SHORT).show();
-
-		return mDb.insert(TABLE_LOCATIONS, null, values);
-	}
-	*/
 }

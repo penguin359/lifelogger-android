@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
   <PreferenceCategory android:title="@string/general_preferences">
     <CheckBoxPreference android:title="@string/start_on_boot"
@@ -26,11 +26,13 @@
      android:dependency="photocatalog"/>
     <EditTextPreference android:title="@string/website"
      android:summary="@string/website_summary"
+     android:inputType="textUri"
      android:key="url"
      android:defaultValue="http://www.example.org/photocatalog/"
      android:dependency="photocatalog"/>
     <EditTextPreference android:title="@string/gps_source"
      android:summary="@string/gps_source_summary"
+     android:inputType="text"
      android:key="source" android:defaultValue="1"
      android:dependency="photocatalog"/>
   </PreferenceCategory>
@@ -49,17 +51,25 @@
     </PreferenceScreen>
     <PreferenceScreen android:title="@string/gps_parameters"
      android:summary="@string/gps_parameters_summary">
-      <EditTextPreference android:title="@string/minimum_distance"
+      <org.northwinds.android.preference.EditFloatPreference
+       android:title="@string/minimum_distance"
        android:summary="@string/minimum_distance_summary"
+       android:inputType="numberDecimal"
        android:key="distance" android:defaultValue="50"/>
-      <EditTextPreference android:title="@string/minimum_time"
+      <org.northwinds.android.preference.EditLongPreference
+       android:title="@string/minimum_time"
        android:summary="@string/minimum_time_summary"
+       android:inputType="number"
        android:key="time" android:defaultValue="60"/>
-      <EditTextPreference android:title="@string/minimum_accoracy"
+      <org.northwinds.android.preference.EditFloatPreference
+       android:title="@string/minimum_accoracy"
        android:summary="@string/minimum_accoracy_summary"
+       android:inputType="numberDecimal"
        android:key="accuracy" android:defaultValue="200"/>
-      <EditTextPreference android:title="@string/skip_samples"
+      <org.northwinds.android.preference.EditIntPreference
+       android:title="@string/skip_samples"
        android:summary="@string/skip_samples_summary"
+       android:inputType="number"
        android:key="skip" android:defaultValue="0"/>
       <CheckBoxPreference android:title="@string/filter_distance"
        android:summaryOn="@string/filter_distance_on"
@@ -95,6 +105,7 @@
        android:key="acra.deviceid.enable" android:defaultValue="true"/>
       <EditTextPreference android:title="@string/acra_user_email"
        android:summary="@string/acra_user_email_summary"
+       android:inputType="textEmailAddress"
        android:key="acra.user.email"/>
       <CheckBoxPreference
        android:title="@string/acra_alwaysaccept"

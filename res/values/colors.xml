@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
   <!-- Colors for the GPS Toggle button on the Main Activity. -->
   <color name="start">#00ff00</color>

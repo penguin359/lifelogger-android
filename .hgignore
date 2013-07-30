@@ -1,6 +1,11 @@
 ^bin/
 ^gen/
+^local.properties$
 ^.settings/
 \.swp$
 ^PhotoCatalog.apk$
 ^PhotoCatalog-[^/]*.apk$
+^tests/bin/
+^tests/gen/
+^tests/local.properties$
+^tests/.settings/
