@@ -28,12 +28,9 @@
 
 package org.northwinds.photocatalog;
 
-//import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-//import java.io.FileOutputStream;
 import java.io.IOException;
-//import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
@@ -137,35 +134,26 @@ class ExportGPS {
 		PrintWriter wr = new PrintWriter(file, "UTF-8");
 		switch(type) {
 		case TYPE_GPX:
-			wr.print("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n");
-			wr.print("<gpx creator=\"PhotoCatalog\" version=\"1.1\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\" xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n");
+			wr.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+			wr.println("<gpx creator=\"PhotoCatalog\" version=\"1.1\" " +
+				   "xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\" " +
+				   "xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">");
 			break;
 		case TYPE_KML:
-			wr.print("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n");
-			wr.print("<kml xsi:schemaLocation=\"http://www.opengis.net/kml/2.2 ogckml22.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.opengis.net/kml/2.2\">\r\n");
-			wr.print("  <Document>\r\n");
-			wr.print("    <name></name>\r\n");
-			wr.print("    <description></description>\r\n");
+			wr.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+			wr.println("<kml xsi:schemaLocation=\"http://www.opengis.net/kml/2.2 ogckml22.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.opengis.net/kml/2.2\">");
+			wr.println("  <Document>");
+			wr.println("    <name></name>");
+			wr.println("    <description></description>");
 			break;
 		case TYPE_CSV:
-			wr.print("PhotoCatalog v1.0\r\n");
-			wr.print("track,timestamp,latitude,longituder\r\n");
+			wr.println("PhotoCatalog v1.0");
+			wr.println("track,timestamp,latitude,longitude");
 			break;
 		}
 		if(headerCursor != null)
 			writeHeader(wr, headerCursor, type);
 		writeBody(wr, bodyCursor, type);
-		switch(type) {
-		case TYPE_GPX:
-			wr.print("</gpx>\r\n");
-			break;
-		case TYPE_KML:
-			wr.print("  </Document>\r\n");
-			wr.print("</kml>\r\n");
-			break;
-		case TYPE_CSV:
-			break;
-		}
 		wr.flush();
 		wr.close();
 		} catch(UnsupportedEncodingException ex) {
@@ -175,7 +163,7 @@ class ExportGPS {
 	private void writeHeader(PrintWriter wr, Cursor c, int type) {
 		if(type != TYPE_GPX)
 			return;
-		wr.print("  <trk>\r\n");
+		wr.println("  <trk>");
 		int nameCol = c.getColumnIndexOrThrow("name");
 		int cmtCol  = c.getColumnIndexOrThrow("cmt");
 		int descCol = c.getColumnIndexOrThrow("desc");
@@ -185,25 +173,25 @@ class ExportGPS {
 			return;
 		if(!c.isNull(nameCol) &&
 		   !"".equals(c.getString(nameCol)))
-			wr.print("    <name>"+c.getString(nameCol)+"</name>\r\n");
+			wr.println("    <name>"+c.getString(nameCol)+"</name>");
 		if(!c.isNull(cmtCol) &&
 		   !"".equals(c.getString(cmtCol)))
-			wr.print("    <cmt>"+c.getString(cmtCol)+"</cmt>\r\n");
+			wr.println("    <cmt>"+c.getString(cmtCol)+"</cmt>");
 		if(!c.isNull(descCol) &&
 		   !"".equals(c.getString(descCol)))
-			wr.print("    <desc>"+c.getString(descCol)+"</desc>\r\n");
+			wr.println("    <desc>"+c.getString(descCol)+"</desc>");
 		if(!c.isNull(idCol) &&
 		   !"".equals(c.getString(idCol)))
-			wr.print("    <number>"+c.getString(idCol)+"</number>\r\n");
+			wr.println("    <number>"+c.getString(idCol)+"</number>");
 		if(!c.isNull(typeCol) &&
 		   !"".equals(c.getString(typeCol)))
-			wr.print("    <type>"+c.getString(typeCol)+"</type>\r\n");
+			wr.println("    <type>"+c.getString(typeCol)+"</type>");
 	}
 
 	private void writeBody(PrintWriter wr, Cursor c, int type) {
 		switch(type) {
 		case TYPE_GPX:
-			wr.print("    <trkseg>\r\n");
+			wr.println("    <trkseg>");
 			break;
 		case TYPE_KML:
 			break;
@@ -242,13 +230,49 @@ class ExportGPS {
 		}
 		switch(type) {
 		case TYPE_GPX:
-			wr.print("    </trkseg>\r\n");
-			wr.print("  </trk>\r\n");
+			wr.println("    </trkseg>");
+			wr.println("  </trk>");
 			break;
 		case TYPE_KML:
 			break;
 		case TYPE_CSV:
 			break;
+		}
+	}
+
+	private void writeFileFooter(PrintWriter wr, int type) {
+		switch(type) {
+		case TYPE_GPX:
+			wr.println("</gpx>");
+			break;
+		case TYPE_KML:
+			wr.println("  </Document>");
+			wr.println("</kml>");
+			break;
+		case TYPE_CSV:
+			break;
+		}
+	}
+
+	private static interface GpsWriter {
+		public void writeFileHeader(PrintWriter wr);
+		public void writeFileFooter(PrintWriter wr);
+	}
+
+	private static class GpxWriter implements GpsWriter {
+		public void writeFileHeader(PrintWriter wr) {
+		}
+
+		public void writeFileFooter(PrintWriter wr) {
+			wr.println("</gpx>");
+		}
+	}
+
+	private static class Browser {
+		private final Context mContext;
+
+		Browser(Context context) {
+			mContext = context;
 		}
 	}
 }
