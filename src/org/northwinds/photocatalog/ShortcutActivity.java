@@ -135,10 +135,10 @@ public class ShortcutActivity extends Activity {
 		layout.addView(button);
 		setContentView(layout);
 	}
-	}
 
 	@Override
 	protected void onDestroy() {
 		mTracker.release();
 		super.onDestroy();
+	}
 }
