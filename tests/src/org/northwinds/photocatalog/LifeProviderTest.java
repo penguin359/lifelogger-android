@@ -1,8 +1,5 @@
 package org.northwinds.photocatalog;
 
-import org.northwinds.photocatalog.LifeLog;
-import org.northwinds.photocatalog.LifeProvider;
-
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.ContentUris;

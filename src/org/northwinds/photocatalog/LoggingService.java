@@ -91,7 +91,7 @@ public class LoggingService extends Service implements Runnable {
 	private int mDroppedSamples = 0;
 	private float mMinAccuracy = 0;
 	private boolean mFilterByDistance = false;
-	private boolean mIsStarted = false;
+	boolean mIsStarted = false;
 	private boolean mStopOnFirstFix = false;
 	private String mSmsAddress = null;
 
@@ -237,7 +237,15 @@ public class LoggingService extends Service implements Runnable {
 		mNotification = new Notification(R.drawable.icon, "PhotoCatalog GPS Logging", System.currentTimeMillis());
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
 		mNotification.setLatestEventInfo(getApplicationContext(), "PhotoCatalog", "Starting GPS...", contentIntent);
-		startForeground(PHOTOCATALOG_ID, mNotification);
+		try {
+			startForeground(PHOTOCATALOG_ID, mNotification);
+		} catch(NullPointerException ex) {
+			/* FIXME: startForeground() seems to just throw a
+			 * NullPointerException when called form a JUnit
+			 * test on Android. See:
+			 * http://stackoverflow.com/questions/13358386/service-startforeground-throws-nullpointerexception-when-run-with-servicetestc
+			 */
+		}
 		mSkipSamples = mPrefs.getInt("skip", 0);
 		mDroppedSamples = 0;
 		mStartTime = SystemClock.uptimeMillis();
@@ -257,7 +265,11 @@ public class LoggingService extends Service implements Runnable {
 			return;
 		mLM.removeUpdates(mLocationListener);
 		mLM.removeGpsStatusListener(mGpsListener);
-		stopForeground(true);
+		try {
+			stopForeground(true);
+		} catch(NullPointerException ex) {
+			/* See note above on call to startForeground() */
+		}
 		mIsStarted = false;
 		mLastLocation = null;
 		for(int i = mClients.size()-1; i >= 0; i--) {

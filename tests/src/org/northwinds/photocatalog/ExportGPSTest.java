@@ -28,23 +28,28 @@
 
 package org.northwinds.photocatalog;
 
-import org.northwinds.photocatalog.ExportGPS;
+import java.lang.Thread;
 
 import android.test.AndroidTestCase;
 import android.test.mock.MockContext;
 
 
 class ExportGPSTest extends AndroidTestCase {
-	private ExportGPS exporter;
+	private ExportGPS mExporter;
 
 	public void setUp() {
 		setContext(new MockContext());
-		exporter = new ExportGPS(getContext());
+		mExporter = new ExportGPS(getContext());
 	}
 
 	public void tearDown() {
 	}
 
 	public void testExport() {
+		mExporter.exportAsGPX(LifeLog.Tracks.CONTENT_URI);
+		try {
+			Thread.sleep(10*1000);
+		} catch(InterruptedException ex) {
+		}
 	}
 }

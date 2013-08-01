@@ -43,6 +43,10 @@ import android.provider.MediaStore.MediaColumns;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * @author Loren M. Lang
+ *
+ */
 public class DebugActivity extends Activity implements LocationListener {
 
 	public void onLocationChanged(Location location) {

@@ -1,7 +1,5 @@
 package org.northwinds.photocatalog;
 
-import org.northwinds.photocatalog.MainActivity;
-
 import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.KeyEvent;

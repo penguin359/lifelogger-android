@@ -43,8 +43,11 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.widget.Toast;
+import android.util.Log;
 
 class ExportGPS {
+	private static final String TAG = "PhotoCatalog-ExportGPS";
+
 	public static final int TYPE_GPX = 0;
 	public static final int TYPE_KML = 1;
 	public static final int TYPE_CSV = 2;
@@ -87,29 +90,34 @@ class ExportGPS {
 		String state = Environment.getExternalStorageState();
 		if(Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
 			Toast.makeText(mCtx, "SD Card is read-only.", Toast.LENGTH_LONG).show();
+			Log.w(TAG, "SD Card is read-only.");
 			return;
 		} else if(!Environment.MEDIA_MOUNTED.equals(state)) {
 			Toast.makeText(mCtx, "No valid SD Card found.", Toast.LENGTH_LONG).show();
+			Log.w(TAG, "No valid SD Card found.");
 			return;
 		}
 		File root = Environment.getExternalStorageDirectory();
+		root.mkdirs();
 		File file = new File(root, filename + ext);
 		try {
 			file.createNewFile();
 		} catch(IOException ex) {
 		}
 		if(!file.canRead()) {
-			Toast.makeText(mCtx, "Can't read " + file.toString() + " file!", Toast.LENGTH_LONG).show();
+			Toast.makeText(mCtx, "Can't read file " + file.toString() + "!", Toast.LENGTH_LONG).show();
+			Log.w(TAG, "Can't read file " + file.toString() + "!");
 			return;
 		}
 		if(!file.canWrite()) {
-			Toast.makeText(mCtx, "Can't write file!", Toast.LENGTH_LONG).show();
+			Toast.makeText(mCtx, "Can't write file " + file.toString() + "!", Toast.LENGTH_LONG).show();
+			Log.w(TAG, "Can't write file " + file.toString() + "!");
 			return;
 		}
 		Cursor trackCursor = null;
 		Cursor locationCursor = null;
 		try {
-			if("tracks".equals(track.getPathSegments().get(0))) {
+			if(LifeLog.Tracks.PATH.equals(track.getPathSegments().get(0))) {
 				try {
 					String trackId = track.getPathSegments().get(1);
 					trackCursor = mCtx.getContentResolver().query(Uri.withAppendedPath(LifeLog.Tracks.CONTENT_URI, trackId), null, null, null, null);
@@ -120,6 +128,7 @@ class ExportGPS {
 			writeFile(file, trackCursor, locationCursor, type);
 		} catch(IOException ex) {
 			Toast.makeText(mCtx, "Exception writing to file: " + ex.toString(), Toast.LENGTH_LONG).show();
+			Log.w(TAG, "Exception writing to file: " + ex.toString());
 		} finally {
 			if(trackCursor != null)
 				trackCursor.close();
@@ -127,6 +136,7 @@ class ExportGPS {
 				locationCursor.close();
 		}
 		Toast.makeText(mCtx, "Saved GPX log to " + file.toString(), Toast.LENGTH_LONG).show();
+		Log.v(TAG, "Saved GPX log to " + file.toString());
 	}
 
 	public void writeFile(File file, Cursor headerCursor, Cursor bodyCursor, int type) throws FileNotFoundException {

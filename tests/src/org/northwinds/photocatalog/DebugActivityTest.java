@@ -1,7 +1,5 @@
 package org.northwinds.photocatalog;
 
-//import org.northwinds.photocatalog.DebugActivity;
-
 import android.test.ActivityInstrumentationTestCase2;
 
 /**
