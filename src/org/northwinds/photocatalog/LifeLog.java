@@ -31,7 +31,7 @@ package org.northwinds.photocatalog;
 import android.net.Uri;
 import android.provider.BaseColumns;;
 
-final public class LifeLog {
+final class LifeLog {
 	/* This class cannot be instantiated */
 	private LifeLog() {}
 

@@ -1,4 +1,4 @@
-package org.northwinds.photocatalog.tests;
+package org.northwinds.photocatalog;
 
 import org.northwinds.photocatalog.LifeLog;
 import org.northwinds.photocatalog.LifeProvider;
