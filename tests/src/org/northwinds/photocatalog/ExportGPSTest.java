@@ -32,9 +32,11 @@ import java.lang.Thread;
 
 import android.test.AndroidTestCase;
 import android.test.mock.MockContext;
+import android.os.Environment;
+import android.util.Log;
 
 
-class ExportGPSTest extends AndroidTestCase {
+public class ExportGPSTest extends AndroidTestCase {
 	private ExportGPS mExporter;
 
 	public void setUp() {
@@ -46,6 +48,15 @@ class ExportGPSTest extends AndroidTestCase {
 	}
 
 	public void testExport() {
+		Log.w("PhotoCatalog-Testing", "getDataDirectory(): " + Environment.getDataDirectory().toString());
+		Log.w("PhotoCatalog-Testing", "getDownloadCacheDirectory(): " + Environment.getDownloadCacheDirectory().toString());
+		Log.w("PhotoCatalog-Testing", "getExternalStorageDirectory(): " + Environment.getExternalStorageDirectory().toString());
+		Log.w("PhotoCatalog-Testing", "getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES): " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString());
+		Log.w("PhotoCatalog-Testing", "getExternalStorageState(): " + Environment.getExternalStorageState());
+		Log.w("PhotoCatalog-Testing", "getRootDirectory(): " + Environment.getRootDirectory().toString());
+		Log.w("PhotoCatalog-Testing", "isExternalStorageEmulated(): " + (Environment.isExternalStorageEmulated() ? "true" : "false"));
+		Log.w("PhotoCatalog-Testing", "isExternalStorageRemovable(): " + (Environment.isExternalStorageRemovable() ? "true" : "false"));
+		assertTrue("Fail test", false);
 		mExporter.exportAsGPX(LifeLog.Tracks.CONTENT_URI);
 		try {
 			Thread.sleep(10*1000);

@@ -68,13 +68,19 @@ class ExportGPS {
 		exportAsGPX(track, filename);
 	}
 
+	public File exportAsGPX(Uri track, int type) {
+		String date = mFilenameFormat.format(new Date());
+		String filename = "photocatalog-" + date;
+		return exportAsGPX(track, filename, type);
+	}
+
 	public void exportAsGPX(Uri track, String filename) {
 		exportAsGPX(track, filename, TYPE_GPX);
 		exportAsGPX(track, filename, TYPE_KML);
 		exportAsGPX(track, filename, TYPE_CSV);
 	}
 
-	public void exportAsGPX(Uri track, String filename, int type) {
+	public File exportAsGPX(Uri track, String filename, int type) {
 		String ext = "";
 		switch(type) {
 		case TYPE_GPX:
@@ -91,11 +97,11 @@ class ExportGPS {
 		if(Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
 			Toast.makeText(mCtx, "SD Card is read-only.", Toast.LENGTH_LONG).show();
 			Log.w(TAG, "SD Card is read-only.");
-			return;
+			return null;
 		} else if(!Environment.MEDIA_MOUNTED.equals(state)) {
 			Toast.makeText(mCtx, "No valid SD Card found.", Toast.LENGTH_LONG).show();
 			Log.w(TAG, "No valid SD Card found.");
-			return;
+			return null;
 		}
 		File root = Environment.getExternalStorageDirectory();
 		root.mkdirs();
@@ -107,12 +113,12 @@ class ExportGPS {
 		if(!file.canRead()) {
 			Toast.makeText(mCtx, "Can't read file " + file.toString() + "!", Toast.LENGTH_LONG).show();
 			Log.w(TAG, "Can't read file " + file.toString() + "!");
-			return;
+			return null;
 		}
 		if(!file.canWrite()) {
 			Toast.makeText(mCtx, "Can't write file " + file.toString() + "!", Toast.LENGTH_LONG).show();
 			Log.w(TAG, "Can't write file " + file.toString() + "!");
-			return;
+			return null;
 		}
 		Cursor trackCursor = null;
 		Cursor locationCursor = null;
@@ -137,6 +143,7 @@ class ExportGPS {
 		}
 		Toast.makeText(mCtx, "Saved GPX log to " + file.toString(), Toast.LENGTH_LONG).show();
 		Log.v(TAG, "Saved GPX log to " + file.toString());
+		return file;
 	}
 
 	public void writeFile(File file, Cursor headerCursor, Cursor bodyCursor, int type) throws FileNotFoundException {
