@@ -70,7 +70,8 @@ final class LifeLog {
 		/* This class cannot be instantiated */
 		private Tracks() {}
 
-		public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/tracks");
+		public static final String PATH	    = "tracks";
+		public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" + PATH);
 
 		public static final String CONTENT_TYPE = "vnd.google.cursor.dir/vnd.northwinds.track";
 		public static final String CONTENT_ITEM_TYPE = "vnd.google.cursor.item/vnd.northwinds.track";
