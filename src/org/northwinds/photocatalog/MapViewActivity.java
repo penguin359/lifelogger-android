@@ -29,24 +29,17 @@
 package org.northwinds.photocatalog;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import android.app.Activity;
-//import android.app.AlertDialog;
+import android.support.v4.app.FragmentActivity;
 import android.content.Intent;
-//import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.SQLException;
 //import android.graphics.Bitmap;
 //import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-//import android.graphics.Color;
-import android.graphics.Path;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.drawable.Drawable;
+//import android.graphics.Paint;
+//import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -56,14 +49,14 @@ import android.view.MenuItem;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-public class MapViewActivity extends Activity {
+public class MapViewActivity extends FragmentActivity {
 	/*
 	private class PathOverlay extends Overlay {
 		Paint mPaint;
@@ -121,11 +114,14 @@ public class MapViewActivity extends Activity {
 
 		Handler mHandler = new Handler() {
 			@Override
+			@SuppressWarnings("unchecked")
 			public void handleMessage(Message msg) {
-				mPathList = (ArrayList<LatLng>)msg.obj;
-				mPath.setPoints(mPathList);
-				if(mPathList.size() > 0)
-					mPoint.setPosition(mPathList.get(mPathList.size()-1));
+				//if(msg.obj instanceof ArrayList<?>) {
+					mPathList = (ArrayList<LatLng>)msg.obj;
+					mPath.setPoints(mPathList);
+					if(mPathList.size() > 0)
+						mPoint.setPosition(mPathList.get(mPathList.size()-1));
+				//}
 			}
 		};
 
@@ -145,7 +141,7 @@ public class MapViewActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map);
-		mMap = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
+		mMap = ((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
 		mTracker = LifeApplication.getTrackerInstance(this);
 		mTracker.trackPageView("/maps");
 
