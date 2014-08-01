@@ -61,7 +61,7 @@ import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 import com.google.android.maps.Projection;
 
-public class MapViewActivity extends MapActivity {
+public class MapViewActivity extends Activity {
 	private Projection mProjection;
 
 	/*
@@ -241,7 +241,7 @@ public class MapViewActivity extends MapActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.map_view);
+		setContentView(R.layout.map);
 		mTracker = LifeApplication.getTrackerInstance(this);
 		mTracker.trackPageView("/maps");
 
@@ -249,6 +249,7 @@ public class MapViewActivity extends MapActivity {
 		if(intent.getData() == null)
 			intent.setData(LifeLog.Locations.CONTENT_URI);
 
+		/*
 		mPathList = refreshPath();
 
 		mMapView = (MapView)findViewById(R.id.map_view);
@@ -258,6 +259,7 @@ public class MapViewActivity extends MapActivity {
 		mapOverlays.add(new PathOverlay());
 
 		getContentResolver().registerContentObserver(getIntent().getData(), true, mObserver);
+		*/
 	}
 
 	@Override
