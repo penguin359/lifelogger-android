@@ -31,6 +31,7 @@ package org.northwinds.photocatalog;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Activity;
 //import android.app.AlertDialog;
 import android.content.Intent;
 //import android.content.Context;
@@ -184,10 +185,12 @@ public class MapViewActivity extends Activity {
 		}
 	}
 
+	/*
 	@Override
 	protected boolean isRouteDisplayed() {
 		return true;
 	}
+	*/
 
 	private GeoPoint[] mPathList;
 
