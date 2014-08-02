@@ -11,7 +11,7 @@
   <item android:id="@+id/manage_tracks" android:title="@string/manage_tracks"
    android:icon="@drawable/ic_menu_agenda" photocatalog:showAsAction="ifRoom"/>
   <item android:id="@+id/maps"          android:title="@string/view_map"
-   android:icon="@drawable/ic_menu_mapmode"/>
+   android:icon="@drawable/ic_menu_mapmode" photocatalog:showAsAction="ifRoom"/>
   <item android:id="@+id/settings"      android:title="@string/settings"
    android:icon="@drawable/ic_menu_preferences" photocatalog:showAsAction="ifRoom"/>
   <item android:id="@+id/quit"          android:title="@string/quit"

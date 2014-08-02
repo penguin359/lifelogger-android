@@ -288,9 +288,9 @@ public class MainActivity extends ActionBarActivity {
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
 		mTracker = LifeApplication.getTrackerInstance(this);
-		if(getLastNonConfigurationInstance() != null)
-			mTracker.release(); /* release alloc() caused by
-					       onRetainNonConfig... */
+		//if(getLastNonConfigurationInstance() != null)
+		//	mTracker.release(); /* release alloc() caused by
+		//			       onRetainNonConfig... */
 
 		mTrackName = (TextView)findViewById(R.id.track);
 		mGpsStatus = (TextView)findViewById(R.id.location);
@@ -382,8 +382,9 @@ public class MainActivity extends ActionBarActivity {
 		//parseIntent(intent);
 	}
 
+	/* XXX Should alloc tracker on retain configuration */
+
 	@Override
-		mTracker.alloc();
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main, menu);

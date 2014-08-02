@@ -143,6 +143,11 @@ public class MapViewFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		//super.onCreate(savedInstanceState);
 		//setContentView(R.layout.map);
+		return inflater.inflate(R.layout.map, container, false);
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
 		mMap = ((SupportMapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
 
 		//String data = getArguments().getString("data");
@@ -160,7 +165,6 @@ public class MapViewFragment extends Fragment {
 		if(mPathList.size() > 0)
 			loc = mPathList.get(mPathList.size()-1);
 		mPoint = mMap.addMarker(new MarkerOptions().position(loc));
-		return inflater.inflate(R.layout.map, container, false);
 	}
 
 	@Override

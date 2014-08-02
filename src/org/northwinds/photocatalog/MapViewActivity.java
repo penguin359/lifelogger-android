@@ -29,6 +29,7 @@
 package org.northwinds.photocatalog;
 
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -38,6 +39,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+//public class MapViewActivity extends ActionBarActivity {
 public class MapViewActivity extends FragmentActivity {
 	private LifeAnalyticsTracker mTracker = null;
 	private MapViewFragment mMapFragment;
@@ -46,6 +48,7 @@ public class MapViewActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map_view);
+		//getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mMapFragment = (MapViewFragment)getSupportFragmentManager().findFragmentById(R.id.map_fragment);
 		mTracker = LifeApplication.getTrackerInstance(this);
 		mTracker.trackPageView("/maps");
