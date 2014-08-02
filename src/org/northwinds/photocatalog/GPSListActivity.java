@@ -28,7 +28,6 @@
 
 package org.northwinds.photocatalog;
 
-import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -38,7 +37,9 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.SimpleCursorAdapter;
 
-public class GPSListActivity extends ListActivity {
+import org.northwinds.android.app.ActionBarListActivity;
+
+public class GPSListActivity extends ActionBarListActivity {
 	private static final int PAGE_SIZE = 5000;
 
 	private static final String[] FROM = new String[] {
@@ -110,6 +111,7 @@ public class GPSListActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gps_list);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mTracker = LifeApplication.getTrackerInstance(this);
 		mTracker.trackPageView("/log");
 

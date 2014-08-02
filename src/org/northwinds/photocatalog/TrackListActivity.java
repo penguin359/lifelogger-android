@@ -45,7 +45,9 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
-public class TrackListActivity extends ListActivity {
+import org.northwinds.android.app.ActionBarListActivity;
+
+public class TrackListActivity extends ActionBarListActivity {
 	private static final String[] FROM = new String[] {
 		LifeLog.Tracks._ID,
 		LifeLog.Tracks.NAME,
@@ -80,6 +82,7 @@ public class TrackListActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.track_list);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mTracker = LifeApplication.getTrackerInstance(this);
 		mTracker.trackPageView("/manage_tracks");
 

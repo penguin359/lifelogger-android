@@ -46,6 +46,7 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Notification;
+import android.support.v4.app.NotificationCompat;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -79,12 +80,17 @@ public class LoggingService extends Service implements Runnable {
 
 	private LocationManager mLM;
 	private NotificationManager mNM;
-	private Notification mNotification;
+	private NotificationCompat.Builder mNotificationBuilder;
 
+	@SuppressWarnings("unused")
 	private int mStatSamples = 0;
+	@SuppressWarnings("unused")
 	private int mStatSkippedSamples = 0;
+	@SuppressWarnings("unused")
 	private int mStatNoAccuracySamples = 0;
+	@SuppressWarnings("unused")
 	private int mStatInaccurateSamples = 0;
+	@SuppressWarnings("unused")
 	private int mStatDistantSamples = 0;
 
 	private int mSkipSamples = 0;
@@ -210,6 +216,14 @@ public class LoggingService extends Service implements Runnable {
 		mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+		PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), MainActivity.class), 0);
+		mNotificationBuilder =
+		  new NotificationCompat.Builder(getApplicationContext())
+		  .setSmallIcon(R.drawable.icon)
+		  .setTicker("PhotoCatalog GPS Logging")
+		  .setContentTitle("PhotoCatalog")
+		  .setContentIntent(contentIntent);
+
 		mMinAccuracy = mPrefs.getFloat("accuracy", 200.f);
 		mFilterByDistance = mPrefs.getBoolean("filterByDistance", false);
 
@@ -234,11 +248,11 @@ public class LoggingService extends Service implements Runnable {
 			return;
 		mLM.requestLocationUpdates(LocationManager.GPS_PROVIDER, mPrefs.getLong("time", 5l)*1000l, mPrefs.getFloat("distance", 5.f), mLocationListener);
 		mLM.addGpsStatusListener(mGpsListener);
-		mNotification = new Notification(R.drawable.icon, "PhotoCatalog GPS Logging", System.currentTimeMillis());
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
-		mNotification.setLatestEventInfo(getApplicationContext(), "PhotoCatalog", "Starting GPS...", contentIntent);
+		//mNotification = new Notification(R.drawable.icon, "PhotoCatalog GPS Logging", System.currentTimeMillis());
+		//mNotification.setLatestEventInfo(getApplicationContext(), "PhotoCatalog", "Starting GPS...", contentIntent);
+		Notification notification = mNotificationBuilder.setContentText("Starting GPS...").build();
 		try {
-			startForeground(PHOTOCATALOG_ID, mNotification);
+			startForeground(PHOTOCATALOG_ID, notification);
 		} catch(NullPointerException ex) {
 			/* FIXME: startForeground() seems to just throw a
 			 * NullPointerException when called form a JUnit
@@ -543,10 +557,8 @@ public class LoggingService extends Service implements Runnable {
 				if(s.usedInFix())
 					nUsed++;
 			}
-			mNotification = new Notification(R.drawable.icon, "PhotoCatalog GPS Logging", System.currentTimeMillis());
-			PendingIntent contentIntent = PendingIntent.getActivity(LoggingService.this, 0, new Intent(LoggingService.this, MainActivity.class), 0);
-			mNotification.setLatestEventInfo(getApplicationContext(), "PhotoCatalog", "GPS: " + nUsed + " / " + nSat, contentIntent);
-			mNM.notify(PHOTOCATALOG_ID, mNotification);
+			Notification notification = mNotificationBuilder.setContentText("GPS: " + nUsed + " / " + nSat).build();
+			mNM.notify(PHOTOCATALOG_ID, notification);
 		}
 	};
 

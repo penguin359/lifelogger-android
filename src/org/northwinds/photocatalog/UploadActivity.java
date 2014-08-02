@@ -44,7 +44,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import android.app.Activity;
+import android.support.v7.app.ActionBarActivity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
@@ -67,7 +67,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class UploadActivity extends Activity implements Runnable {
+public class UploadActivity extends ActionBarActivity implements Runnable {
 	private static final String TAG = "PhotoCatalog-UploadActivity";
 
 	private Thread mThread;
@@ -145,10 +145,9 @@ public class UploadActivity extends Activity implements Runnable {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.upload, menu);
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	private static final int ACTIVITY_SELECT_IMAGE = 0;

@@ -32,7 +32,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import android.app.Activity;
+import android.support.v7.app.ActionBarActivity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ComponentName;
@@ -62,7 +62,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends ActionBarActivity {
 	private LifeAnalyticsTracker mTracker;
 
 	private TextView mTimestamp;
@@ -383,17 +383,11 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
-	public Object onRetainNonConfigurationInstance() {
 		mTracker.alloc();
-		return new Object();
-	}
-
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main, menu);
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
