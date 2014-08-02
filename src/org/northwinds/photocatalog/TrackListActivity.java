@@ -80,6 +80,7 @@ public class TrackListActivity extends ActionBarListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.track_list);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		registerForContextMenu(getListView());
 	}

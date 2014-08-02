@@ -145,10 +145,9 @@ public class UploadActivity extends ActionBarActivity implements Runnable {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.upload, menu);
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	private static final int ACTIVITY_SELECT_IMAGE = 0;

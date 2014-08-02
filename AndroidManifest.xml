@@ -20,12 +20,24 @@
 			</intent-filter>
 		</activity>
 		<activity android:name=".EditTrackActivity"
-			  android:label="@string/edit_track"/>
+			  android:label="@string/edit_track"
+			  android:parentActivityName=".TrackListActivity">
+			<meta-data android:name="android.support.PARENT_ACTIVITY"
+				   android:value=".TrackListActivity"/>
+		</activity>
 		<activity android:name=".ExportActivity"
 			  android:label="@string/save"
-			  android:theme="@style/Theme.AppCompat.DialogWhenLarge"/>
+			  android:theme="@style/Theme.AppCompat.DialogWhenLarge"
+			  android:parentActivityName=".TrackListActivity">
+			<meta-data android:name="android.support.PARENT_ACTIVITY"
+				   android:value=".TrackListActivity"/>
+		</activity>
 		<activity android:name=".GPSListActivity"
-			  android:label="@string/gps_list"/>
+			  android:label="@string/gps_list"
+			  android:parentActivityName=".TrackListActivity">
+			<meta-data android:name="android.support.PARENT_ACTIVITY"
+				   android:value=".TrackListActivity"/>
+		</activity>
 		<activity android:name=".MainActivity"
 			  android:launchMode="singleTask">
 			<intent-filter>
@@ -33,7 +45,11 @@
 				<category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
 		</activity>
-		<activity android:name=".PreferencesActivity"/>
+		<activity android:name=".PreferencesActivity"
+			  android:parentActivityName=".MainActivity">
+			<meta-data android:name="android.support.PARENT_ACTIVITY"
+				   android:value=".MainActivity"/>
+		</activity>
 		<activity android:name=".ShortcutActivity"
 			  android:label="@string/app_name"
 			  android:theme="@style/Theme.AppCompat.DialogWhenLarge"
@@ -45,7 +61,11 @@
 			</intent-filter>
 		</activity>
 		<activity android:name=".TrackListActivity"
-			  android:label="@string/manage_tracks"/>
+			  android:label="@string/manage_tracks"
+			  android:parentActivityName=".MainActivity">
+			<meta-data android:name="android.support.PARENT_ACTIVITY"
+				   android:value=".MainActivity"/>
+		</activity>
 		<activity android:name=".UploadActivity"
 			  android:label="@string/app_name">
 			<intent-filter>

@@ -51,6 +51,7 @@ public class ExportActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.export);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		String date = mFilenameFormat.format(new Date());
 		String filename = "photocatalog-" + date;

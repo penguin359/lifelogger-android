@@ -45,6 +45,7 @@ public class EditTrackActivity extends ActionBarActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.edit_track);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		if(getIntent().getData() == null) {
 			finish();

@@ -109,6 +109,7 @@ public class GPSListActivity extends ActionBarListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.gps_list);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		Intent intent = getIntent();
 		mBaseUri = intent.getData();
