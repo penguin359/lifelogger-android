@@ -28,18 +28,9 @@
 
 package org.northwinds.photocatalog;
 
-import java.util.ArrayList;
-
 import android.support.v4.app.FragmentActivity;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.database.ContentObserver;
-import android.database.Cursor;
-import android.database.SQLException;
-//import android.graphics.Bitmap;
-//import android.graphics.BitmapFactory;
-//import android.graphics.Paint;
-//import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -47,118 +38,17 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
-
 public class MapViewActivity extends FragmentActivity {
-	/*
-	private class PathOverlay extends Overlay {
-		Paint mPaint;
-		Drawable mIndicator;
-		//Bitmap mIndicator;
-
-		public PathOverlay() {
-			Resources r = getResources();
-			mPaint = new Paint();
-			mPaint.setDither(true);
-			//mPaint.setColor(Color.RED);
-			//mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-			mPaint.setColor(r.getColor(R.color.map_color));
-			mPaint.setStyle(Paint.Style.STROKE);
-			mPaint.setStrokeJoin(Paint.Join.ROUND);
-			mPaint.setStrokeCap(Paint.Cap.ROUND);
-			mPaint.setStrokeWidth(r.getColor(R.integer.map_width));
-
-			mIndicator = DummyItemizedOverlay.myBoundCenter(getResources().getDrawable(R.drawable.ic_maps_indicator_current_position));
-			//mIndicator = BitmapFactory.decodeResource(getResources(), R.drawable.ic_maps_indicator_current_position);
-		}
-	}
-	*/
-
-	private ArrayList<LatLng> mPathList;
-	private Marker mPoint;
-	private Polyline mPath;
-
-	private ArrayList<LatLng> refreshPath() {
-		ArrayList<LatLng> pathList = new ArrayList<LatLng>();
-		try {
-			Cursor c = getContentResolver().query(getIntent().getData(), new String[] { LifeLog.Locations.LATITUDE, LifeLog.Locations.LONGITUDE, }, null, null, null);
-			int latCol = c.getColumnIndexOrThrow(LifeLog.Locations.LATITUDE);
-			int lonCol = c.getColumnIndexOrThrow(LifeLog.Locations.LONGITUDE);
-			while(c.moveToNext()) {
-				double lat = c.getDouble(latCol);
-				double lon = c.getDouble(lonCol);
-				LatLng point = new LatLng(lat, lon);
-				pathList.add(point);
-			}
-			c.close();
-		} catch(SQLException ex) {
-		}
-
-		return pathList;
-	}
-
-	private GoogleMap mMap;
-
-	private ContentObserver mObserver = new ContentObserver(null) {
-		@Override
-		public boolean deliverSelfNotifications() {
-			return true;
-		}
-
-		Handler mHandler = new Handler() {
-			@Override
-			@SuppressWarnings("unchecked")
-			public void handleMessage(Message msg) {
-				//if(msg.obj instanceof ArrayList<?>) {
-					mPathList = (ArrayList<LatLng>)msg.obj;
-					mPath.setPoints(mPathList);
-					if(mPathList.size() > 0)
-						mPoint.setPosition(mPathList.get(mPathList.size()-1));
-				//}
-			}
-		};
-
-		@Override
-		public void onChange(boolean selfChange) {
-			super.onChange(selfChange);
-			try {
-				Thread.sleep(2000);
-			} catch(InterruptedException ex) {}
-			mHandler.sendMessage(Message.obtain(null, 0, refreshPath()));
-		}
-	};
-
 	private LifeAnalyticsTracker mTracker = null;
+	private MapViewFragment mMapFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.map);
-		mMap = ((SupportMapFragment)getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
+		setContentView(R.layout.map_view);
+		mMapFragment = (MapViewFragment)getSupportFragmentManager().findFragmentById(R.id.map_fragment);
 		mTracker = LifeApplication.getTrackerInstance(this);
 		mTracker.trackPageView("/maps");
-
-		Intent intent = getIntent();
-		if(intent.getData() == null)
-			intent.setData(LifeLog.Locations.CONTENT_URI);
-
-		mPathList = refreshPath();
-
-		Resources r = getResources();
-		mPath = mMap.addPolyline(new PolylineOptions().geodesic(true).color(r.getColor(R.color.map_color)).width(10).addAll(mPathList));
-		LatLng loc = new LatLng(0., 0.);
-		if(mPathList.size() > 0)
-			loc = mPathList.get(mPathList.size()-1);
-		mPoint = mMap.addMarker(new MarkerOptions().position(loc));
-
-		getContentResolver().registerContentObserver(getIntent().getData(), true, mObserver);
 	}
 
 	@Override
@@ -172,14 +62,10 @@ public class MapViewActivity extends FragmentActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
 		case R.id.map_mode:
-			if(mMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL)
-				mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-			else
-				mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+			mMapFragment.mapMode();
 			return true;
 		case R.id.center_map:
-			if(mPathList.size() > 0)
-				mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mPathList.get(mPathList.size()-1), 18.0f));
+			mMapFragment.centerMap();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -187,7 +73,6 @@ public class MapViewActivity extends FragmentActivity {
 
 	@Override
 	protected void onDestroy() {
-		getContentResolver().unregisterContentObserver(mObserver);
 		mTracker.release();
 		super.onDestroy();
 	}
