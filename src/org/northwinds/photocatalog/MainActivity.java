@@ -32,7 +32,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import android.app.Activity;
+import android.support.v7.app.ActionBarActivity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ComponentName;
@@ -62,7 +62,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends ActionBarActivity {
 	private TextView mTimestamp;
 	private TextView mLatitude;
 	private TextView mLongitude;
@@ -370,11 +370,6 @@ public class MainActivity extends Activity {
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		//parseIntent(intent);
-	}
-
-	@Override
-	public Object onRetainNonConfigurationInstance() {
-		return new Object();
 	}
 
 	@Override

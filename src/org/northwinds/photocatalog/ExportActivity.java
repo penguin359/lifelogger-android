@@ -33,14 +33,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import android.app.Activity;
+import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 
-public class ExportActivity extends Activity {
+public class ExportActivity extends ActionBarActivity {
 	private static final DateFormat mFilenameFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss", Locale.US);
 	private EditText mName;
 	//private RadioButton mGpx;

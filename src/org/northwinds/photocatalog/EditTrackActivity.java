@@ -28,14 +28,14 @@
 
 package org.northwinds.photocatalog;
 
-import android.app.Activity;
+import android.support.v7.app.ActionBarActivity;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.Bundle;
 import android.widget.EditText;
 
-public class EditTrackActivity extends Activity {
+public class EditTrackActivity extends ActionBarActivity {
 	private EditText mName;
 	private EditText mComment;
 	private EditText mType;

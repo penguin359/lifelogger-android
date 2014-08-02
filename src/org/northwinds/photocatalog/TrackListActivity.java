@@ -45,7 +45,9 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
-public class TrackListActivity extends ListActivity {
+import org.northwinds.android.app.ActionBarListActivity;
+
+public class TrackListActivity extends ActionBarListActivity {
 	private static final String[] FROM = new String[] {
 		LifeLog.Tracks._ID,
 		LifeLog.Tracks.NAME,
