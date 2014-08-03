@@ -33,5 +33,6 @@ Fix Satellites
 Image fails to load on file:// URIs
 *Low resolution upload data
 
+Global message Strings (OK/Cancel)?
 Do I need to gfs permission?
 Drop toast notification for Google Play

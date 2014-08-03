@@ -28,143 +28,19 @@
 
 package org.northwinds.photocatalog;
 
-import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
+import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.SimpleCursorAdapter;
 
-import org.northwinds.android.app.ActionBarListActivity;
-
-public class GPSListActivity extends ActionBarListActivity {
-	private static final int PAGE_SIZE = 5000;
-
-	private static final String[] FROM = new String[] {
-		LifeLog.Locations._ID,
-		LifeLog.Locations.TIMESTAMP,
-		LifeLog.Locations.LATITUDE,
-		LifeLog.Locations.LONGITUDE,
-		LifeLog.Locations.ALTITUDE,
-		LifeLog.Locations.ACCURACY,
-		LifeLog.Locations.SPEED,
-		LifeLog.Locations.UPLOADED,
-	};
-	private static final int[] TO = new int[] {
-		0,
-		R.id.timestamp,
-		R.id.latitude,
-		R.id.longitude,
-		R.id.altitude,
-		R.id.accuracy,
-		R.id.speed,
-		R.id.row,
-	};
-
-	private Uri mBaseUri;
-	private int mOffset = 0;
-
-	private void refreshLocations() {
-		Uri uri = mBaseUri.buildUpon()
-		         .appendQueryParameter(LifeLog.PARAM_FORMAT,
-					       LifeLog.FORMAT_PRETTY)
-		         .appendQueryParameter(LifeLog.PARAM_LIMIT,
-					       new Integer(PAGE_SIZE).toString())
-		         .appendQueryParameter(LifeLog.PARAM_OFFSET,
-					       new Integer(mOffset).toString())
-			 .build();
-		getIntent().setData(uri);
-
-		Cursor c =
-		   managedQuery(getIntent().getData(), FROM, null, null, null);
-		SimpleCursorAdapter entries =
-		   new SimpleCursorAdapter(this, R.layout.gps_row, c, FROM, TO);
-		entries.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-		    private final int uploadedColor =
-			getResources().getColor(R.color.uploaded);
-
-		    private final int notUploadedColor =
-			getResources().getColor(R.color.not_uploaded);
-
-		    public boolean setViewValue(View view,
-						Cursor cursor,
-						int columnIndex) {
-			if(cursor.getColumnName(columnIndex)
-				 .equals(LifeLog.Locations.UPLOADED)) {
-			    if(cursor.getInt(columnIndex) != 0)
-				view.setBackgroundColor(uploadedColor);
-			    else
-				view.setBackgroundColor(notUploadedColor);
-			    return true;
-			}
-			return false;
-		    }
-		});
-		setListAdapter(entries);
-	}
-
+public class GPSListActivity extends ActionBarActivity {
 	private LifeAnalyticsTracker mTracker = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.gps_list);
+		setContentView(R.layout.gps_list_act);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mTracker = LifeApplication.getTrackerInstance(this);
 		mTracker.trackPageView("/log");
-
-		Intent intent = getIntent();
-		mBaseUri = intent.getData();
-		if(mBaseUri == null)
-			mBaseUri = LifeLog.Locations.CONTENT_URI;
-
-		refreshLocations();
-
-		ImageButton ib = (ImageButton)findViewById(R.id.forward);
-		ib.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				mOffset += PAGE_SIZE;
-				refreshLocations();
-			}
-		});
-		ib = (ImageButton)findViewById(R.id.back);
-		ib.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				mOffset -= PAGE_SIZE;
-				if(mOffset < 0)
-					mOffset = 0;
-				refreshLocations();
-			}
-		});
-		Button b = (Button)findViewById(R.id.delete_uploaded_but);
-		b.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				getContentResolver()
-				    .delete(getIntent().getData(),
-					    LifeLog.Locations.UPLOADED + "=1",
-					    null);
-				//refreshLocations();
-			}
-		});
-
-		b = (Button)findViewById(R.id.delete_but);
-		b.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				getContentResolver()
-				    .delete(getIntent().getData(),
-					    null,
-					    null);
-				//refreshLocations();
-			}
-		});
-	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-		//refreshLocations();
 	}
 
 	@Override

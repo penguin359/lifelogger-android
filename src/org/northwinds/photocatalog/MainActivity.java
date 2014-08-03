@@ -35,6 +35,7 @@ import java.util.Date;
 import android.support.v7.app.ActionBarActivity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.support.v4.app.DialogFragment;
 import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.DialogInterface;
@@ -281,8 +282,10 @@ public class MainActivity extends ActionBarActivity {
 		   getLastNonConfigurationInstance() == null &&
 		   mPrefs.getBoolean("autoStart", false))
 			startService(new Intent(LoggingService.ACTION_START_LOG, null, this, LoggingService.class));
-		if(mPrefs.getBoolean("firstTime", true))
-			showDialog(DIALOG_FIRST_TIME);
+		if(mPrefs.getBoolean("firstTime", true)) {
+			DialogFragment dialog = new FirstTimeFragment();
+			dialog.show(getSupportFragmentManager(), "FirstTimeFragment");
+		}
 	}
 
 	@Override
@@ -501,34 +504,27 @@ public class MainActivity extends ActionBarActivity {
 		mTracker = null;
 	}
 
-	private static final int DIALOG_FIRST_TIME = 1;
-
-	@Override
-	protected Dialog onCreateDialog(int which) {
-		switch(which) {
-		case DIALOG_FIRST_TIME:
-			AlertDialog.Builder builder =
-			    new AlertDialog.Builder(this);
+	public static class FirstTimeFragment extends DialogFragment {
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 			builder.setTitle(R.string.first_time_title);
 			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog,
-						    int which) {
+				public void onClick(DialogInterface dialog, int which) {
+					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 					if(((CheckBox)((Dialog)dialog).findViewById(R.id.dont_show_again)).isChecked())
-						mPrefs.edit().putBoolean("firstTime", false).commit();
-					//dialog.dismiss();
+						prefs.edit().putBoolean("firstTime", false).commit();
 				}
 			});
 			builder.setNeutralButton(R.string.visit_website, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog,
-						    int which) {
+				public void onClick(DialogInterface dialog, int which) {
 					startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.north-winds.org/unix/photocatalog/")));
 				}
 			});
-			LayoutInflater inflater = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
+			LayoutInflater inflater = (LayoutInflater)getActivity().getSystemService(LAYOUT_INFLATER_SERVICE);
 			View view = inflater.inflate(R.layout.first_time, null);
 			builder.setView(view);
 			return builder.create();
 		}
-		return super.onCreateDialog(which);
 	}
 }
