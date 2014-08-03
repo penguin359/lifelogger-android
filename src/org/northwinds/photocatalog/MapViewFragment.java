@@ -43,6 +43,7 @@ import android.database.SQLException;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 //import android.view.Menu;
 //import android.view.MenuInflater;
@@ -60,6 +61,8 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MapViewFragment extends Fragment {
+	private static final String TAG = "PhotoCatalog-MapViewFragment";
+
 	/*
 	private class PathOverlay extends Overlay {
 		Paint mPaint;
@@ -141,14 +144,20 @@ public class MapViewFragment extends Fragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		//super.onCreate(savedInstanceState);
+		super.onCreateView(inflater, container, savedInstanceState);
 		//setContentView(R.layout.map);
 		return inflater.inflate(R.layout.map, container, false);
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
-		mMap = ((SupportMapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
+		super.onActivityCreated(savedInstanceState);
+		SupportMapFragment mapFrag = (SupportMapFragment)getFragmentManager().findFragmentById(R.id.map);
+		if(mapFrag == null) {
+			Log.e(TAG, "Can't find map fragment");
+			return;
+		}
+		mMap = mapFrag.getMap();
 
 		//String data = getArguments().getString("data");
 		//if(data == null)
@@ -169,6 +178,9 @@ public class MapViewFragment extends Fragment {
 
 	@Override
 	public void onStart() {
+		super.onStart();
+		if(mMap == null)
+			return;
 		//getActivity().getContentResolver().registerContentObserver(getArguments().getString("data"), true, mObserver);
 		getActivity().getContentResolver().registerContentObserver(getActivity().getIntent().getData(), true, mObserver);
 	}
@@ -200,6 +212,14 @@ public class MapViewFragment extends Fragment {
 	*/
 
 	public void mapMode() {
+		if(mMap == null) {
+			SupportMapFragment mapFrag = (SupportMapFragment)getFragmentManager().findFragmentById(R.id.map);
+			if(mapFrag == null) {
+				Log.e(TAG, "Can't find map fragment: mapMode()");
+				return;
+			}
+			mMap = mapFrag.getMap();
+		}
 		if(mMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL)
 			mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
 		else
@@ -213,7 +233,10 @@ public class MapViewFragment extends Fragment {
 
 	@Override
 	public void onStop() {
+		if(mMap == null)
+			return;
 		getActivity().getContentResolver().unregisterContentObserver(mObserver);
+		super.onStop();
 	}
 
 	@Override

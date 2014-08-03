@@ -61,6 +61,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 
 public class MainActivity extends ActionBarActivity {
 	private LifeAnalyticsTracker mTracker;
@@ -355,6 +359,9 @@ public class MainActivity extends ActionBarActivity {
 		mPrefs.registerOnSharedPreferenceChangeListener(mPrefsChange);
 
 		parseIntent(getIntent());
+
+		if(GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS)
+			Toast.makeText(this, "Google Play services are not available.", Toast.LENGTH_LONG).show();
 	}
 
 	@Override

@@ -3,4 +3,5 @@
   <string name="acra_form_key">0000000000000000000000000000000000</string>
   <string name="acra_post_url">http://www.example.org/crash_report.cgi</string>
   <string name="analytics_id">UA-XXXXXXXX-X</string>
+  <string name="maps_api_key">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</string>
 </resources>

@@ -32,3 +32,6 @@ Fix current GPS status display
 Fix Satellites
 Image fails to load on file:// URIs
 *Low resolution upload data
+
+Do I need to gfs permission?
+Drop toast notification for Google Play

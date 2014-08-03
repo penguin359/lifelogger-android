@@ -3,6 +3,9 @@
 	<name>PhotoCatalog</name>
 	<comment></comment>
 	<projects>
+		<project>android-support-v7-appcompat</project>
+		<project>google-play-services_lib</project>
+		<project>PhotoCatalog Test</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

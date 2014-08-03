@@ -39,8 +39,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-//public class MapViewActivity extends ActionBarActivity {
-public class MapViewActivity extends FragmentActivity {
+public class MapViewActivity extends ActionBarActivity {
+//public class MapViewActivity extends FragmentActivity {
 	private LifeAnalyticsTracker mTracker = null;
 	private MapViewFragment mMapFragment;
 
@@ -48,7 +48,7 @@ public class MapViewActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map_view);
-		//getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mMapFragment = (MapViewFragment)getSupportFragmentManager().findFragmentById(R.id.map_fragment);
 		mTracker = LifeApplication.getTrackerInstance(this);
 		mTracker.trackPageView("/maps");
