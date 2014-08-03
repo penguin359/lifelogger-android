@@ -32,3 +32,5 @@ Fix current GPS status display
 Fix Satellites
 Image fails to load on file:// URIs
 *Low resolution upload data
+
+Global message Strings (OK/Cancel)?
