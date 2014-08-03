@@ -156,7 +156,7 @@ public class GPSListFragment extends ListFragment
 
 		refreshLocations();
 
-		getLoaderManager().initLoader(0, null, GPSListFragment.this);
+		getLoaderManager().initLoader(0, null, this);
 	}
 
 	@Override
