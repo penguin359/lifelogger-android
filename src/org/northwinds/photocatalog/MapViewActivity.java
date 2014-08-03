@@ -28,7 +28,6 @@
 
 package org.northwinds.photocatalog;
 
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -40,38 +39,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 public class MapViewActivity extends ActionBarActivity {
-//public class MapViewActivity extends FragmentActivity {
 	private LifeAnalyticsTracker mTracker = null;
-	private MapViewFragment mMapFragment;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map_view);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		mMapFragment = (MapViewFragment)getSupportFragmentManager().findFragmentById(R.id.map_fragment);
 		mTracker = LifeApplication.getTrackerInstance(this);
 		mTracker.trackPageView("/maps");
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.map_view, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch(item.getItemId()) {
-		case R.id.map_mode:
-			mMapFragment.mapMode();
-			return true;
-		case R.id.center_map:
-			mMapFragment.centerMap();
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	@Override

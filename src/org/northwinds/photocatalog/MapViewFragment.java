@@ -45,9 +45,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
-//import android.view.Menu;
-//import android.view.MenuInflater;
-//import android.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -143,9 +143,14 @@ public class MapViewFragment extends Fragment {
 	};
 
 	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setHasOptionsMenu(true);
+	}
+
+	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
-		//setContentView(R.layout.map);
 		return inflater.inflate(R.layout.map, container, false);
 	}
 
@@ -185,12 +190,9 @@ public class MapViewFragment extends Fragment {
 		getActivity().getContentResolver().registerContentObserver(getActivity().getIntent().getData(), true, mObserver);
 	}
 
-	/*
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.map_view, menu);
-		return true;
 	}
 
 	@Override
@@ -208,27 +210,6 @@ public class MapViewFragment extends Fragment {
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
-	}
-	*/
-
-	public void mapMode() {
-		if(mMap == null) {
-			SupportMapFragment mapFrag = (SupportMapFragment)getFragmentManager().findFragmentById(R.id.map);
-			if(mapFrag == null) {
-				Log.e(TAG, "Can't find map fragment: mapMode()");
-				return;
-			}
-			mMap = mapFrag.getMap();
-		}
-		if(mMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL)
-			mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-		else
-			mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-	}
-
-	public void centerMap() {
-		if(mPathList.size() > 0)
-			mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mPathList.get(mPathList.size()-1), 18.0f));
 	}
 
 	@Override
