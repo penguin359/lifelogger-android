@@ -4,4 +4,6 @@
   <string name="acra_post_url">http://www.example.org/crash_report.cgi</string>
   <string name="analytics_id">UA-XXXXXXXX-X</string>
   <string name="maps_api_key">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</string>
+  <string name="ad_unit_id">000000000000000</string>
+  <string name="ad_device_id">00000000000000000000000000000000</string>
 </resources>

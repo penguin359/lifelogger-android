@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		xmlns:ads="http://schemas.android.com/apk/res-auto"
  android:layout_width="fill_parent" android:layout_height="fill_parent">
   <TextView
    android:layout_width="fill_parent" android:layout_height="wrap_content"
@@ -46,6 +47,7 @@
    android:layout_width="fill_parent" android:layout_height="wrap_content"
    android:layout_below="@id/upload_once_but"
    android:layout_alignLeft="@id/upload_once_but"
+   android:id="@+id/gps_view"
    android:padding="12px">
     <TableRow
      android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -112,4 +114,10 @@
        android:id="@+id/satellites"/>
     </TableRow>
   </TableLayout>
+  <com.google.android.gms.ads.AdView
+   android:layout_width="fill_parent" android:layout_height="wrap_content"
+   android:layout_below="@id/gps_view"
+   android:layout_alignLeft="@id/gps_view"
+   android:id="@+id/ad_view"
+   ads:adSize="BANNER" ads:adUnitId="@string/ad_unit_id"/>
 </RelativeLayout>

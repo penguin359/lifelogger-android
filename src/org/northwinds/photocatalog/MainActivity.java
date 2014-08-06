@@ -64,6 +64,9 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+//import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
@@ -78,6 +81,8 @@ public class MainActivity extends ActionBarActivity {
 	private TextView mBearing;
 	private TextView mSpeed;
 	private TextView mSatellites;
+
+	private AdView mAdView;
 
 	private static final DateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd  HH:mm:ss");
 
@@ -365,6 +370,13 @@ public class MainActivity extends ActionBarActivity {
 
 		if(GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS)
 			Toast.makeText(this, "Google Play services are not available.", Toast.LENGTH_LONG).show();
+
+		mAdView = (AdView)findViewById(R.id.ad_view);
+		AdRequest adRequest = new AdRequest.Builder()
+			.addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+			.addTestDevice(getString(R.string.ad_device_id))
+			.build();
+		mAdView.loadAd(adRequest);
 	}
 
 	@Override
@@ -384,6 +396,9 @@ public class MainActivity extends ActionBarActivity {
 		if(nameCol >= 0 && c.moveToFirst())
 			mTrackName.setText(getString(R.string.track_format, c.getString(nameCol)));
 		c.close();
+
+		if(mAdView != null)
+			mAdView.resume();
 	}
 
 	@Override
@@ -483,8 +498,14 @@ public class MainActivity extends ActionBarActivity {
 	}
 
 	@Override
+	protected void onPause() {
+		if(mAdView != null)
+			mAdView.pause();
+		super.onPause();
+	}
+
+	@Override
 	protected void onStop() {
-		super.onStop();
 		if(mService != null) {
 			try {
 				Message msg = Message.obtain(null, LoggingService.MSG_UNREGISTER_CLIENT);
@@ -494,14 +515,17 @@ public class MainActivity extends ActionBarActivity {
 				mService = null;
 			}
 		}
+		super.onStop();
 	}
 
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
+		if(mAdView != null)
+			mAdView.destroy();
 		unbindService(mConnection);
 		mTracker.release();
 		mTracker = null;
+		super.onDestroy();
 	}
 
 	public static class FirstTimeFragment extends DialogFragment {

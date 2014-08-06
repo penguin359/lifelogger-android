@@ -145,6 +145,12 @@ public class TrackListFragment extends ListFragment
 				       uri.appendPath("locations").build(),
 				       getActivity(), GPSListActivity.class));
 			return true;
+		case R.id.map:
+			startActivity(
+			    new Intent(Intent.ACTION_VIEW,
+				       uri.appendPath("locations").build(),
+				       getActivity(), MapViewActivity.class));
+			return true;
 		}
 		return super.onContextItemSelected(item);
 	}

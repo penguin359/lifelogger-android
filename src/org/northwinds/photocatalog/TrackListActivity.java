@@ -41,12 +41,6 @@ public class TrackListActivity extends ActionBarActivity {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mTracker = LifeApplication.getTrackerInstance(this);
 		mTracker.trackPageView("/manage_tracks");
-		case R.id.map:
-			startActivity(
-			    new Intent(Intent.ACTION_VIEW,
-				       uri.appendPath("locations").build(),
-				       this, MapViewActivity.class));
-			return true;
 	}
 
 	@Override

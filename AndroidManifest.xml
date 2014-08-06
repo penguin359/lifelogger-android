@@ -91,6 +91,9 @@
 			  android:launchMode="singleInstance"
 			  android:excludeFromRecents="true"
 			  android:finishOnTaskLaunch="true"/>
+		<activity android:name="com.google.android.gms.ads.AdActivity"
+			  android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+			  android:theme="@style/Theme.Translucent"/>
 		<provider android:name=".LifeProvider"
 		          android:authorities="org.northwinds.photocatalog.lifelog"/>
 		<receiver android:name=".Receiver">
